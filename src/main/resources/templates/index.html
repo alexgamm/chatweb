@@ -1,0 +1,55 @@
+{{#partial "styles"}}
+<style>
+    body {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        min-height: 100vh;
+    }
+
+    .sidebar {
+        position: absolute;
+        left: 0;
+    }
+
+    .status {
+        width: 15px;
+        height: 15px;
+        border-radius: 15px;
+        background: #787878;
+    }
+
+    .status.online {
+        background: #087c08;
+    }
+</style>
+{{/partial}}
+
+{{#partial "body"}}
+<div class="sidebar d-flex flex-column align-items-stretch flex-shrink-0 bg-body-tertiary" style="width: 380px;">
+    <div class="p-3 border-bottom">
+        <span class="fs-5 fw-semibold">Users</span>
+    </div>
+    <div id="user-list" class="list-group list-group-flush border-bottom scrollarea">
+    </div>
+</div>
+<script>
+    const userList = document.querySelector("#user-list");
+    fetch("/api/users")
+        .then(r => r.json())
+        .then(r => {
+            for (const user of r.users) {
+                const online = Date.now() - user.lastActivityAt < 60000;
+                userList.innerHTML += `
+                 <a href="#" class="list-group-item list-group-item-action py-3 lh-sm">
+                        <div class="d-flex w-100 align-items-center justify-content-between">
+                            <strong class="mb-1">${user.username}</strong>
+                           <i class="status ${online ? 'online' : ''}"></i>
+                        </div>
+                    </a>
+                `;
+            }
+        })
+</script>
+{{/partial}}
+{{> base}}

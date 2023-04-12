@@ -1,0 +1,64 @@
+{{#partial "styles"}}
+<style>
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding-bottom: 300px;
+    }
+
+    .registration-form {
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+        min-width: 470px;
+    }
+
+</style>
+{{/partial}}
+
+{{#partial "body"}}
+<form method="post" class="registration-form">
+    <h1 class="h3 pb-5 fw-normal text-center">Please sign up</h1>
+    <div class="form-floating">
+        <input class="form-control {{#if error}}is-invalid{{/if}}" type="text" placeholder="username" id="username"
+               name="username" value="{{username}}">
+        <label for="username">username</label>
+    </div>
+    <div class="form-floating">
+        <input class="form-control {{#if error}}is-invalid{{/if}}" type="password" placeholder="password" id="password"
+               name="password">
+        <label for="password">password</label>
+    </div>
+    <div class="form-floating">
+        <input class="form-control {{#if error}}is-invalid{{/if}}" type="password" placeholder="repeat password"
+               id="repeat-password">
+        <label for="repeat-password">repeat password</label>
+    </div>
+    <span id="error-text" class="text-danger">{{error}}</span>
+    <button class="w-100 btn btn-lg btn-primary mt-2" type="submit">Sign up</button>
+</form>
+<script>
+    function submit(event) {
+        const password = document.querySelector('input[name="password"]').value;
+        const repeatPassword = document.querySelector('#repeat-password').value;
+        if (password !== repeatPassword) {
+            event.preventDefault();
+            document.querySelector('#error-text').innerText = "passwords don't match";
+        }
+    }
+
+    document.querySelector("form").addEventListener("submit", submit)
+    const inputs = document.querySelectorAll("input")
+    for (const input of inputs) {
+        input.addEventListener("input", function () {
+            document.querySelector('#error-text').innerText = "";
+            document.querySelectorAll('.form-control').forEach(function (elem) {
+                elem.classList.remove('is-invalid')
+            })
+        })
+    }
+</script>
+{{/partial}}
+{{> base}}
