@@ -31,7 +31,7 @@ public class Main {
         ));
         HttpServer httpServer = HttpServer.create(new InetSocketAddress("localhost", 80), 0);
         UserRepository userRepository = new UserRepository(database);
-        SessionRepository sessionRepository = new SessionRepository();
+        SessionRepository sessionRepository = new SessionRepository(database);
         TemplateLoader templateLoader = new ClassPathTemplateLoader("/templates", ".html");
         Handlebars handlebars = new Handlebars(templateLoader);
         ObjectMapper objectMapper = new ObjectMapper();
