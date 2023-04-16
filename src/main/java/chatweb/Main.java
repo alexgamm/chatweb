@@ -1,19 +1,24 @@
 package chatweb;
 
+import chatweb.db.Database;
+import chatweb.entity.Session;
+import chatweb.entity.User;
+import chatweb.longpoll.LongPollHandler;
+import chatweb.model.Message;
+import chatweb.model.MessagesResponse;
+import chatweb.model.SendMessageRequest;
+import chatweb.model.UserListResponse;
+import chatweb.repository.SessionRepository;
 import chatweb.repository.UserRepository;
+import chatweb.service.MessageService;
+import chatweb.utils.HttpUtils;
+import chatweb.utils.PasswordUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.TemplateLoader;
 import com.sun.net.httpserver.HttpServer;
-import chatweb.db.Database;
-import chatweb.entity.Session;
-import chatweb.entity.User;
-import chatweb.model.UserListResponse;
-import chatweb.repository.SessionRepository;
-import chatweb.utils.HttpUtils;
-import chatweb.utils.PasswordUtils;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -21,6 +26,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 public class Main {
     public static void main(String[] args) throws IOException, SQLException {
@@ -29,12 +35,13 @@ public class Main {
                 System.getenv("DB_USER"),
                 System.getenv("DB_PASSWORD")
         ));
-        HttpServer httpServer = HttpServer.create(new InetSocketAddress("localhost", 80), 0);
+        HttpServer httpServer = HttpServer.create(new InetSocketAddress("0.0.0.0", 80), 0);
         UserRepository userRepository = new UserRepository(database);
         SessionRepository sessionRepository = new SessionRepository(database);
         TemplateLoader templateLoader = new ClassPathTemplateLoader("/templates", ".html");
         Handlebars handlebars = new Handlebars(templateLoader);
         ObjectMapper objectMapper = new ObjectMapper();
+        MessageService messageService = new MessageService();
 
         httpServer.createContext("/", exchange -> {
             try {
@@ -149,7 +156,47 @@ public class Main {
             UserListResponse response = new UserListResponse(list);
             HttpUtils.respond(exchange, 200, objectMapper.writeValueAsString(response));
         });
-        httpServer.setExecutor(Executors.newSingleThreadExecutor());
+        httpServer.createContext("/api/messages", exchange -> {
+            if (exchange.getRequestMethod().equals("GET")) {
+                String tsRaw = HttpUtils.parseQueryString(exchange.getRequestURI().getQuery()).get("ts");
+                long ts = Long.parseLong(tsRaw);
+                List<Message> newMessages = messageService.getNewMessages(ts);
+                LongPollHandler longPollHandler = new LongPollHandler(objectMapper, exchange, ts);
+                if (newMessages.isEmpty()) {
+                    messageService.addLongPollHandler(longPollHandler);
+                } else {
+                    longPollHandler.handle(newMessages);
+                }
+            } else if (exchange.getRequestMethod().equals("POST")) {
+                SendMessageRequest request;
+                try {
+                    String requestBody = HttpUtils.readRequestBody(exchange);
+                    request = objectMapper.readValue(requestBody, SendMessageRequest.class);
+                } catch (Throwable ex) {
+                    HttpUtils.respond(exchange, 400, "");
+                    return;
+                }
+                if (request.getMessage() == null || request.getMessage().isBlank()) {
+                    HttpUtils.respond(exchange, 400, "");
+                    return;
+                }
+                User user = Optional.ofNullable(HttpUtils.getCookies(exchange).get("sessionId"))
+                        // с чем работаем -> что возвращаем
+                        .map(sessionId -> sessionRepository.findSessionById(sessionId))
+                        .map(session -> userRepository.findUserById(session.getUserId()))
+                        .orElse(null);
+                if (user == null) {
+                    HttpUtils.respond(exchange, 401, "");
+                    return;
+                }
+                messageService.addMessage(new Message(request.getMessage(), user.getUsername(), new Date()));
+                HttpUtils.respond(exchange, 200, "");
+            } else {
+                HttpUtils.respond(exchange, 405, "");
+            }
+        });
+        httpServer.setExecutor(Executors.newCachedThreadPool());
         httpServer.start();
+
     }
 }

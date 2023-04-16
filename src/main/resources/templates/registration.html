@@ -1,44 +1,38 @@
-{{#partial "styles"}}
-<style>
-    body {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        padding-bottom: 300px;
-    }
-
-    .registration-form {
-        display: flex;
-        flex-direction: column;
-        padding: 20px;
-        min-width: 470px;
-    }
-
-</style>
-{{/partial}}
-
 {{#partial "body"}}
-<form method="post" class="registration-form">
-    <h1 class="h3 pb-5 fw-normal text-center">Please sign up</h1>
-    <div class="form-floating">
-        <input class="form-control {{#if error}}is-invalid{{/if}}" type="text" placeholder="username" id="username"
-               name="username" value="{{username}}">
-        <label for="username">username</label>
-    </div>
-    <div class="form-floating">
-        <input class="form-control {{#if error}}is-invalid{{/if}}" type="password" placeholder="password" id="password"
-               name="password">
-        <label for="password">password</label>
-    </div>
-    <div class="form-floating">
-        <input class="form-control {{#if error}}is-invalid{{/if}}" type="password" placeholder="repeat password"
-               id="repeat-password">
-        <label for="repeat-password">repeat password</label>
-    </div>
-    <span id="error-text" class="text-danger">{{error}}</span>
-    <button class="w-100 btn btn-lg btn-primary mt-2" type="submit">Sign up</button>
-</form>
+<main class="flex justify-center items-center h-screen flex-col">
+    <h1 class="text-3xl mb-10">Please sign up</h1>
+    <form method="post" class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
+        <div class="card-body">
+            <div class="form-control">
+                <label class="label" for="username">
+                    <span class="label-text">username</span>
+                </label>
+                <input class="input input-bordered {{#if error}}input-error{{/if}}" type="text"
+                       id="username"
+                       name="username" value="{{username}}">
+            </div>
+            <div class="form-control">
+                <label class="label" for="password">
+                    <span class="label-text">password</span>
+                </label>
+                <input class="input input-bordered {{#if error}}input-error{{/if}}" type="password"
+                       id="password"
+                       name="password">
+            </div>
+            <div class="form-control">
+                <label class="label" for="repeat-password">
+                    <span class="label-text">repeat password</span>
+                </label>
+                <input class="input input-bordered {{#if error}}input-error{{/if}}" type="password"
+                       id="repeat-password">
+            </div>
+            <span id="error-text" class="text-error">{{error}}</span>
+            <div class="form-control mt-6">
+                <button type="submit" class="btn btn-primary">Sign up</button>
+            </div>
+        </div>
+    </form>
+</main>
 <script>
     function submit(event) {
         const password = document.querySelector('input[name="password"]').value;
@@ -46,6 +40,9 @@
         if (password !== repeatPassword) {
             event.preventDefault();
             document.querySelector('#error-text').innerText = "passwords don't match";
+            document.querySelectorAll('.form-control input[type="password"]').forEach(function (elem){
+                elem.classList.add('input-error')
+            })
         }
     }
 
@@ -54,8 +51,8 @@
     for (const input of inputs) {
         input.addEventListener("input", function () {
             document.querySelector('#error-text').innerText = "";
-            document.querySelectorAll('.form-control').forEach(function (elem) {
-                elem.classList.remove('is-invalid')
+            document.querySelectorAll('.form-control input').forEach(function (elem) {
+                elem.classList.remove('input-error')
             })
         })
     }

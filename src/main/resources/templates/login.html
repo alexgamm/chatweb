@@ -1,38 +1,33 @@
-{{#partial "styles"}}
-<style>
-    body {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        padding-bottom: 300px;
-    }
-
-    .login-form {
-        display: flex;
-        flex-direction: column;
-        padding: 20px;
-        min-width: 470px;
-    }
-
-</style>
-{{/partial}}
-
 {{#partial "body"}}
-<form method="post" class="login-form text-center">
-    <h1 class="h3 pb-5 fw-normal">Please sign in</h1>
-    <div class="form-floating">
-        <input class="form-control {{#if error}}is-invalid{{/if}}" id="username" type="text" name="username"
-               value="{{username}}" placeholder="username">
-        <label for="username">username</label>
-    </div>
-    <div class="form-floating">
-        <input class="form-control mt-1 {{#if error}}is-invalid{{/if}}" id="password" type="password" name="password"
-               placeholder="password">
-        <label for="password">password</label>
-    </div>
-    <button class="w-100 btn btn-lg btn-primary mt-2" type="submit">Sign in</button>
-    <a href="/registration" class="text-body mt-3">Create an account</a>
-</form>
+<main class="flex justify-center items-center h-screen flex-col">
+    <h1 class="text-3xl mb-10">Please sign in</h1>
+    <form method="post" class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
+        <div class="card-body">
+            <div class="form-control">
+                <label class="label" for="username">
+                    <span class="label-text">username</span>
+                </label>
+                <input class="input input-bordered {{#if error}}input-error{{/if}}" type="text"
+                       id="username"
+                       name="username" value="{{username}}">
+            </div>
+            <div class="form-control">
+                <label class="label" for="password">
+                    <span class="label-text">password</span>
+                </label>
+                <input class="input input-bordered {{#if error}}input-error{{/if}}" type="password"
+                       id="password"
+                       name="password">
+            </div>
+            <div class="form-control mt-6">
+                <button type="submit" class="btn btn-primary">Sign in</button>
+            </div>
+        </div>
+    </form>
+    <a href="/registration" class="btn gap-2 mt-5">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+        Create an account
+    </a>
+</main>
 {{/partial}}
 {{> base}}

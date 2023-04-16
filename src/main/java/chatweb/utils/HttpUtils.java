@@ -4,6 +4,8 @@ import com.sun.net.httpserver.HttpExchange;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,11 +30,11 @@ public class HttpUtils {
     }
 
     public static void respond(HttpExchange exchange, int statusCode, String response) throws IOException {
-        exchange.sendResponseHeaders(statusCode, response.length());
-        PrintWriter printWriter = new PrintWriter(exchange.getResponseBody());
-        printWriter.print(response);
-        printWriter.flush();
-        printWriter.close();
+        byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
+        exchange.sendResponseHeaders(statusCode, responseBytes.length);
+        exchange.getResponseBody().write(responseBytes);
+        exchange.getResponseBody().flush();
+        exchange.getResponseBody().close();
     }
 
     public static String readRequestBody(HttpExchange exchange) {
