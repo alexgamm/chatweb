@@ -1,25 +1,25 @@
 package chatweb.service;
 
+import chatweb.email.EmailTemplate;
+import chatweb.email.context.VerificationCodeContext;
 import chatweb.entity.User;
 import chatweb.entity.Verification;
 import chatweb.repository.VerificationRepository;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class VerificationService {
-    private final EmailService emailService;
     private final VerificationRepository verificationRepository;
-
-    public VerificationService(EmailService emailService, VerificationRepository verificationRepository) {
-        this.emailService = emailService;
-        this.verificationRepository = verificationRepository;
-    }
+    private final EmailTemplate<VerificationCodeContext> verificationCodeTemplate;
 
     public boolean createAndSendVerification(User user) {
         String code = RandomStringUtils.random(6, false, true);
-        if (emailService.send(user.getEmail().toLowerCase(), "Verification code", code)) {
+        boolean sent = verificationCodeTemplate.send(user.getEmail().toLowerCase(), new VerificationCodeContext(code));
+        if (sent) {
             createVerification(user.getId(), code);
             return true;
         }
