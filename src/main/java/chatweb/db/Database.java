@@ -23,7 +23,7 @@ public class Database {
         return mapper.map(ps.executeQuery());
     }
 
-    public void executeInsert(String sql, Object... params) throws SQLException {
+    public void execute(String sql, Object... params) throws SQLException {
         PreparedStatement ps = connection.prepareStatement(sql);
         for (int paramIdx = 0; paramIdx < params.length; paramIdx++) {
             ps.setObject(paramIdx + 1, params[paramIdx]);

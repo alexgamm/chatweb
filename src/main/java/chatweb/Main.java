@@ -131,7 +131,7 @@ public class Main {
                         return;
                     }
 
-                    user = new User(0, username.toLowerCase(), PasswordUtils.hash(password));
+                    user = new User(0, username.toLowerCase(), PasswordUtils.hash(password), new Date());
                     userRepository.saveUser(user);
                     user = userRepository.findUserByUsername(user.getUsername());
                     Session session = new Session(UUID.randomUUID().toString(), user.getId());
@@ -150,13 +150,25 @@ public class Main {
             }
         });
         httpServer.createContext("/api/users", exchange -> {
-            List<UserListResponse.User> list = new ArrayList<>();
-            list.add(new UserListResponse.User("Luxor", new Date()));
-            list.add(new UserListResponse.User("Ed Po", new Date(0)));
+
+            List<UserListResponse.User> list = userRepository.getAllUsers().stream()
+                    .map(user -> new UserListResponse.User(user.getUsername(), user.getLastActivityAt()))
+                    .toList();
             UserListResponse response = new UserListResponse(list);
             HttpUtils.respond(exchange, 200, objectMapper.writeValueAsString(response));
         });
+
         httpServer.createContext("/api/messages", exchange -> {
+            User user = Optional.ofNullable(HttpUtils.getCookies(exchange).get("sessionId"))
+                    // с чем работаем -> что возвращаем
+                    .map(sessionId -> sessionRepository.findSessionById(sessionId))
+                    .map(session -> userRepository.findUserById(session.getUserId()))
+                    .orElse(null);
+            if (user == null) {
+                HttpUtils.respond(exchange, 401, "");
+                return;
+            }
+
             if (exchange.getRequestMethod().equals("GET")) {
                 String tsRaw = HttpUtils.parseQueryString(exchange.getRequestURI().getQuery()).get("ts");
                 long ts = Long.parseLong(tsRaw);
@@ -167,6 +179,7 @@ public class Main {
                 } else {
                     longPollHandler.handle(newMessages);
                 }
+                userRepository.updateLastActivityAt(user.getId());
             } else if (exchange.getRequestMethod().equals("POST")) {
                 SendMessageRequest request;
                 try {
@@ -178,15 +191,6 @@ public class Main {
                 }
                 if (request.getMessage() == null || request.getMessage().isBlank()) {
                     HttpUtils.respond(exchange, 400, "");
-                    return;
-                }
-                User user = Optional.ofNullable(HttpUtils.getCookies(exchange).get("sessionId"))
-                        // с чем работаем -> что возвращаем
-                        .map(sessionId -> sessionRepository.findSessionById(sessionId))
-                        .map(session -> userRepository.findUserById(session.getUserId()))
-                        .orElse(null);
-                if (user == null) {
-                    HttpUtils.respond(exchange, 401, "");
                     return;
                 }
                 messageService.addMessage(new Message(request.getMessage(), user.getUsername(), new Date()));

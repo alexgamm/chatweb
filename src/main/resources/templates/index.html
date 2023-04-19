@@ -126,7 +126,7 @@
                         </div>
                     `
                 }
-                messagesContainerWrapper.scrollTop = messagesContainerWrapper.scrollHeight;
+                requestAnimationFrame(() => messagesContainerWrapper.scrollTo({top: messagesContainerWrapper.scrollHeight, behavior: 'smooth'}))
                 poll();
             })
     }

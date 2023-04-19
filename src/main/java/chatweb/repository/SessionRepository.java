@@ -3,12 +3,9 @@ package chatweb.repository;
 import chatweb.db.Database;
 import chatweb.db.mappers.ListMapper;
 import chatweb.entity.Session;
-import chatweb.entity.User;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class SessionRepository {
     private final Database database;
@@ -20,7 +17,7 @@ public class SessionRepository {
 
     public void saveSession(Session session) {
         try {
-            database.executeInsert("insert into sessions (id, userId) values (?,?)",  session.getId(), session.getUserId());
+            database.execute("insert into sessions (id, userId) values (?,?)",  session.getId(), session.getUserId());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
