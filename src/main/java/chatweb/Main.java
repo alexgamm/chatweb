@@ -1,11 +1,12 @@
 package chatweb;
 
 import chatweb.db.Database;
+import chatweb.endpoint.IndexEndpoint;
+import chatweb.endpoint.UsersEndpoint;
 import chatweb.entity.Session;
 import chatweb.entity.User;
 import chatweb.longpoll.LongPollHandler;
 import chatweb.model.Message;
-import chatweb.model.MessagesResponse;
 import chatweb.model.SendMessageRequest;
 import chatweb.model.UserListResponse;
 import chatweb.repository.SessionRepository;
@@ -19,14 +20,13 @@ import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.TemplateLoader;
 import com.sun.net.httpserver.HttpServer;
+import webserver.WebServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.function.Consumer;
 
 public class Main {
     public static void main(String[] args) throws IOException, SQLException {
@@ -35,38 +35,16 @@ public class Main {
                 System.getenv("DB_USER"),
                 System.getenv("DB_PASSWORD")
         ));
-        HttpServer httpServer = HttpServer.create(new InetSocketAddress("0.0.0.0", 80), 0);
+        ObjectMapper objectMapper = new ObjectMapper();
+        WebServer webServer = new WebServer(new InetSocketAddress("0.0.0.0", 80), objectMapper);
+        HttpServer httpServer = webServer.getHttpServer();
         UserRepository userRepository = new UserRepository(database);
         SessionRepository sessionRepository = new SessionRepository(database);
         TemplateLoader templateLoader = new ClassPathTemplateLoader("/templates", ".html");
         Handlebars handlebars = new Handlebars(templateLoader);
-        ObjectMapper objectMapper = new ObjectMapper();
         MessageService messageService = new MessageService();
 
-        httpServer.createContext("/", exchange -> {
-            try {
-
-                User user = Optional.ofNullable(HttpUtils.getCookies(exchange).get("sessionId"))
-                        // с чем работаем -> что возвращаем
-                        .map(sessionId -> sessionRepository.findSessionById(sessionId))
-                        .map(session -> userRepository.findUserById(session.getUserId()))
-                        .orElse(null);
-
-                if (user == null) {
-                    exchange.getResponseHeaders().add("Location", "/login");
-                    exchange.sendResponseHeaders(302, 0);
-
-                } else {
-                    Template template = handlebars.compile("index");
-                    Map<String, Object> ctx = new HashMap<>();
-                    ctx.put("username", user.getUsername());
-                    HttpUtils.respond(exchange, 200, template.apply(ctx));
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+        webServer.addEndpoint("/", new IndexEndpoint(handlebars, sessionRepository, userRepository));
         httpServer.createContext("/login", exchange -> {
             try {
                 if (exchange.getRequestMethod().equals("POST")) {
@@ -149,15 +127,7 @@ public class Main {
                 e.printStackTrace();
             }
         });
-        httpServer.createContext("/api/users", exchange -> {
-
-            List<UserListResponse.User> list = userRepository.getAllUsers().stream()
-                    .map(user -> new UserListResponse.User(user.getUsername(), user.getLastActivityAt()))
-                    .toList();
-            UserListResponse response = new UserListResponse(list);
-            HttpUtils.respond(exchange, 200, objectMapper.writeValueAsString(response));
-        });
-
+        webServer.addEndpoint("/api/users", new UsersEndpoint(userRepository));
         httpServer.createContext("/api/messages", exchange -> {
             User user = Optional.ofNullable(HttpUtils.getCookies(exchange).get("sessionId"))
                     // с чем работаем -> что возвращаем
@@ -199,8 +169,5 @@ public class Main {
                 HttpUtils.respond(exchange, 405, "");
             }
         });
-        httpServer.setExecutor(Executors.newCachedThreadPool());
-        httpServer.start();
-
     }
 }
