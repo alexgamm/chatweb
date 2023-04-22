@@ -2,6 +2,7 @@ package chatweb;
 
 import chatweb.db.Database;
 import chatweb.endpoint.IndexEndpoint;
+import chatweb.endpoint.LoginEndpoint;
 import chatweb.endpoint.UsersEndpoint;
 import chatweb.entity.Session;
 import chatweb.entity.User;
@@ -45,36 +46,7 @@ public class Main {
         MessageService messageService = new MessageService();
 
         webServer.addEndpoint("/", new IndexEndpoint(handlebars, sessionRepository, userRepository));
-        httpServer.createContext("/login", exchange -> {
-            try {
-                if (exchange.getRequestMethod().equals("POST")) {
-                    Map<String, String> body = HttpUtils.parseQueryString(HttpUtils.readRequestBody(exchange));
-                    String username = body.get("username");
-                    User user = userRepository.findUserByUsername(username);
-                    String password = body.get("password");
-                    if (user == null || password == null || !PasswordUtils.check(password, user.getPassword())) {
-                        Template template = handlebars.compile("login");
-                        Map<String, Object> ctx = new HashMap<>();
-                        ctx.put("username", username);
-                        ctx.put("error", true);
-                        HttpUtils.respond(exchange, 400, template.apply(ctx));
-                        return;
-                    }
-                    Session session = new Session(UUID.randomUUID().toString(), user.getId());
-                    sessionRepository.saveSession(session);
-                    exchange.getResponseHeaders().add("Location", "/");
-                    exchange.getResponseHeaders().add("Set-Cookie", "sessionId=" + session.getId());
-                    exchange.sendResponseHeaders(302, 0);
-
-                } else {
-                    Template template = handlebars.compile("login");
-                    HttpUtils.respond(exchange, 200, template.apply(null));
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+        webServer.addEndpoint("/login", new LoginEndpoint(handlebars, userRepository, sessionRepository));
         httpServer.createContext("/registration", exchange -> {
             try {
                 if (exchange.getRequestMethod().equals("POST")) {

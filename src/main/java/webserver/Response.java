@@ -1,6 +1,7 @@
 package webserver;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Response {
@@ -15,7 +16,16 @@ public class Response {
     }
 
     public static Response redirect(String location) {
-        return new Response(Collections.singletonMap("Location", location), 302, "");
+        return redirect(location, Collections.emptyMap());
+    }
+
+    public static Response redirect(String location, Map<String, String> headers) {
+        Map<String, String> allHeaders = new HashMap<>(headers);
+        allHeaders.put("Location", location);
+        return new Response(allHeaders, 302, "");
+    }
+    public static Response badRequest(String body){
+        return new Response(Collections.emptyMap(), 400, body);
     }
 
     public Map<String, String> getHeaders() {
