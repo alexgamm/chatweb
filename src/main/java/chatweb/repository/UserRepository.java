@@ -6,6 +6,7 @@ import chatweb.entity.User;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.List;
 
 public class UserRepository {
@@ -22,53 +23,34 @@ public class UserRepository {
     }
 
     public List<User> getAllUsers() {
-        try {
-            return database.executeSelect(mapper, "select * from users order by last_activity_at desc");
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        return database.executeSelect(mapper, "select * from users order by last_activity_at desc");
     }
 
     public User findUserByUsername(@Nullable String username) {
-        try {
-            return database.executeSelect(mapper, "select * from users where username = ?", username)
-                    .stream()
-                    .findFirst()
-                    .orElse(null);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        return database.executeSelect(mapper, "select * from users where username = ?", username)
+                .stream()
+                .findFirst()
+                .orElse(null);
     }
 
     public User findUserById(int id) {
-        try {
-            return database.executeSelect(mapper, "select * from users where id = ?", id)
-                    .stream()
-                    .findFirst()
-                    .orElse(null);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        return database.executeSelect(mapper, "select * from users where id = ?", id)
+                .stream()
+                .findFirst()
+                .orElse(null);
     }
 
     public void saveUser(User user) {
-        try {
-            database.execute(
-                    "insert into users (username, password, last_activity_at) values (?,?,?)",
-                    user.getUsername(),
-                    user.getPassword(),
-                    user.getLastActivityAt()
-            );
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        database.execute(
+                "insert into users (username, password, last_activity_at) values (?,?,?)",
+                user.getUsername(),
+                user.getPassword(),
+                new Timestamp(user.getLastActivityAt().getTime())
+        );
+
     }
 
     public void updateLastActivityAt(int userId) {
-        try {
-            database.execute("update users set last_activity_at = now() where id = ?", userId);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        database.execute("update users set last_activity_at = now() where id = ?", userId);
     }
 }

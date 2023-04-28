@@ -1,6 +1,6 @@
 package chatweb.service;
 
-import chatweb.longpoll.LongPollHandler;
+import chatweb.longpoll.LongPollFuture;
 import chatweb.model.Message;
 
 import java.util.*;
@@ -13,27 +13,27 @@ public class MessageService {
     private static final long LONG_POLL_TIMEOUT = 20_000;
     private static final ScheduledExecutorService SCHEDULER = Executors.newSingleThreadScheduledExecutor();
     private final List<Message> messages = new ArrayList<>();
-    private final Set<LongPollHandler> longPollHandlers = new HashSet<>();
+    private final Set<LongPollFuture> longPollFutures = new HashSet<>();
 
     public MessageService() {
         SCHEDULER.scheduleWithFixedDelay(() -> {
-            Set<LongPollHandler> expiredLongPollHandlers = longPollHandlers.stream()
-                    .filter(handler -> System.currentTimeMillis() - handler.getCreatedAt() >= LONG_POLL_TIMEOUT)
+            Set<LongPollFuture> expiredLongPollFutures = longPollFutures.stream()
+                    .filter(future -> System.currentTimeMillis() - future.getCreatedAt() >= LONG_POLL_TIMEOUT)
                     .collect(Collectors.toSet());
-            longPollHandlers.removeAll(expiredLongPollHandlers);
-            expiredLongPollHandlers.forEach(handler -> handler.handle(Collections.emptyList()));
+            longPollFutures.removeAll(expiredLongPollFutures);
+            expiredLongPollFutures.forEach(future -> future.complete(Collections.emptyList()));
         }, 0, 1, TimeUnit.SECONDS);
     }
 
     public void addMessage(Message message) {
         messages.add(message);
-        Set<LongPollHandler> currentLongPollHandlers = new HashSet<>(longPollHandlers);
-        longPollHandlers.clear();
-        currentLongPollHandlers.stream().forEach(handler -> handler.handle(getNewMessages(handler.getTs())));
+        Set<LongPollFuture> currentLongPollFutures = new HashSet<>(longPollFutures);
+        longPollFutures.clear();
+        currentLongPollFutures.stream().forEach(future -> future.complete(getNewMessages(future.getTs())));
     }
 
-    public void addLongPollHandler(LongPollHandler longPollHandler) {
-        longPollHandlers.add(longPollHandler);
+    public void addLongPollFuture(LongPollFuture longPollFuture) {
+        longPollFutures.add(longPollFuture);
     }
 
     public List<Message> getNewMessages(long ts) {
