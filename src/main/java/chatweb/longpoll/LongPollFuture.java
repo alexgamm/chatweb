@@ -1,16 +1,11 @@
 package chatweb.longpoll;
 
-import chatweb.model.Message;
-import chatweb.model.MessagesResponse;
-import chatweb.utils.HttpUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.net.httpserver.HttpExchange;
+import chatweb.model.Event;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class LongPollFuture extends CompletableFuture<List<Message>> {
+public class LongPollFuture extends CompletableFuture<List<Event>> {
     private final long ts;
     private final long createdAt = System.currentTimeMillis();
 

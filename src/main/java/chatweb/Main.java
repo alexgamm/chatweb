@@ -2,24 +2,19 @@ package chatweb;
 
 import chatweb.db.Database;
 import chatweb.endpoint.*;
-import chatweb.longpoll.LongPollFuture;
-import chatweb.model.Message;
 import chatweb.repository.SessionRepository;
 import chatweb.repository.UserRepository;
-import chatweb.service.MessageService;
-import chatweb.utils.HttpUtils;
+import chatweb.service.EventsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.TemplateLoader;
-import com.sun.net.httpserver.HttpServer;
 import webserver.WebServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.*;
 
 public class Main {
     public static void main(String[] args) throws IOException, SQLException {
@@ -34,12 +29,13 @@ public class Main {
         SessionRepository sessionRepository = new SessionRepository(database);
         TemplateLoader templateLoader = new ClassPathTemplateLoader("/templates", ".html");
         Handlebars handlebars = new Handlebars(templateLoader);
-        MessageService messageService = new MessageService();
+        EventsService eventsService = new EventsService();
 
         webServer.addEndpoint("/", new IndexEndpoint(userRepository, sessionRepository, handlebars));
         webServer.addEndpoint("/login", new LoginEndpoint(handlebars, userRepository, sessionRepository));
         webServer.addEndpoint("/registration", new RegistrationEndpoint(handlebars, userRepository, sessionRepository));
         webServer.addEndpoint("/api/users", new UsersEndpoint(userRepository));
-        webServer.addEndpoint("/api/messages", new MessagesEndpoint(userRepository, sessionRepository, messageService));
+        webServer.addEndpoint("/api/messages", new MessagesEndpoint(userRepository, sessionRepository, eventsService));
+        webServer.addEndpoint("/api/events", new EventsEndpoint(userRepository, sessionRepository, eventsService));
     }
 }
