@@ -1,22 +1,20 @@
 package chatweb.model;
 
-import java.util.Date;
 
-public class UserActivity extends Event{
+public class UserActivity extends Event {
+    private static final long LIFETIME = 20_000;
     private final String username;
-    private final Date lastActivityAt;
 
-    public UserActivity(String username, Date lastActivityAt) {
+    public UserActivity(String username) {
         super(EventType.USER_ACTIVITY);
         this.username = username;
-        this.lastActivityAt = lastActivityAt;
     }
 
     public String getUsername() {
         return username;
     }
 
-    public Date getLastActivityAt() {
-        return lastActivityAt;
+    public boolean isExpired() {
+        return System.currentTimeMillis() - getDate().getTime() > LIFETIME;
     }
 }

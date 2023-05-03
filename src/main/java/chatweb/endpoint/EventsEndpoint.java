@@ -4,6 +4,7 @@ import chatweb.entity.User;
 import chatweb.longpoll.LongPollFuture;
 import chatweb.model.Event;
 import chatweb.model.EventsResponse;
+import chatweb.model.UserActivity;
 import chatweb.repository.SessionRepository;
 import chatweb.repository.UserRepository;
 import chatweb.service.EventsService;
@@ -12,7 +13,7 @@ import webserver.RequestFailedException;
 
 import java.util.List;
 
-public class EventsEndpoint extends AuthEndpoint{
+public class EventsEndpoint extends AuthEndpoint {
     private final EventsService eventsService;
 
     public EventsEndpoint(UserRepository userRepository, SessionRepository sessionRepository, EventsService eventsService) {
@@ -36,6 +37,12 @@ public class EventsEndpoint extends AuthEndpoint{
             longPollFuture.complete(events);
         }
         userRepository.updateLastActivityAt(user.getId());
+        if (eventsService.getEvents().stream()
+                .noneMatch(event -> event instanceof UserActivity
+                        && ((UserActivity) event).getUsername().equals(user.getUsername())
+                        && !((UserActivity) event).isExpired())) {
+            eventsService.addEvent(new UserActivity(user.getUsername()));
+        }
         return longPollFuture.thenApply(eventList -> new EventsResponse(eventList));
     }
 }

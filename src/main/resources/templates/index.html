@@ -32,6 +32,23 @@
         'bg-secondary',
         'bg-secondary-focus',
     ];
+    let users = [];
+    function displayUsers (){
+        let userListHtml = "";
+        for (const user of users) {
+            const online = Date.now() - user.lastActivityAt < 30000;
+            userListHtml += `
+                 <li class="border rounded-xl mb-2 ${online ? 'border-primary' : 'border-gray-400'}">
+                    <a class="flex justify-between">
+                       <strong>${user.username}</strong>
+                       <i class="w-3 h-3 rounded-full ${online ? 'bg-primary' : 'bg-gray-400'}"></i>
+                    </a>
+                 </li>
+                `;
+        }
+        userList.innerHTML = userListHtml;
+    }
+    setInterval(displayUsers, 1000);
 
     function randomMessageColor() {
         return MESSAGES_COLORS[Math.floor(Math.random() * MESSAGES_COLORS.length)]
@@ -40,17 +57,8 @@
     fetch("/api/users")
         .then(r => r.json())
         .then(r => {
-            for (const user of r.users) {
-                const online = Date.now() - user.lastActivityAt < 60000;
-                userList.innerHTML += `
-                 <li class="border rounded-xl mb-2 ${online ? 'border-primary' : 'border-gray-400'}">
-                    <a class="flex justify-between">
-                       <strong>${user.username}</strong>
-                       <i class="w-3 h-3 rounded-full ${online ? 'bg-primary' : 'bg-gray-400'}"></i>
-                    </a>
-                 </li>
-                `;
-            }
+           users = r.users;
+           displayUsers();
         });
     document.querySelector('form').addEventListener("submit", function (event) {
         event.preventDefault();
@@ -67,19 +75,38 @@
     let ts = 0;
 
     function poll() {
-        fetch(`/api/messages?ts=${ts}`)
+        fetch(`/api/events?ts=${ts}`)
             .then(r => r.json())
             .then(r => {
-                for (const message of r.messages) {
-                    if (ts < message.sendDate) {
-                        ts = message.sendDate;
+                for (const event of r.events) {
+                    if (ts < event.date) {
+                        ts = event.date;
                     }
-                    messagesContainer.innerHTML += `
-                        <div class="chat chat-start">
-                          <div class="chat-header font-bold mb-1">${message.username}</div>
-                          <div class="chat-bubble ${randomMessageColor()}">${message.message}</div>
-                        </div>
-                    `
+                    switch (event.type){
+                        case "NEW_MESSAGE":
+                            const message = event.message;
+                            messagesContainer.innerHTML += `
+                                <div class="chat chat-start">
+                                  <div class="chat-header font-bold mb-1">${message.username}</div>
+                                  <div class="chat-bubble ${randomMessageColor()}">${message.message}</div>
+                                </div>
+                            `
+                            break;
+                        case "USER_ACTIVITY":
+                            const user = users.find(u => u.username === event.username);
+                            if (user){
+                                user.lastActivityAt = event.date;
+                            } else {
+                                users = [{
+                                    username: event.username,
+                                    lastActivityAt: event.date
+                                }, ...users];
+                            }
+
+                            break;
+
+                    }
+
                 }
                 requestAnimationFrame(() => messagesContainerWrapper.scrollTo({top: messagesContainerWrapper.scrollHeight, behavior: 'smooth'}))
                 poll();

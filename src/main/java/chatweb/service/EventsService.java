@@ -1,20 +1,21 @@
 package chatweb.service;
 
+import chatweb.entity.User;
 import chatweb.longpoll.LongPollFuture;
 import chatweb.model.Event;
-import chatweb.model.Message;
 
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class EventsService {
     private static final long LONG_POLL_TIMEOUT = 20_000;
     private static final ScheduledExecutorService SCHEDULER = Executors.newSingleThreadScheduledExecutor();
-    private final List<Event> events = new ArrayList<>();
-    private final Set<LongPollFuture> longPollFutures = new HashSet<>();
+    private final List<Event> events = Collections.synchronizedList(new LinkedList<>());
+    private final Set<LongPollFuture> longPollFutures = Collections.synchronizedSet(new HashSet<>());
 
     public EventsService() {
         SCHEDULER.scheduleWithFixedDelay(() -> {
@@ -41,5 +42,9 @@ public class EventsService {
         return events.stream()
                 .filter(event -> event.getDate().getTime() > ts)
                 .collect(Collectors.toList());
+    }
+
+    public List<Event> getEvents() {
+        return events;
     }
 }
