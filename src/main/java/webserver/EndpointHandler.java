@@ -5,12 +5,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 public class EndpointHandler implements HttpHandler {
+    private final static Logger LOG = LoggerFactory.getLogger(EndpointHandler.class);
     private final Endpoint endpoint;
     private final ObjectMapper objectMapper;
 
@@ -23,8 +26,7 @@ public class EndpointHandler implements HttpHandler {
         try {
             HttpUtils.respond(exchange, statusCode, response);
         } catch (IOException e) {
-            throw new RuntimeException(e);
-            // TODO log error
+            LOG.error("Failed to respond.", e);
         }
     }
 

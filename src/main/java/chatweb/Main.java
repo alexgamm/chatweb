@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.TemplateLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import webserver.WebServer;
 
 import java.io.IOException;
@@ -17,14 +19,17 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class Main {
+    private static final Logger LOG = LoggerFactory.getLogger(Main.class);
     public static void main(String[] args) throws IOException, SQLException {
         Database database = new Database(DriverManager.getConnection(
                 System.getenv("DB_URL"),
                 System.getenv("DB_USER"),
                 System.getenv("DB_PASSWORD")
         ));
+        LOG.info("Database initialized.");
         ObjectMapper objectMapper = new ObjectMapper();
         WebServer webServer = new WebServer(new InetSocketAddress("0.0.0.0", 80), objectMapper);
+        LOG.info("WebServer initialized.");
         UserRepository userRepository = new UserRepository(database);
         SessionRepository sessionRepository = new SessionRepository(database);
         TemplateLoader templateLoader = new ClassPathTemplateLoader("/templates", ".html");
