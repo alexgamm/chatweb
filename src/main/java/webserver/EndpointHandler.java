@@ -1,6 +1,5 @@
 package webserver;
 
-import chatweb.utils.HttpUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
@@ -9,8 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 public class EndpointHandler implements HttpHandler {
     private final static Logger LOG = LoggerFactory.getLogger(EndpointHandler.class);
@@ -24,7 +23,11 @@ public class EndpointHandler implements HttpHandler {
 
     private static void respond(HttpExchange exchange, int statusCode, String response) {
         try {
-            HttpUtils.respond(exchange, statusCode, response);
+            byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(statusCode, responseBytes.length);
+            exchange.getResponseBody().write(responseBytes);
+            exchange.getResponseBody().flush();
+            exchange.getResponseBody().close();
         } catch (IOException e) {
             LOG.error("Failed to respond.", e);
         }
