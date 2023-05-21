@@ -1,9 +1,24 @@
 {{#partial "body"}}
 <div class="drawer drawer-mobile">
+    <ul id="contextMenu" class="menu bg-base-100 w-56 hidden absolute z-10">
+        <li id="replyButton"><a href="#">Reply</a></li>
+    </ul>
     <input id="my-drawer-2" type="checkbox" class="drawer-toggle"/>
+
     <div class="drawer-content flex flex-col p-2">
+
         <div class="messages-container-wrapper flex-1 min-h-0 overflow-auto py-2">
+
             <div class="messages-container flex flex-col justify-end min-h-full">
+            </div>
+        </div>
+        <div id="repliedMessage" class="alert shadow-lg hidden">
+            <div id="repliedMessageSection">
+                <svg class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+                </svg>
+                <span></span>
             </div>
         </div>
         <form>
@@ -21,7 +36,11 @@
     </div>
 </div>
 
+
 <script>
+    const repliedMessage = document.querySelector("#repliedMessage");
+    const contextMenu = document.querySelector("#contextMenu");
+    const drawer = document.querySelector(".drawer");
     const userList = document.querySelector("#user-list");
     const messagesContainer = document.querySelector(".messages-container");
     const messageInput = document.querySelector("#message-input");
@@ -33,7 +52,46 @@
         'bg-secondary-focus',
     ];
     let users = [];
-    function displayUsers (){
+    let messageId;
+    let repliedMessageText;
+
+    document.addEventListener('click', (e) => {
+        contextMenu.classList.add("hidden");
+    })
+
+    function showCustomContextMenu(message, id, event) {
+        contextMenu.classList.remove("hidden");
+        messageId = id;
+        repliedMessageText = message;
+        contextMenu.style.left = event.pageX + "px";
+        contextMenu.style.top = event.pageY + "px";
+        event.preventDefault();
+    }
+
+    function hideCustomContextMenu() {
+        contextMenu.classList.add("hidden");
+    }
+
+    drawer.addEventListener('contextmenu', (e) => {
+        if (e.target.classList.contains('.chat-bubble') ||
+            // ??
+            e.target.closest('.chat-bubble') !== null) {
+            contextMenu.classList.remove("hidden");
+        } else {
+            contextMenu.classList.add("hidden");
+        }
+    });
+
+    function addRepliedMessageSection() {
+        document.querySelector("#replyButton").addEventListener('click', () => {
+            repliedMessage.classList.remove("hidden");
+            document.querySelector("#repliedMessageSection span").innerHTML = repliedMessageText;
+
+        });
+    }
+
+
+    function displayUsers() {
         let userListHtml = "";
         for (const user of users) {
             const online = Date.now() - user.lastActivityAt < 30000;
@@ -48,6 +106,7 @@
         }
         userList.innerHTML = userListHtml;
     }
+
     setInterval(displayUsers, 1000);
 
     function randomMessageColor() {
@@ -57,8 +116,8 @@
     fetch("/api/users")
         .then(r => r.json())
         .then(r => {
-           users = r.users;
-           displayUsers();
+            users = r.users;
+            displayUsers();
         });
     document.querySelector('form').addEventListener("submit", function (event) {
         event.preventDefault();
@@ -66,10 +125,18 @@
         if (!message) {
             return;
         }
-        fetch("/api/messages", {
-            method: "POST",
-            body: JSON.stringify({message: message})
-        });
+        if (repliedMessage.classList.contains("hidden")) {
+            fetch("/api/messages", {
+                method: "POST",
+                body: JSON.stringify({message: message})
+            });
+        } else {
+            fetch("/api/messages", {
+                method: "POST",
+                body: JSON.stringify({message: message, repliedMessageId: messageId})
+            });
+            repliedMessage.classList.add("hidden");
+        }
         messageInput.value = "";
     });
     let ts = 0;
@@ -82,19 +149,41 @@
                     if (ts < event.date) {
                         ts = event.date;
                     }
-                    switch (event.type){
+                    switch (event.type) {
                         case "NEW_MESSAGE":
                             const message = event.message;
+                            const repliedMessage = message.repliedMessage;
+                            let repliedMessageHTML = "";
+                            if (message.repliedMessage) {
+                                repliedMessageHTML = `
+                                <div class="w-auto bg-black bg-opacity-25 rounded-md p-4">
+                                        <div>
+                                          <div class=" font-semibold text-sm"> ${repliedMessage.username} </div>
+                                          <div class="text-sm">  ${repliedMessage.message}</div>
+                                       </div>
+                                </div>
+                                `
+                            }
+                            addRepliedMessageSection();
                             messagesContainer.innerHTML += `
                                 <div class="chat chat-start">
-                                  <div class="chat-header font-bold mb-1">${message.username}</div>
-                                  <div class="chat-bubble ${randomMessageColor()}">${message.message}</div>
+                                  <div class="chat-header font-bold mb-1 ">${message.username}</div>
+                                  <div oncontextmenu="showCustomContextMenu('${message.message}','${message.id}', event)"
+                                      onclick="hideCustomContextMenu()"
+                                      class="chat-bubble w-auto ${randomMessageColor()}">
+                                    ${repliedMessageHTML}
+                                    ${message.message}
+                                  </div>
                                 </div>
-                            `
+                            `;
+
+
                             break;
+
+
                         case "USER_ACTIVITY":
                             const user = users.find(u => u.username === event.username);
-                            if (user){
+                            if (user) {
                                 user.lastActivityAt = event.date;
                             } else {
                                 users = [{
@@ -102,13 +191,15 @@
                                     lastActivityAt: event.date
                                 }, ...users];
                             }
-
                             break;
 
                     }
 
                 }
-                requestAnimationFrame(() => messagesContainerWrapper.scrollTo({top: messagesContainerWrapper.scrollHeight, behavior: 'smooth'}))
+                requestAnimationFrame(() => messagesContainerWrapper.scrollTo({
+                    top: messagesContainerWrapper.scrollHeight,
+                    behavior: 'smooth'
+                }))
                 poll();
             })
     }

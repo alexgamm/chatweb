@@ -5,7 +5,6 @@ import chatweb.entity.User;
 import chatweb.repository.SessionRepository;
 import chatweb.repository.UserRepository;
 import chatweb.response.TemplateResponse;
-import chatweb.utils.HttpUtils;
 import chatweb.utils.PasswordUtils;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;

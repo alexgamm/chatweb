@@ -2,5 +2,6 @@ package chatweb.model;
 
 public enum EventType {
     NEW_MESSAGE,
-    USER_ACTIVITY
+    USER_ACTIVITY,
+    REPLY
 }
