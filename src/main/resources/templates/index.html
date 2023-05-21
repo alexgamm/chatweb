@@ -12,7 +12,7 @@
             <div class="messages-container flex flex-col justify-end min-h-full">
             </div>
         </div>
-        <div id="repliedMessage" class="alert shadow-lg hidden">
+        <div id="repliedMessageContainer" class="alert shadow-lg hidden">
             <div id="repliedMessageSection">
                 <svg class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -38,7 +38,7 @@
 
 
 <script>
-    const repliedMessage = document.querySelector("#repliedMessage");
+    const repliedMessageContainer = document.querySelector("#repliedMessageContainer");
     const contextMenu = document.querySelector("#contextMenu");
     const drawer = document.querySelector(".drawer");
     const userList = document.querySelector("#user-list");
@@ -52,17 +52,16 @@
         'bg-secondary-focus',
     ];
     let users = [];
-    let messageId;
-    let repliedMessageText;
+    const messages = {};
+    let repliedMessage;
 
     document.addEventListener('click', (e) => {
         contextMenu.classList.add("hidden");
     })
 
-    function showCustomContextMenu(message, id, event) {
+    function showCustomContextMenu(id, event) {
         contextMenu.classList.remove("hidden");
-        messageId = id;
-        repliedMessageText = message;
+        repliedMessage = messages[id];
         contextMenu.style.left = event.pageX + "px";
         contextMenu.style.top = event.pageY + "px";
         event.preventDefault();
@@ -84,8 +83,8 @@
 
     function addRepliedMessageSection() {
         document.querySelector("#replyButton").addEventListener('click', () => {
-            repliedMessage.classList.remove("hidden");
-            document.querySelector("#repliedMessageSection span").innerHTML = repliedMessageText;
+            repliedMessageContainer.classList.remove("hidden");
+            document.querySelector("#repliedMessageSection span").innerHTML = repliedMessage.message;
 
         });
     }
@@ -125,7 +124,7 @@
         if (!message) {
             return;
         }
-        if (repliedMessage.classList.contains("hidden")) {
+        if (repliedMessageContainer.classList.contains("hidden")) {
             fetch("/api/messages", {
                 method: "POST",
                 body: JSON.stringify({message: message})
@@ -133,9 +132,9 @@
         } else {
             fetch("/api/messages", {
                 method: "POST",
-                body: JSON.stringify({message: message, repliedMessageId: messageId})
+                body: JSON.stringify({message: message, repliedMessageId: repliedMessage.id})
             });
-            repliedMessage.classList.add("hidden");
+            repliedMessageContainer.classList.add("hidden");
         }
         messageInput.value = "";
     });
@@ -152,25 +151,27 @@
                     switch (event.type) {
                         case "NEW_MESSAGE":
                             const message = event.message;
+                            messages[message.id] = message;
                             const repliedMessage = message.repliedMessage;
                             let repliedMessageHTML = "";
                             if (message.repliedMessage) {
                                 repliedMessageHTML = `
-                                <div class="w-auto bg-black bg-opacity-25 rounded-md p-4">
-                                        <div>
-                                          <div class=" font-semibold text-sm"> ${repliedMessage.username} </div>
-                                          <div class="text-sm">  ${repliedMessage.message}</div>
-                                       </div>
+                                <div class="flex gap-2 w-auto bg-black bg-opacity-25 rounded-lg p-4 text-sm text-gray-300 mb-1">
+                                    <i class="block h-100 bg-white bg-opacity-20 rounded-md w-1 mt-1" style="min-width: 4px;"></i>
+                                    <div>
+                                      <div class="font-semibold mb-1">${repliedMessage.username}</div>
+                                      <div class="">${repliedMessage.message}</div>
+                                    </div>
                                 </div>
                                 `
                             }
                             addRepliedMessageSection();
                             messagesContainer.innerHTML += `
                                 <div class="chat chat-start">
-                                  <div class="chat-header font-bold mb-1 ">${message.username}</div>
-                                  <div oncontextmenu="showCustomContextMenu('${message.message}','${message.id}', event)"
+                                  <div class="chat-header font-bold mb-1">${message.username}</div>
+                                  <div oncontextmenu="showCustomContextMenu('${message.id}', event)"
                                       onclick="hideCustomContextMenu()"
-                                      class="chat-bubble w-auto ${randomMessageColor()}">
+                                      class="chat-bubble w-auto max-w-4xl text-gray-200 ${randomMessageColor()}">
                                     ${repliedMessageHTML}
                                     ${message.message}
                                   </div>
