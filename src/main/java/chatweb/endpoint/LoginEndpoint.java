@@ -7,16 +7,12 @@ import chatweb.repository.UserRepository;
 import chatweb.response.TemplateResponse;
 import chatweb.utils.PasswordUtils;
 import com.github.jknack.handlebars.Handlebars;
-import com.github.jknack.handlebars.Template;
 import webserver.Endpoint;
 import webserver.Request;
 import webserver.RequestFailedException;
 import webserver.Response;
 
-import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class LoginEndpoint implements Endpoint {

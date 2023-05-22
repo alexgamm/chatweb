@@ -10,7 +10,6 @@ public class Message {
         this.id = id;
         this.message = message;
         this.username = username;
-
         this.repliedMessage = repliedMessage;
     }
 
@@ -25,7 +24,6 @@ public class Message {
     public String getUsername() {
         return username;
     }
-
 
     public Message getRepliedMessage() {
         return repliedMessage;
