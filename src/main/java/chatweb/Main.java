@@ -2,6 +2,7 @@ package chatweb;
 
 import chatweb.db.Database;
 import chatweb.endpoint.*;
+import chatweb.repository.MessageRepository;
 import chatweb.repository.SessionRepository;
 import chatweb.repository.UserRepository;
 import chatweb.service.EventsService;
@@ -32,6 +33,7 @@ public class Main {
         LOG.info("WebServer initialized.");
         UserRepository userRepository = new UserRepository(database);
         SessionRepository sessionRepository = new SessionRepository(database);
+        MessageRepository messageRepository = new MessageRepository(database);
         TemplateLoader templateLoader = new ClassPathTemplateLoader("/templates", ".html");
         Handlebars handlebars = new Handlebars(templateLoader);
         EventsService eventsService = new EventsService();
@@ -40,7 +42,7 @@ public class Main {
         webServer.addEndpoint("/login", new LoginEndpoint(handlebars, userRepository, sessionRepository));
         webServer.addEndpoint("/registration", new RegistrationEndpoint(handlebars, userRepository, sessionRepository));
         webServer.addEndpoint("/api/users", new UsersEndpoint(userRepository));
-        webServer.addEndpoint("/api/messages", new MessagesEndpoint(userRepository, sessionRepository, eventsService));
+        webServer.addEndpoint("/api/messages", new MessagesEndpoint(userRepository, sessionRepository, eventsService, messageRepository));
         webServer.addEndpoint("/api/events", new EventsEndpoint(userRepository, sessionRepository, eventsService));
     }
 }
