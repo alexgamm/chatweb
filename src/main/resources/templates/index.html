@@ -54,6 +54,8 @@
     let users = [];
     const messages = {};
     let repliedMessage;
+    let bottom = true;
+
 
     document.addEventListener('click', (e) => {
         contextMenu.classList.add("hidden");
@@ -118,29 +120,92 @@
             users = r.users;
             displayUsers();
         });
+
     document.querySelector('form').addEventListener("submit", function (event) {
         event.preventDefault();
         const message = messageInput.value;
         if (!message) {
             return;
         }
-        if (repliedMessageContainer.classList.contains("hidden")) {
-            fetch("/api/messages", {
-                method: "POST",
-                body: JSON.stringify({message: message})
-            });
-        } else {
-            fetch("/api/messages", {
-                method: "POST",
-                body: JSON.stringify({message: message, repliedMessageId: repliedMessage.id})
-            });
+        // TODO Избавиться от копипаста
+        const body = {message};
+        if (!repliedMessageContainer.classList.contains("hidden")) {
+            body.repliedMessageId = repliedMessage.id;
             repliedMessageContainer.classList.add("hidden");
         }
+        fetch("/api/messages", {
+            method: "POST",
+            body: JSON.stringify(body)
+        });
         messageInput.value = "";
     });
     let ts = 0;
+    let from = 0;
+
+    function addMessage(message) {
+        const repliedMessage = message.repliedMessage;
+        let repliedMessageHTML = "";
+
+        if (message.repliedMessage) {
+            repliedMessageHTML = `
+               <div class="flex gap-2 w-auto bg-black bg-opacity-25 rounded-lg p-4 text-sm text-gray-300 mb-1">
+                  <i class="block h-100 bg-white bg-opacity-20 rounded-md w-1 mt-1" style="min-width: 4px;"></i>
+                     <div>
+                       <div class="font-semibold mb-1">${repliedMessage.username}</div>
+                       <div class="">${repliedMessage.message}</div>
+                     </div>
+               </div>
+        `
+        }
+        let messageHTML = `
+               <div class="chat chat-start">
+                 <div class="chat-header font-bold mb-1">${message.username}</div>
+                   <div oncontextmenu="showCustomContextMenu('${message.id}', event)"
+                        onclick="hideCustomContextMenu()"
+                        class="chat-bubble w-auto max-w-4xl text-gray-200 ${randomMessageColor()}">
+                               ${repliedMessageHTML}
+                               ${message.message}
+                 </div>
+               </div>
+        `;
+        addRepliedMessageSection();
+        if (bottom === false) {
+            messagesContainer.innerHTML = messageHTML + messagesContainer.innerHTML;
+        } else {
+            messagesContainer.innerHTML += messageHTML;
+        }
+    }
+
+    messagesContainerWrapper.addEventListener('scroll', function () {
+        console.log(messagesContainerWrapper.scrollTop)
+        if (messagesContainerWrapper.scrollTop === 0) {
+            // вернет массив сообщений
+            from = Object.values(messages).reduce(function (acc, curr) {
+                return !acc || acc > curr.sendDate ? curr.sendDate : acc;
+            }, null)
+
+            displayMessages();
+        }
+    })
+
+    function displayMessages() {
+        fetch(`/api/messages?from=${from}&count=20`)
+            .then(r => r.json())
+            .then(r => {
+                for (const message of r.messages) {
+                    bottom = false;
+                    messages[message.id] = message;
+                    addMessage(message);
+                }
+            })
+    }
+
+    displayMessages();
 
     function poll() {
+        ts = Object.values(messages).reduce(function (acc, curr) {
+            return !acc || acc < curr.sendDate ? curr.sendDate : acc;
+        }, null)
         fetch(`/api/events?ts=${ts}`)
             .then(r => r.json())
             .then(r => {
@@ -151,37 +216,10 @@
                     switch (event.type) {
                         case "NEW_MESSAGE":
                             const message = event.message;
+                            bottom = true;
                             messages[message.id] = message;
-                            const repliedMessage = message.repliedMessage;
-                            let repliedMessageHTML = "";
-                            if (message.repliedMessage) {
-                                repliedMessageHTML = `
-                                <div class="flex gap-2 w-auto bg-black bg-opacity-25 rounded-lg p-4 text-sm text-gray-300 mb-1">
-                                    <i class="block h-100 bg-white bg-opacity-20 rounded-md w-1 mt-1" style="min-width: 4px;"></i>
-                                    <div>
-                                      <div class="font-semibold mb-1">${repliedMessage.username}</div>
-                                      <div class="">${repliedMessage.message}</div>
-                                    </div>
-                                </div>
-                                `
-                            }
-                            addRepliedMessageSection();
-                            messagesContainer.innerHTML += `
-                                <div class="chat chat-start">
-                                  <div class="chat-header font-bold mb-1">${message.username}</div>
-                                  <div oncontextmenu="showCustomContextMenu('${message.id}', event)"
-                                      onclick="hideCustomContextMenu()"
-                                      class="chat-bubble w-auto max-w-4xl text-gray-200 ${randomMessageColor()}">
-                                    ${repliedMessageHTML}
-                                    ${message.message}
-                                  </div>
-                                </div>
-                            `;
-
-
+                            addMessage(message);
                             break;
-
-
                         case "USER_ACTIVITY":
                             const user = users.find(u => u.username === event.username);
                             if (user) {
@@ -193,9 +231,7 @@
                                 }, ...users];
                             }
                             break;
-
                     }
-
                 }
                 requestAnimationFrame(() => messagesContainerWrapper.scrollTo({
                     top: messagesContainerWrapper.scrollHeight,
@@ -204,8 +240,6 @@
                 poll();
             })
     }
-
-    poll();
 </script>
 {{/partial}}
 {{> base}}

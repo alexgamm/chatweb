@@ -8,6 +8,7 @@ import chatweb.service.EventsService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Date;
 import java.util.List;
 
 public class EventsServiceTest {
@@ -15,7 +16,7 @@ public class EventsServiceTest {
 
     @Test
     public void addEventTest() {
-        eventsService.addEvent(new NewMessage(new Message("dg654" ,"hi", "noname", null)));
+        eventsService.addEvent(new NewMessage(new Message("dg654" ,"hi", "noname", null,new Date(Long.parseLong("1685282664601")))));
         List<Event> events = eventsService.getEvents(0);
         Assertions.assertEquals(1, events.size());
         Event event = events.get(0);

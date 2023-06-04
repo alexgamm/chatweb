@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
@@ -23,7 +24,7 @@ public class JsonTest {
     @SuppressWarnings("unchecked")
     @Test
     public void newMessageToJson() throws JsonProcessingException {
-        NewMessage newMessage = new NewMessage(new Message(UUID.randomUUID().toString(), "hi", "name", null));
+        NewMessage newMessage = new NewMessage(new Message(UUID.randomUUID().toString(), "hi", "name", null, new Date(Long.parseLong("1685282664601"))));
         String json = objectMapper.writeValueAsString(newMessage);
         Map<String, ?> parsed = objectMapper.readValue(json, Map.class);
         Assertions.assertEquals("NEW_MESSAGE", parsed.get("type"));
