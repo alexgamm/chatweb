@@ -7,6 +7,7 @@ import chatweb.repository.UserRepository;
 import chatweb.response.TemplateResponse;
 import chatweb.utils.PasswordUtils;
 import com.github.jknack.handlebars.Handlebars;
+import org.apache.commons.validator.routines.EmailValidator;
 import webserver.Endpoint;
 import webserver.Request;
 import webserver.RequestFailedException;
@@ -18,6 +19,7 @@ import java.util.UUID;
 
 public class RegistrationEndpoint implements Endpoint {
     private static final String TEMPLATE_NAME = "registration";
+    private static final EmailValidator EMAIL_VALIDATOR = EmailValidator.getInstance();
     private final Handlebars handlebars;
     private final UserRepository userRepository;
     private final SessionRepository sessionRepository;
@@ -36,11 +38,19 @@ public class RegistrationEndpoint implements Endpoint {
     @Override
     public Object post(Request request) throws RequestFailedException {
         String username = request.getBody().get("username");
+        String email = request.getBody().get("email");
         String password = request.getBody().get("password");
+
         if (username == null || username.isEmpty()) {
             return new TemplateResponse.Builder(handlebars, TEMPLATE_NAME)
                     .statusCode(400)
                     .addToContext("error", "username is missing")
+                    .build();
+        }
+        if (email == null || email.isEmpty() || !EMAIL_VALIDATOR.isValid(email)) {
+            return new TemplateResponse.Builder(handlebars, TEMPLATE_NAME)
+                    .statusCode(400)
+                    .addToContext("error", "email is missing or invalid")
                     .build();
         }
         if (password == null || password.length() < 6) {

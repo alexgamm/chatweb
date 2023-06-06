@@ -1,12 +1,14 @@
 package chatweb.model;
 
 
+import java.util.Date;
+
 public class UserActivity extends Event {
     private static final long LIFETIME = 20_000;
     private final String username;
 
     public UserActivity(String username) {
-        super(EventType.USER_ACTIVITY);
+        super(EventType.USER_ACTIVITY, new Date());
         this.username = username;
     }
 

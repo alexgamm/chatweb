@@ -16,7 +16,7 @@ public class EventsServiceTest {
 
     @Test
     public void addEventTest() {
-        eventsService.addEvent(new NewMessage(new Message("dg654" ,"hi", "noname", null,new Date(Long.parseLong("1685282664601")))));
+        eventsService.addEvent(new NewMessage(new Message("dg654" ,"hi", "noname", null,new Date())));
         List<Event> events = eventsService.getEvents(0);
         Assertions.assertEquals(1, events.size());
         Event event = events.get(0);

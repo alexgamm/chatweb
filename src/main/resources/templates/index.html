@@ -139,8 +139,6 @@
         });
         messageInput.value = "";
     });
-    let ts = 0;
-    let from = 0;
 
     function addMessage(message) {
         const repliedMessage = message.repliedMessage;
@@ -180,16 +178,19 @@
         console.log(messagesContainerWrapper.scrollTop)
         if (messagesContainerWrapper.scrollTop === 0) {
             // вернет массив сообщений
-            from = Object.values(messages).reduce(function (acc, curr) {
+           const from = Object.values(messages).reduce(function (acc, curr) {
                 return !acc || acc > curr.sendDate ? curr.sendDate : acc;
             }, null)
-
-            displayMessages();
+            displayMessages(from);
         }
     })
 
-    function displayMessages() {
-        fetch(`/api/messages?from=${from}&count=20`)
+    function displayMessages(from) {
+        const params = {count:20}
+        if(from){
+            params.from = from;
+        }
+       return fetch(`/api/messages?${new URLSearchParams(params).toString()}`)
             .then(r => r.json())
             .then(r => {
                 for (const message of r.messages) {
@@ -198,14 +199,17 @@
                     addMessage(message);
                 }
             })
+
     }
 
-    displayMessages();
-
-    function poll() {
-        ts = Object.values(messages).reduce(function (acc, curr) {
+    displayMessages().then(()=> {
+        const ts = Object.values(messages).reduce(function (acc, curr) {
             return !acc || acc < curr.sendDate ? curr.sendDate : acc;
-        }, null)
+        }, 0)
+        poll(ts);
+    });
+
+    function poll(ts) {
         fetch(`/api/events?ts=${ts}`)
             .then(r => r.json())
             .then(r => {
@@ -237,7 +241,7 @@
                     top: messagesContainerWrapper.scrollHeight,
                     behavior: 'smooth'
                 }))
-                poll();
+                poll(ts);
             })
     }
 </script>

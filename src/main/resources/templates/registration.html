@@ -12,6 +12,14 @@
                        name="username" value="{{username}}">
             </div>
             <div class="form-control">
+                <label class="label" for="email">
+                    <span class="label-text">email</span>
+                </label>
+                <input class="input input-bordered {{#if error}}input-error{{/if}}" type="email"
+                       id="email"
+                       name="email" value="{{email}}">
+            </div>
+            <div class="form-control">
                 <label class="label" for="password">
                     <span class="label-text">password</span>
                 </label>

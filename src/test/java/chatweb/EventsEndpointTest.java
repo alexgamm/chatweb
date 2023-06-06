@@ -42,7 +42,7 @@ public class EventsEndpointTest {
         future = (CompletableFuture<EventsResponse>) eventsEndpoint.authGet(request, user);
         Assertions.assertFalse(future.isDone());
 
-        NewMessage newMessage = new NewMessage(new Message("1", "hi", user.getUsername(), null, new Date(Long.parseLong("1685282664601"))));
+        NewMessage newMessage = new NewMessage(new Message("1", "hi", user.getUsername(), null, new Date()));
         eventsService.addEvent(newMessage);
         eventsResponse = future.get(10, TimeUnit.SECONDS);
         Assertions.assertEquals(newMessage, eventsResponse.getEvents().get(0));
