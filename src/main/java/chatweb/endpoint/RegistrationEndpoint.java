@@ -51,6 +51,8 @@ public class RegistrationEndpoint implements Endpoint {
             return new TemplateResponse.Builder(handlebars, TEMPLATE_NAME)
                     .statusCode(400)
                     .addToContext("error", "email is missing or invalid")
+                    .addToContext("username", username)
+                    .addToContext("email", email)
                     .build();
         }
         if (password == null || password.length() < 6) {
@@ -68,7 +70,7 @@ public class RegistrationEndpoint implements Endpoint {
                     .addToContext("error", "username has been already taken")
                     .build();
         }
-        user = new User(0, username.toLowerCase(), PasswordUtils.hash(password), new Date());
+        user = new User(0, username.toLowerCase(), email, PasswordUtils.hash(password), new Date());
         userRepository.saveUser(user);
         user = userRepository.findUserByUsername(user.getUsername());
         Session session = new Session(UUID.randomUUID().toString(), user.getId());

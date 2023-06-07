@@ -31,7 +31,7 @@ public class EventsEndpointTest {
         SessionRepository sessionRepository = mock(SessionRepository.class);
         Request request = mock(Request.class);
         when(request.getQuery()).thenReturn(Collections.singletonMap("ts", "0"));
-        User user = new User(4656, "name", "afll", new Date());
+        User user = new User(4656, "name", "test@gmail.com", "afll", new Date());
         EventsService eventsService = new EventsService();
         EventsEndpoint eventsEndpoint = new EventsEndpoint(userRepository, sessionRepository, eventsService);
 

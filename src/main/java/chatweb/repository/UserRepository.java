@@ -5,7 +5,6 @@ import chatweb.db.mappers.ListMapper;
 import chatweb.entity.User;
 import org.jetbrains.annotations.Nullable;
 
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -14,9 +13,9 @@ public class UserRepository {
     private final ListMapper<User> mapper = rs -> new User(
             rs.getInt("id"),
             rs.getString("username"),
+            rs.getString("email"),
             rs.getString("password"),
-            rs.getTimestamp("last_activity_at")
-    );
+            rs.getTimestamp("last_activity_at"));
 
     public UserRepository(Database database) {
         this.database = database;
@@ -42,10 +41,13 @@ public class UserRepository {
 
     public void saveUser(User user) {
         database.execute(
-                "insert into users (username, password, last_activity_at) values (?,?,?)",
+                "insert into users (username, password, last_activity_at, verified, verification_code, email) values (?,?,?,?,?)",
                 user.getUsername(),
                 user.getPassword(),
-                new Timestamp(user.getLastActivityAt().getTime())
+                new Timestamp(user.getLastActivityAt().getTime()),
+                false,
+                0,
+                user.getEmail()
         );
 
     }

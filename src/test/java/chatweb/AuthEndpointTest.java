@@ -41,7 +41,7 @@ public class AuthEndpointTest {
 
     @Test
     public void testAuthorized() {
-        User user = new User(45, "sasha", "zzaaqq", new Date());
+        User user = new User(45, "sasha", "test@gmail.com", "zzaaqq", new Date());
         Session session = new Session("4545", 45);
         UserRepository userRepository = mock(UserRepository.class);
         when(userRepository.findUserById(45)).thenReturn(user);
