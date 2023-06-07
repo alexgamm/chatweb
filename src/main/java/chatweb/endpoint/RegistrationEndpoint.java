@@ -1,10 +1,9 @@
 package chatweb.endpoint;
 
-import chatweb.entity.Session;
 import chatweb.entity.User;
-import chatweb.repository.SessionRepository;
 import chatweb.repository.UserRepository;
 import chatweb.response.TemplateResponse;
+import chatweb.service.VerificationService;
 import chatweb.utils.PasswordUtils;
 import com.github.jknack.handlebars.Handlebars;
 import org.apache.commons.validator.routines.EmailValidator;
@@ -13,21 +12,19 @@ import webserver.Request;
 import webserver.RequestFailedException;
 import webserver.Response;
 
-import java.util.Collections;
 import java.util.Date;
-import java.util.UUID;
 
 public class RegistrationEndpoint implements Endpoint {
     private static final String TEMPLATE_NAME = "registration";
     private static final EmailValidator EMAIL_VALIDATOR = EmailValidator.getInstance();
     private final Handlebars handlebars;
     private final UserRepository userRepository;
-    private final SessionRepository sessionRepository;
+    private final VerificationService verificationService;
 
-    public RegistrationEndpoint(Handlebars handlebars, UserRepository userRepository, SessionRepository sessionRepository) {
+    public RegistrationEndpoint(Handlebars handlebars, UserRepository userRepository, VerificationService verificationService) {
         this.handlebars = handlebars;
         this.userRepository = userRepository;
-        this.sessionRepository = sessionRepository;
+        this.verificationService = verificationService;
     }
 
     @Override
@@ -73,11 +70,8 @@ public class RegistrationEndpoint implements Endpoint {
         user = new User(0, username.toLowerCase(), email, PasswordUtils.hash(password), new Date());
         userRepository.saveUser(user);
         user = userRepository.findUserByUsername(user.getUsername());
-        Session session = new Session(UUID.randomUUID().toString(), user.getId());
-        sessionRepository.saveSession(session);
-        return Response.redirect(
-                "/",
-                Collections.singletonMap("Set-Cookie", "sessionId=" + session.getId())
-        );
+        verificationService.createAndSendVerification(user);
+        //TODO handle email problems
+        return Response.redirect("/verification?email=" + user.getEmail());
     }
 }

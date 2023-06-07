@@ -41,12 +41,10 @@ public class UserRepository {
 
     public void saveUser(User user) {
         database.execute(
-                "insert into users (username, password, last_activity_at, verified, verification_code, email) values (?,?,?,?,?)",
+                "insert into users (username, password, last_activity_at, email) values (?,?,?,?)",
                 user.getUsername(),
                 user.getPassword(),
                 new Timestamp(user.getLastActivityAt().getTime()),
-                false,
-                0,
                 user.getEmail()
         );
 
