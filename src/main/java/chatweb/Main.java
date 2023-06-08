@@ -54,8 +54,10 @@ public class Main {
         webServer.addEndpoint("/", new IndexEndpoint(userRepository, sessionRepository, handlebars));
         webServer.addEndpoint("/login", new LoginEndpoint(handlebars, userRepository, sessionRepository));
         webServer.addEndpoint("/registration", new RegistrationEndpoint(handlebars, userRepository, verificationService));
+        webServer.addEndpoint("/verification", new VerificationEndpoint(verificationRepository, verificationService, handlebars));
         webServer.addEndpoint("/api/users", new UsersEndpoint(userRepository));
         webServer.addEndpoint("/api/messages", new MessagesEndpoint(userRepository, sessionRepository, eventsService, messageRepository));
         webServer.addEndpoint("/api/events", new EventsEndpoint(userRepository, sessionRepository, eventsService));
+
     }
 }
