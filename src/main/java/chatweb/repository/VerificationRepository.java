@@ -25,4 +25,8 @@ public class VerificationRepository {
                 .findFirst()
                 .orElse(null);
     }
+
+    public void updateVerified(int userId) {
+        database.execute("update verifications set verified = true where user_id = ?", userId);
+    }
 }

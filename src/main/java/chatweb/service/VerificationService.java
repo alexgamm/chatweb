@@ -1,6 +1,7 @@
 package chatweb.service;
 
 import chatweb.entity.User;
+import chatweb.entity.Verification;
 import chatweb.repository.VerificationRepository;
 import org.apache.commons.lang3.RandomStringUtils;
 
@@ -20,5 +21,13 @@ public class VerificationService {
             return true;
         }
         return false;
+    }
+
+    public Verification findVerification(int userId) {
+        return verificationRepository.findVerification(userId);
+    }
+
+    public void updateVerified(int userId) {
+        verificationRepository.updateVerified(userId);
     }
 }

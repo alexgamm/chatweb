@@ -31,6 +31,13 @@ public class UserRepository {
                 .findFirst()
                 .orElse(null);
     }
+    public User findUserByEmail(@Nullable String email) {
+        return database.executeSelect(mapper, "select * from users where email = ?", email)
+                .stream()
+                .findFirst()
+                .orElse(null);
+    }
+
 
     public User findUserById(int id) {
         return database.executeSelect(mapper, "select * from users where id = ?", id)
