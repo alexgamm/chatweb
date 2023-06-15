@@ -3,6 +3,7 @@ package chatweb.endpoint;
 import chatweb.entity.User;
 import chatweb.repository.UserRepository;
 import chatweb.response.TemplateResponse;
+import chatweb.service.GoogleOAuthService;
 import chatweb.service.VerificationService;
 import chatweb.utils.PasswordUtils;
 import com.github.jknack.handlebars.Handlebars;
@@ -20,16 +21,21 @@ public class RegistrationEndpoint implements Endpoint {
     private final Handlebars handlebars;
     private final UserRepository userRepository;
     private final VerificationService verificationService;
+    private final GoogleOAuthService googleOAuthService;
 
-    public RegistrationEndpoint(Handlebars handlebars, UserRepository userRepository, VerificationService verificationService) {
+    public RegistrationEndpoint(Handlebars handlebars, UserRepository userRepository, VerificationService verificationService, GoogleOAuthService googleOAuthService) {
         this.handlebars = handlebars;
         this.userRepository = userRepository;
         this.verificationService = verificationService;
+        this.googleOAuthService = googleOAuthService;
     }
 
     @Override
     public Object get(Request request) throws RequestFailedException {
-        return new TemplateResponse.Builder(handlebars, TEMPLATE_NAME).build();
+        return new TemplateResponse.Builder(handlebars, TEMPLATE_NAME)
+                .addToContext("googleOAuthClientId", googleOAuthService.getClientId())
+                .addToContext("googleOAuthRedirectUri", googleOAuthService.getRedirectUri())
+                .build();
     }
 
     @Override

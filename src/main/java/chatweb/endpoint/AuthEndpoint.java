@@ -1,13 +1,17 @@
 package chatweb.endpoint;
 
+import chatweb.entity.Session;
 import chatweb.entity.User;
 import chatweb.repository.SessionRepository;
 import chatweb.repository.UserRepository;
 import webserver.Endpoint;
 import webserver.Request;
 import webserver.RequestFailedException;
+import webserver.Response;
 
+import java.util.Collections;
 import java.util.Optional;
+import java.util.UUID;
 
 public abstract class AuthEndpoint implements Endpoint {
     protected final UserRepository userRepository;
@@ -36,12 +40,21 @@ public abstract class AuthEndpoint implements Endpoint {
         return authPost(request, getUser(request));
     }
 
-    public Object authGet(Request request, User user) throws RequestFailedException{
+    public Object authGet(Request request, User user) throws RequestFailedException {
         throw new RequestFailedException(405, "method not allowed");
     }
 
-    public Object authPost(Request request, User user) throws RequestFailedException{
+    public Object authPost(Request request, User user) throws RequestFailedException {
         throw new RequestFailedException(405, "method not allowed");
+    }
+
+    public Response authorizeAndRedirect(int userId, String location) {
+        Session session = new Session(UUID.randomUUID().toString(), userId);
+        sessionRepository.saveSession(session);
+        return Response.redirect(
+                location,
+                Collections.singletonMap("Set-Cookie", "sessionId=" + session.getId() + "; Path=/")
+        );
     }
 
 }

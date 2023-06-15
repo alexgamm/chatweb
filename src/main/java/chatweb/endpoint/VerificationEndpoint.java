@@ -1,6 +1,5 @@
 package chatweb.endpoint;
 
-import chatweb.entity.Session;
 import chatweb.entity.User;
 import chatweb.entity.Verification;
 import chatweb.repository.SessionRepository;
@@ -8,24 +7,17 @@ import chatweb.repository.UserRepository;
 import chatweb.response.TemplateResponse;
 import chatweb.service.VerificationService;
 import com.github.jknack.handlebars.Handlebars;
-import webserver.Endpoint;
 import webserver.Request;
 import webserver.RequestFailedException;
 import webserver.Response;
 
-import java.util.Collections;
-import java.util.UUID;
-
-public class VerificationEndpoint implements Endpoint {
+public class VerificationEndpoint extends AuthEndpoint {
     private final VerificationService verificationService;
-    private final UserRepository userRepository;
-    private final SessionRepository sessionRepository;
     private final Handlebars handlebars;
 
-    public VerificationEndpoint(VerificationService verificationService, UserRepository userRepository, SessionRepository sessionRepository, Handlebars handlebars) {
+    public VerificationEndpoint(UserRepository userRepository, SessionRepository sessionRepository, VerificationService verificationService, Handlebars handlebars) {
+        super(userRepository, sessionRepository);
         this.verificationService = verificationService;
-        this.userRepository = userRepository;
-        this.sessionRepository = sessionRepository;
         this.handlebars = handlebars;
     }
 
@@ -70,11 +62,6 @@ public class VerificationEndpoint implements Endpoint {
         if (!verification.isVerified()) {
             verificationService.updateVerified(user.getId());
         }
-        Session session = new Session(UUID.randomUUID().toString(), user.getId());
-        sessionRepository.saveSession(session);
-        return Response.redirect(
-                "/",
-                Collections.singletonMap("Set-Cookie", "sessionId=" + session.getId())
-        );
+        return authorizeAndRedirect(user.getId(), "/");
     }
 }

@@ -8,6 +8,7 @@ import chatweb.repository.UserRepository;
 import chatweb.repository.VerificationRepository;
 import chatweb.service.EmailService;
 import chatweb.service.EventsService;
+import chatweb.service.GoogleOAuthService;
 import chatweb.service.VerificationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.jknack.handlebars.Handlebars;
@@ -26,6 +27,7 @@ public class Main {
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) throws IOException, SQLException {
+        ObjectMapper objectMapper = new ObjectMapper();
         Database database = new Database(DriverManager.getConnection(
                 System.getenv("DB_URL"),
                 System.getenv("DB_USER"),
@@ -39,7 +41,12 @@ public class Main {
                 System.getenv("SMTP_FROM_NAME"),
                 System.getenv("SMTP_PASSWORD")
         );
-        ObjectMapper objectMapper = new ObjectMapper();
+        GoogleOAuthService googleOAuthService = new GoogleOAuthService(
+                objectMapper,
+                System.getenv("GOOGLE_OAUTH_CLIENT_ID"),
+                System.getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
+                System.getenv("GOOGLE_OAUTH_REDIRECT_URI")
+        );
         WebServer webServer = new WebServer(new InetSocketAddress("0.0.0.0", 80), objectMapper);
         LOG.info("WebServer initialized.");
         UserRepository userRepository = new UserRepository(database);
@@ -52,9 +59,10 @@ public class Main {
         EventsService eventsService = new EventsService();
 
         webServer.addEndpoint("/", new IndexEndpoint(userRepository, sessionRepository, handlebars));
-        webServer.addEndpoint("/login", new LoginEndpoint(handlebars, userRepository, sessionRepository));
-        webServer.addEndpoint("/registration", new RegistrationEndpoint(handlebars, userRepository, verificationService));
-        webServer.addEndpoint("/verification", new VerificationEndpoint(verificationService, userRepository, sessionRepository, handlebars));
+        webServer.addEndpoint("/login", new LoginEndpoint(userRepository, sessionRepository, handlebars, verificationService));
+        webServer.addEndpoint("/registration", new RegistrationEndpoint(handlebars, userRepository, verificationService, googleOAuthService));
+        webServer.addEndpoint("/google/oauth/redirect", new GoogleOAuthRedirectEndpoint(userRepository, sessionRepository, googleOAuthService, verificationService));
+        webServer.addEndpoint("/verification", new VerificationEndpoint(userRepository, sessionRepository, verificationService, handlebars));
         webServer.addEndpoint("/api/users", new UsersEndpoint(userRepository));
         webServer.addEndpoint("/api/messages", new MessagesEndpoint(userRepository, sessionRepository, eventsService, messageRepository));
         webServer.addEndpoint("/api/events", new EventsEndpoint(userRepository, sessionRepository, eventsService));
