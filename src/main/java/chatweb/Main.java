@@ -27,45 +27,45 @@ public class Main {
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) throws IOException, SQLException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        Database database = new Database(DriverManager.getConnection(
-                System.getenv("DB_URL"),
-                System.getenv("DB_USER"),
-                System.getenv("DB_PASSWORD")
-        ));
-        LOG.info("Database initialized.");
-        EmailService emailService = new EmailService(
-                System.getenv("SMTP_HOST"),
-                Integer.parseInt(System.getenv("SMTP_PORT")),
-                System.getenv("SMTP_EMAIL"),
-                System.getenv("SMTP_FROM_NAME"),
-                System.getenv("SMTP_PASSWORD")
-        );
-        GoogleOAuthService googleOAuthService = new GoogleOAuthService(
-                objectMapper,
-                System.getenv("GOOGLE_OAUTH_CLIENT_ID"),
-                System.getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
-                System.getenv("GOOGLE_OAUTH_REDIRECT_URI")
-        );
-        WebServer webServer = new WebServer(new InetSocketAddress("0.0.0.0", 80), objectMapper);
-        LOG.info("WebServer initialized.");
-        UserRepository userRepository = new UserRepository(database);
-        SessionRepository sessionRepository = new SessionRepository(database);
-        MessageRepository messageRepository = new MessageRepository(database);
-        VerificationRepository verificationRepository = new VerificationRepository(database);
-        TemplateLoader templateLoader = new ClassPathTemplateLoader("/templates", ".html");
-        Handlebars handlebars = new Handlebars(templateLoader);
-        VerificationService verificationService = new VerificationService(emailService, verificationRepository);
-        EventsService eventsService = new EventsService();
-
-        webServer.addEndpoint("/", new IndexEndpoint(userRepository, sessionRepository, handlebars));
-        webServer.addEndpoint("/login", new LoginEndpoint(userRepository, sessionRepository, handlebars, verificationService));
-        webServer.addEndpoint("/registration", new RegistrationEndpoint(handlebars, userRepository, verificationService, googleOAuthService));
-        webServer.addEndpoint("/google/oauth/redirect", new GoogleOAuthRedirectEndpoint(userRepository, sessionRepository, googleOAuthService, verificationService));
-        webServer.addEndpoint("/verification", new VerificationEndpoint(userRepository, sessionRepository, verificationService, handlebars));
-        webServer.addEndpoint("/api/users", new UsersEndpoint(userRepository));
-        webServer.addEndpoint("/api/messages", new MessagesEndpoint(userRepository, sessionRepository, eventsService, messageRepository));
-        webServer.addEndpoint("/api/events", new EventsEndpoint(userRepository, sessionRepository, eventsService));
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        Database database = new Database(DriverManager.getConnection(
+//                System.getenv("DB_URL"),
+//                System.getenv("DB_USER"),
+//                System.getenv("DB_PASSWORD")
+//        ));
+//        LOG.info("Database initialized.");
+//        EmailService emailService = new EmailService(
+//                System.getenv("SMTP_HOST"),
+//                Integer.parseInt(System.getenv("SMTP_PORT")),
+//                System.getenv("SMTP_EMAIL"),
+//                System.getenv("SMTP_FROM_NAME"),
+//                System.getenv("SMTP_PASSWORD")
+//        );
+//        GoogleOAuthService googleOAuthService = new GoogleOAuthService(
+//                objectMapper,
+//                System.getenv("GOOGLE_OAUTH_CLIENT_ID"),
+//                System.getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
+//                System.getenv("GOOGLE_OAUTH_REDIRECT_URI")
+//        );
+//        WebServer webServer = new WebServer(new InetSocketAddress("0.0.0.0", 80), objectMapper);
+//        LOG.info("WebServer initialized.");
+//        UserRepository userRepository = new UserRepository(database);
+//        SessionRepository sessionRepository = new SessionRepository(database);
+//        MessageRepository messageRepository = new MessageRepository(database);
+//        VerificationRepository verificationRepository = new VerificationRepository(database);
+//        TemplateLoader templateLoader = new ClassPathTemplateLoader("/templates", ".html");
+//        Handlebars handlebars = new Handlebars(templateLoader);
+//        VerificationService verificationService = new VerificationService(emailService, verificationRepository);
+//        EventsService eventsService = new EventsService();
+//
+//        webServer.addEndpoint("/", new IndexEndpoint(userRepository, sessionRepository, handlebars));
+//        webServer.addEndpoint("/login", new LoginEndpoint(userRepository, sessionRepository, handlebars, verificationService));
+//        webServer.addEndpoint("/registration", new RegistrationEndpoint(handlebars, userRepository, verificationService, googleOAuthService));
+//        webServer.addEndpoint("/google/oauth/redirect", new GoogleOAuthRedirectEndpoint(userRepository, sessionRepository, googleOAuthService, verificationService));
+//        webServer.addEndpoint("/verification", new VerificationEndpoint(userRepository, sessionRepository, verificationService, handlebars));
+//        webServer.addEndpoint("/api/users", new UsersEndpoint(userRepository));
+//        webServer.addEndpoint("/api/messages", new MessagesEndpoint(userRepository, sessionRepository, eventsService, messageRepository));
+//        webServer.addEndpoint("/api/events", new EventsEndpoint(userRepository, sessionRepository, eventsService));
 
     }
 }

@@ -1,5 +1,6 @@
 package chatweb.service;
 
+import chatweb.configuration.properties.GoogleOAuthProperties;
 import chatweb.model.google.OAuthTokenResponse;
 import chatweb.model.google.UserInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -14,43 +15,43 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 
+@Service
+@EnableConfigurationProperties(GoogleOAuthProperties.class)
 public class GoogleOAuthService {
     private final static String TOKEN_URI = "https://oauth2.googleapis.com/token";
     private final static String USER_INFO_URI = "https://www.googleapis.com/oauth2/v2/userinfo";
     private final ObjectMapper objectMapper;
-    private final String clientId;
-    private final String clientSecret;
-    private final String redirectUri;
+    private final GoogleOAuthProperties googleOAuthProperties;
     private final HttpClient httpClient = HttpClients.createDefault();
 
-    public GoogleOAuthService(ObjectMapper objectMapper, String clientId, String clientSecret, String redirectUri) {
+    public GoogleOAuthService(ObjectMapper objectMapper, GoogleOAuthProperties googleOAuthProperties) {
         this.objectMapper = objectMapper;
-        this.clientId = clientId;
-        this.clientSecret = clientSecret;
-        this.redirectUri = redirectUri;
+        this.googleOAuthProperties = googleOAuthProperties;
     }
 
     public String getClientId() {
-        return clientId;
+        return googleOAuthProperties.getClientId();
     }
 
     public String getRedirectUri() {
-        return redirectUri;
+        return googleOAuthProperties.getRedirectUri();
     }
 
     public String getToken(String code) throws IOException {
         HttpPost request = new HttpPost(TOKEN_URI);
         List<NameValuePair> form = List.of(
-                new BasicNameValuePair("client_id", clientId),
-                new BasicNameValuePair("client_secret", clientSecret),
+                new BasicNameValuePair("client_id", googleOAuthProperties.getClientId()),
+                new BasicNameValuePair("client_secret", googleOAuthProperties.getClientSecret()),
                 new BasicNameValuePair("code", code),
                 new BasicNameValuePair("grant_type", "authorization_code"),
-                new BasicNameValuePair("redirect_uri", redirectUri)
+                new BasicNameValuePair("redirect_uri", googleOAuthProperties.getRedirectUri())
         );
         request.setEntity(new UrlEncodedFormEntity(form));
         HttpResponse response = httpClient.execute(request);

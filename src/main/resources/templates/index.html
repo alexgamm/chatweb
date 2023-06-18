@@ -1,4 +1,4 @@
-{{#partial "body"}}
+{{> pre-body}}
 <div class="drawer drawer-mobile">
     <ul id="contextMenu" class="menu bg-base-100 w-56 hidden absolute z-10">
         <li id="replyButton"><a href="#">Reply</a></li>
@@ -127,7 +127,6 @@
         if (!message) {
             return;
         }
-        // TODO Избавиться от копипаста
         const body = {message};
         if (!repliedMessageContainer.classList.contains("hidden")) {
             body.repliedMessageId = repliedMessage.id;
@@ -135,7 +134,11 @@
         }
         fetch("/api/messages", {
             method: "POST",
-            body: JSON.stringify(body)
+            body: JSON.stringify(body),
+            //TODO read about content type
+            headers: {
+                "Content-Type": "application/json;charset=UTF8"
+            }
         });
         messageInput.value = "";
     });
@@ -245,5 +248,4 @@
             })
     }
 </script>
-{{/partial}}
-{{> base}}
+{{> post-body}}

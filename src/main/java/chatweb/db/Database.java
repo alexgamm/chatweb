@@ -2,6 +2,7 @@ package chatweb.db;
 
 import chatweb.db.mappers.ListMapper;
 import chatweb.exception.DatabaseException;
+import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

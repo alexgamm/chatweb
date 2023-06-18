@@ -3,12 +3,14 @@ package chatweb.repository;
 import chatweb.db.Database;
 import chatweb.db.mappers.ListMapper;
 import chatweb.model.Message;
+import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@Component
 public class MessageRepository {
     private final Database database;
 

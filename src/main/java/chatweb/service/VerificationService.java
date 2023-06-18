@@ -4,7 +4,9 @@ import chatweb.entity.User;
 import chatweb.entity.Verification;
 import chatweb.repository.VerificationRepository;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.stereotype.Service;
 
+@Service
 public class VerificationService {
     private final EmailService emailService;
     private final VerificationRepository verificationRepository;

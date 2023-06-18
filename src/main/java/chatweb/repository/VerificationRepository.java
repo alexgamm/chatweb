@@ -3,7 +3,9 @@ package chatweb.repository;
 import chatweb.db.Database;
 import chatweb.db.mappers.ListMapper;
 import chatweb.entity.Verification;
+import org.springframework.stereotype.Component;
 
+@Component
 public class VerificationRepository {
     private final Database database;
     private final ListMapper<Verification> mapper = rs -> new Verification(

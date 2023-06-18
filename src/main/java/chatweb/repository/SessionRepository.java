@@ -4,9 +4,11 @@ import chatweb.db.Database;
 import chatweb.db.mappers.ListMapper;
 import chatweb.entity.Session;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 
+@Component
 public class SessionRepository {
     private final Database database;
     private final ListMapper<Session> mapper = rs -> new Session(

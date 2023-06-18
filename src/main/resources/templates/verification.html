@@ -1,8 +1,7 @@
-{{#partial "body"}}
+{{> pre-body}}
 <main class="flex justify-center items-center h-screen flex-col">
     <h1 class="text-3xl mb-10">Verify your email</h1>
     <form method="post" class="card flex-shrink-0 w-80 shadow-2xl bg-base-100">
-        <input type="hidden" name="email" value="{{email}}">
         <div class="card-body">
             <h2 class="text-sm mb-5 text-center">
                 Enter the code you received at<br>
@@ -20,7 +19,7 @@
                     <div class="w-10 h-[45px] rounded-xl border border-primary"></div>
                 </div>
             </div>
-            <span class="text-error mt-4 text-center">{{error}}</span>
+            <span class="text-error mt-4 text-center">{{#error}}{{error}}{{/error}}</span>
         </div>
     </form>
 </main>
@@ -35,5 +34,4 @@
     })
 
 </script>
-{{/partial}}
-{{> base}}
+{{> post-body}}

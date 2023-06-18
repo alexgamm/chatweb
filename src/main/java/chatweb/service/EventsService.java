@@ -1,18 +1,19 @@
 package chatweb.service;
 
-import chatweb.entity.User;
 import chatweb.longpoll.LongPollFuture;
 import chatweb.model.Event;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Service
 public class EventsService {
     private static final long LONG_POLL_TIMEOUT = 20_000;
+    //TODO use spring scheduler
     private static final ScheduledExecutorService SCHEDULER = Executors.newSingleThreadScheduledExecutor();
     private final List<Event> events = Collections.synchronizedList(new LinkedList<>());
     private final Set<LongPollFuture> longPollFutures = Collections.synchronizedSet(new HashSet<>());

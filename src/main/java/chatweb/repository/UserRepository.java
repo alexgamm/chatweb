@@ -4,10 +4,12 @@ import chatweb.db.Database;
 import chatweb.db.mappers.ListMapper;
 import chatweb.entity.User;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.List;
 
+@Component
 public class UserRepository {
     private final Database database;
     private final ListMapper<User> mapper = rs -> new User(

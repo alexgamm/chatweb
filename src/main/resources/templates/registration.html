@@ -1,4 +1,4 @@
-{{#partial "body"}}
+{{> pre-body}}
 <main class="flex justify-center items-center h-screen flex-col">
     <h1 class="text-3xl mb-10">Please sign up</h1>
     <form method="post" class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
@@ -16,17 +16,17 @@
                 <label class="label" for="username">
                     <span class="label-text">username</span>
                 </label>
-                <input class="input input-bordered {{#if error}}input-error{{/if}}" type="text"
+                <input class="input input-bordered {{#error}}input-error{{/error}}" type="text"
                        id="username"
-                       name="username" value="{{username}}">
+                       name="username" value="{{#username}}{{username}}{{/username}}">
             </div>
             <div class="form-control">
                 <label class="label" for="email">
                     <span class="label-text">email</span>
                 </label>
-                <input class="input input-bordered {{#if error}}input-error{{/if}}" type="email"
+                <input class="input input-bordered {{#error}}input-error{{/error}}" type="email"
                        id="email"
-                       name="email" value="{{email}}">
+                       name="email" value="{{#email}}{{email}}{{/email}}">
             </div>
             <div class="form-control">
                 <label class="label" for="password">
@@ -43,7 +43,7 @@
                             </svg>
                         </a>
                     </div>
-                    <input class="input input-bordered w-full {{#if error}}input-error{{/if}}"
+                    <input class="input input-bordered w-full {{#error}}input-error{{/error}}"
                            type="password"
                            id="password"
                            name="password">
@@ -53,10 +53,10 @@
                 <label class="label" for="repeat-password">
                     <span class="label-text">repeat password</span>
                 </label>
-                <input class="input input-bordered {{#if error}}input-error{{/if}}" type="password"
+                <input class="input input-bordered {{#error}}input-error{{/error}}" type="password"
                        id="repeat-password">
             </div>
-            <span id="error-text" class="text-error">{{error}}</span>
+            <span id="error-text" class="text-error">{{#error}}{{error}}{{/error}}</span>
             <div class="form-control mt-6">
                 <button type="submit"
                         class="btn bg-violet-500 bg-opacity-60 border-transparent hover:bg-opacity-80 hover:bg-violet-500 hover:border-transparent mb-2 w-full text-gray-300">
@@ -110,5 +110,4 @@
         })
     }
 </script>
-{{/partial}}
-{{> base}}
+{{> post-body}}
