@@ -45,7 +45,7 @@ public class LoginController extends AuthController {
             verification = verificationService.findVerification(user.getId());
         }
         if (!verification.isVerified()) {
-            return "redirect:/verification?email=" + user.getEmail();
+            return "redirect:/verification?email=" + user.getEmail().toLowerCase();
         }
         return authorizeAndRedirect(response, user.getId(), "/");
     }

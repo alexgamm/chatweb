@@ -18,7 +18,7 @@ public class VerificationService {
 
     public boolean createAndSendVerification(User user) {
         String code = RandomStringUtils.random(6, false, true);
-        if (emailService.send(user.getEmail(), "Verification code", code)) {
+        if (emailService.send(user.getEmail().toLowerCase(), "Verification code", code)) {
             createVerification(user.getId(), code);
             return true;
         }

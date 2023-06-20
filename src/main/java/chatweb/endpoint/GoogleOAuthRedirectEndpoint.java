@@ -37,10 +37,10 @@ public class GoogleOAuthRedirectEndpoint extends AuthEndpoint {
         } catch (IOException e) {
             throw new RequestFailedException(500, "internal error");
         }
-        User user = userRepository.findUserByEmail(userInfo.getEmail());
+        User user = userRepository.findUserByEmail(userInfo.getEmail().toLowerCase());
         if (user == null) {
             String username = userInfo.getEmail().split("@")[0];
-            user = new User(0, username, userInfo.getEmail(), null, new Date());
+            user = new User(0, username, userInfo.getEmail().toLowerCase(), null, new Date());
             userRepository.saveUser(user);
             user = userRepository.findUserByUsername(user.getUsername());
         }

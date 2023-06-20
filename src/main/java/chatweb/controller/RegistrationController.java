@@ -2,6 +2,7 @@ package chatweb.controller;
 
 import chatweb.entity.User;
 import chatweb.repository.UserRepository;
+import chatweb.service.EmailService;
 import chatweb.service.GoogleOAuthService;
 import chatweb.service.VerificationService;
 import chatweb.utils.PasswordUtils;
@@ -47,6 +48,12 @@ public class RegistrationController {
             model.addAttribute("email", email);
             return "registration";
         }
+        if (userRepository.hasMatch(email)){
+            model.addAttribute("error", "email is already taken");
+            model.addAttribute("username", username);
+            model.addAttribute("email", email);
+            return "registration";
+        }
         if (password == null || password.length() < 6) {
             model.addAttribute("error", "password is missing or short");
             model.addAttribute("username", username);
@@ -59,12 +66,12 @@ public class RegistrationController {
             model.addAttribute("username", username);
             return "registration";
         }
-        user = new User(0, username.toLowerCase(), email, PasswordUtils.hash(password), new Date());
+        user = new User(0, username.toLowerCase(), email.toLowerCase(), PasswordUtils.hash(password), new Date());
         userRepository.saveUser(user);
         user = userRepository.findUserByUsername(user.getUsername());
         verificationService.createAndSendVerification(user);
         //TODO handle email problems
-        return "redirect:/verification?email=" + user.getEmail();
+        return "redirect:/verification?email=" + user.getEmail().toLowerCase();
     }
 }
 

@@ -62,4 +62,11 @@ public class UserRepository {
     public void updateLastActivityAt(int userId) {
         database.execute("update users set last_activity_at = now() where id = ?", userId);
     }
+    public boolean hasMatch (String email){
+        User user = database.executeSelect(mapper, "select * from users where email = ?", email)
+                .stream()
+                .findFirst()
+                .orElse(null);
+        return user != null;
+    }
 }

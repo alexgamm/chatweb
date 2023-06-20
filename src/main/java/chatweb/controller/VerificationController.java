@@ -35,7 +35,7 @@ public class VerificationController extends AuthController {
     public String verification(@RequestParam String code, @RequestParam String email, Model model, HttpServletResponse response) {
         model.addAttribute("error", "something went wrong");
         model.addAttribute("email", email);
-        User user = userRepository.findUserByEmail(email);
+        User user = userRepository.findUserByEmail(email.toLowerCase());
         if (user == null) {
             return "verification";
         }
