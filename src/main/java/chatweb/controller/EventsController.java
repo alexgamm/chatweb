@@ -1,34 +1,31 @@
-package chatweb.endpoint;
+package chatweb.controller;
 
 import chatweb.entity.User;
 import chatweb.longpoll.LongPollFuture;
 import chatweb.model.Event;
 import chatweb.model.EventsResponse;
 import chatweb.model.UserActivity;
-import chatweb.repository.SessionRepository;
 import chatweb.repository.UserRepository;
 import chatweb.service.EventsService;
-import webserver.Request;
-import webserver.RequestFailedException;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
-public class EventsEndpoint extends AuthEndpoint {
+@RestController
+@RequestMapping("/api/events")
+@RequiredArgsConstructor
+public class EventsController {
     private final EventsService eventsService;
+    private final UserRepository userRepository;
 
-    public EventsEndpoint(UserRepository userRepository, SessionRepository sessionRepository, EventsService eventsService) {
-        super(userRepository, sessionRepository);
-        this.eventsService = eventsService;
-    }
-
-    @Override
-    public Object authGet(Request request, User user) throws RequestFailedException {
-        long ts;
-        try {
-            ts = Long.parseLong(request.getQuery().get("ts"));
-        } catch (Throwable e) {
-            throw new RequestFailedException(400, "incorrect ts");
-        }
+    @GetMapping
+    public CompletableFuture<EventsResponse> getEvents(@RequestParam long ts, HttpServletRequest request) {
         List<Event> events = eventsService.getEvents(ts);
         LongPollFuture longPollFuture = new LongPollFuture(ts);
         if (events.isEmpty()) {
@@ -36,6 +33,7 @@ public class EventsEndpoint extends AuthEndpoint {
         } else {
             longPollFuture.complete(events);
         }
+        User user = (User) request.getAttribute("user");
         userRepository.updateLastActivityAt(user.getId());
         if (eventsService.getEvents().stream()
                 .noneMatch(event -> event instanceof UserActivity
@@ -46,3 +44,4 @@ public class EventsEndpoint extends AuthEndpoint {
         return longPollFuture.thenApply(eventList -> new EventsResponse(eventList));
     }
 }
+

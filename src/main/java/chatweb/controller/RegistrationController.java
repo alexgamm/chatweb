@@ -61,7 +61,6 @@ public class RegistrationController {
         }
         User user = userRepository.findUserByUsername(username);
         if (user != null) {
-            // TODO check email too
             model.addAttribute("error", "username has been already taken");
             model.addAttribute("username", username);
             return "registration";
@@ -70,7 +69,7 @@ public class RegistrationController {
         userRepository.saveUser(user);
         user = userRepository.findUserByUsername(user.getUsername());
         verificationService.createAndSendVerification(user);
-        //TODO handle email problems
+        //TODO handle email problems (if email was not sent)
         return "redirect:/verification?email=" + user.getEmail().toLowerCase();
     }
 }

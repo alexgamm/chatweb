@@ -4,6 +4,7 @@ import chatweb.entity.User;
 import chatweb.entity.Verification;
 import chatweb.repository.SessionRepository;
 import chatweb.repository.UserRepository;
+import chatweb.service.GoogleOAuthService;
 import chatweb.service.VerificationService;
 import chatweb.utils.PasswordUtils;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,20 +20,26 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class LoginController extends AuthController {
     private final UserRepository userRepository;
     private final VerificationService verificationService;
+    private final GoogleOAuthService googleOAuthService;
 
-    public LoginController(SessionRepository sessionRepository, UserRepository userRepository, VerificationService verificationService) {
+    public LoginController(SessionRepository sessionRepository, UserRepository userRepository, VerificationService verificationService, GoogleOAuthService googleOAuthService) {
         super(sessionRepository);
         this.userRepository = userRepository;
         this.verificationService = verificationService;
+        this.googleOAuthService = googleOAuthService;
     }
 
     @GetMapping
-    public String login() {
+    public String login(Model model) {
+        model.addAttribute("googleOAuthClientId", googleOAuthService.getClientId());
+        model.addAttribute("googleOAuthRedirectUri", googleOAuthService.getRedirectUri());
         return "login";
     }
 
     @PostMapping
     public String login(@RequestParam String username, @RequestParam String password, Model model, HttpServletResponse response) {
+        model.addAttribute("googleOAuthClientId", googleOAuthService.getClientId());
+        model.addAttribute("googleOAuthRedirectUri", googleOAuthService.getRedirectUri());
         User user = userRepository.findUserByUsername(username);
         if (user == null || password == null || !PasswordUtils.check(password, user.getPassword())) {
             model.addAttribute("username", username);

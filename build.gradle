@@ -18,12 +18,10 @@ configurations {
 }
 
 repositories {
-	mavenLocal() //TODO remove
 	mavenCentral()
 }
 
 dependencies {
-	implementation 'webserver:webserver:0.0.1' //TODO remove
 
 	//implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 //	implementation 'org.springframework.boot:spring-boot-starter-security'

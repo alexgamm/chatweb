@@ -1,4 +1,4 @@
-package chatweb.endpoint;
+package chatweb.controller;
 
 import chatweb.entity.User;
 import chatweb.entity.Verification;
@@ -7,35 +7,37 @@ import chatweb.repository.SessionRepository;
 import chatweb.repository.UserRepository;
 import chatweb.service.GoogleOAuthService;
 import chatweb.service.VerificationService;
-import webserver.Request;
-import webserver.RequestFailedException;
-import webserver.Response;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
 import java.util.Date;
 
-public class GoogleOAuthRedirectEndpoint extends AuthEndpoint {
-    private final GoogleOAuthService googleOAuthService;
+@Controller
+@RequestMapping("google/oauth")
+public class GoogleOAuthController extends AuthController {
     private final VerificationService verificationService;
+    private final GoogleOAuthService googleOAuthService;
+    private final UserRepository userRepository;
 
-    public GoogleOAuthRedirectEndpoint(UserRepository userRepository, SessionRepository sessionRepository, GoogleOAuthService googleOAuthService, VerificationService verificationService) {
-        super(userRepository, sessionRepository);
-        this.googleOAuthService = googleOAuthService;
+    public GoogleOAuthController(SessionRepository sessionRepository, VerificationService verificationService, GoogleOAuthService googleOAuthService, UserRepository userRepository) {
+        super(sessionRepository);
         this.verificationService = verificationService;
+        this.googleOAuthService = googleOAuthService;
+        this.userRepository = userRepository;
     }
 
-    @Override
-    public Object get(Request request) throws RequestFailedException {
-        String code = request.getQuery().get("code");
-        if (code == null || code.isEmpty()) {
-            return Response.badRequest("something went wrong");
-        }
+    @GetMapping("redirect")
+    public String redirect(HttpServletResponse response, @RequestParam String code) {
         UserInfo userInfo;
         try {
             String token = googleOAuthService.getToken(code);
             userInfo = googleOAuthService.getUserInfo(token);
         } catch (IOException e) {
-            throw new RequestFailedException(500, "internal error");
+            return "redirect:/login#oauth-failed";
         }
         User user = userRepository.findUserByEmail(userInfo.getEmail().toLowerCase());
         if (user == null) {
@@ -52,6 +54,7 @@ public class GoogleOAuthRedirectEndpoint extends AuthEndpoint {
         if (!verification.isVerified()) {
             verificationService.updateVerified(user.getId());
         }
-        return authorizeAndRedirect(user.getId(), "/");
+        return authorizeAndRedirect(response, user.getId(), "/");
     }
 }
+

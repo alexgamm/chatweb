@@ -2,30 +2,28 @@ package chatweb.service;
 
 import chatweb.longpoll.LongPollFuture;
 import chatweb.model.Event;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
+@EnableScheduling
 public class EventsService {
     private static final long LONG_POLL_TIMEOUT = 20_000;
-    //TODO use spring scheduler
-    private static final ScheduledExecutorService SCHEDULER = Executors.newSingleThreadScheduledExecutor();
     private final List<Event> events = Collections.synchronizedList(new LinkedList<>());
     private final Set<LongPollFuture> longPollFutures = Collections.synchronizedSet(new HashSet<>());
 
-    public EventsService() {
-        SCHEDULER.scheduleWithFixedDelay(() -> {
-            Set<LongPollFuture> expiredLongPollFutures = longPollFutures.stream()
-                    .filter(future -> System.currentTimeMillis() - future.getCreatedAt() >= LONG_POLL_TIMEOUT)
-                    .collect(Collectors.toSet());
-            longPollFutures.removeAll(expiredLongPollFutures);
-            expiredLongPollFutures.forEach(future -> future.complete(Collections.emptyList()));
-        }, 0, 1, TimeUnit.SECONDS);
+    @Scheduled(fixedDelay = 1, timeUnit = TimeUnit.SECONDS)
+    public void removeExpiredLongPollFutures() {
+        Set<LongPollFuture> expiredLongPollFutures = longPollFutures.stream()
+                .filter(future -> System.currentTimeMillis() - future.getCreatedAt() >= LONG_POLL_TIMEOUT)
+                .collect(Collectors.toSet());
+        longPollFutures.removeAll(expiredLongPollFutures);
+        expiredLongPollFutures.forEach(future -> future.complete(Collections.emptyList()));
     }
 
     public void addEvent(Event event) {
