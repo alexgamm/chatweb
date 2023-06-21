@@ -5,6 +5,7 @@ import chatweb.entity.Verification;
 import chatweb.repository.VerificationRepository;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class VerificationService {
@@ -26,14 +27,15 @@ public class VerificationService {
     }
 
     public Verification findVerification(int userId) {
-        return verificationRepository.findVerification(userId);
+        return verificationRepository.findByUserId(userId);
     }
 
+    @Transactional
     public void updateVerified(int userId) {
         verificationRepository.updateVerified(userId);
     }
 
     public void createVerification(int userId, String code) {
-        verificationRepository.createVerification(userId, code);
+        verificationRepository.save(new Verification(userId, code, false));
     }
 }

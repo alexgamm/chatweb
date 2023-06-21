@@ -9,9 +9,9 @@ public class MessagesResponse {
         private final String message;
         private final String id;
         private final Date sendDate;
-        private final chatweb.model.Message repliedMessage;
+        private final chatweb.entity.Message repliedMessage;
 
-        public Message(String username, String message, String id, Date sendDate,chatweb.model.Message repliedMessage) {
+        public Message(String username, String message, String id, Date sendDate, chatweb.entity.Message repliedMessage) {
             this.username = username;
             this.message = message;
             this.id = id;
@@ -35,7 +35,7 @@ public class MessagesResponse {
             return sendDate;
         }
 
-        public chatweb.model.Message getRepliedMessage() {
+        public chatweb.entity.Message getRepliedMessage() {
             return repliedMessage;
         }
     }

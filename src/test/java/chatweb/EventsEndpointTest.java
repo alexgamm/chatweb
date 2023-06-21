@@ -3,7 +3,7 @@ package chatweb;
 import chatweb.endpoint.EventsEndpoint;
 import chatweb.entity.User;
 import chatweb.model.EventsResponse;
-import chatweb.model.Message;
+import chatweb.entity.Message;
 import chatweb.model.NewMessage;
 import chatweb.repository.SessionRepository;
 import chatweb.repository.UserRepository;

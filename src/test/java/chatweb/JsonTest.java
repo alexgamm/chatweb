@@ -1,6 +1,6 @@
 package chatweb;
 
-import chatweb.model.Message;
+import chatweb.entity.Message;
 import chatweb.model.NewMessage;
 import chatweb.model.SendMessageRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;

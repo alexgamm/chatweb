@@ -1,25 +1,24 @@
 package chatweb.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "verifications")
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
 public class Verification {
-    private final int userId;
-    private final String code;
-    private final boolean verified;
-
-    public Verification(int userId, String code, boolean verified) {
-        this.userId = userId;
-        this.code = code;
-        this.verified = verified;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public boolean isVerified() {
-        return verified;
-    }
+    @Id
+    @Column(name = "user_id")
+    private int userId;
+    @Column(name = "code")
+    private String code;
+    @Column(name = "verified")
+    private boolean verified;
 }

@@ -2,7 +2,7 @@ package chatweb;
 
 import chatweb.model.Event;
 import chatweb.model.EventType;
-import chatweb.model.Message;
+import chatweb.entity.Message;
 import chatweb.model.NewMessage;
 import chatweb.service.EventsService;
 import org.junit.jupiter.api.Assertions;
