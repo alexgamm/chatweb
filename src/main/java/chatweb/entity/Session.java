@@ -1,19 +1,23 @@
 package chatweb.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "sessions")
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
 public class Session {
-    private final String id;
-    private final int userId;
+    @Id
+    @Column(name = "id")
+    private String id;
+    @Column(name = "user_id")
+    private int userId;
 
-    public Session(String id, int userId) {
-        this.id = id;
-        this.userId = userId;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
 }

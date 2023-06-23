@@ -13,7 +13,7 @@ public abstract class AuthController {
 
     public String authorizeAndRedirect(HttpServletResponse response, int userId, String location) {
         Session session = new Session(UUID.randomUUID().toString(), userId);
-        sessionRepository.saveSession(session);
+        sessionRepository.save(session);
         response.addHeader("Set-Cookie", "sessionId=" + session.getId() + "; Path=/");
         return "redirect:" + location;
     }

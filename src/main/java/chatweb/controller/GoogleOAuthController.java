@@ -43,7 +43,7 @@ public class GoogleOAuthController extends AuthController {
         if (user == null) {
             String username = userInfo.getEmail().split("@")[0];
             user = new User(0, username, userInfo.getEmail().toLowerCase(), null, new Date());
-            userRepository.saveUser(user);
+            userRepository.save(user);
             user = userRepository.findUserByUsername(user.getUsername());
         }
         Verification verification = verificationService.findVerification(user.getId());

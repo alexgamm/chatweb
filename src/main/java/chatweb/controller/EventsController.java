@@ -9,6 +9,7 @@ import chatweb.repository.UserRepository;
 import chatweb.service.EventsService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,6 +26,7 @@ public class EventsController {
     private final UserRepository userRepository;
 
     @GetMapping
+    @Transactional
     public CompletableFuture<EventsResponse> getEvents(@RequestParam long ts, HttpServletRequest request) {
         List<Event> events = eventsService.getEvents(ts);
         LongPollFuture longPollFuture = new LongPollFuture(ts);

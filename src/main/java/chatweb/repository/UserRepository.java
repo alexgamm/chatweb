@@ -4,69 +4,25 @@ import chatweb.db.Database;
 import chatweb.db.mappers.ListMapper;
 import chatweb.entity.User;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
 import java.util.List;
 
-@Component
-public class UserRepository {
-    private final Database database;
-    private final ListMapper<User> mapper = rs -> new User(
-            rs.getInt("id"),
-            rs.getString("username"),
-            rs.getString("email"),
-            rs.getString("password"),
-            rs.getTimestamp("last_activity_at"));
+@Repository
+public interface UserRepository extends JpaRepository<User, Integer> {
 
-    public UserRepository(Database database) {
-        this.database = database;
-    }
+    User findAllByOrderByLastActivityAtDesc ();
+    User findUserByUsername (String username);
+    User findUserByEmail (String email);
+    User findUserById (int id);
+    @Modifying
+    @Query("update User u set u.lastActivityAt = CURRENT_TIMESTAMP where u.id = :userId")
+    void updateLastActivityAt (int userId);
 
-    public List<User> getAllUsers() {
-        return database.executeSelect(mapper, "select * from users order by last_activity_at desc");
-    }
-
-    public User findUserByUsername(@Nullable String username) {
-        return database.executeSelect(mapper, "select * from users where username = ?", username)
-                .stream()
-                .findFirst()
-                .orElse(null);
-    }
-    public User findUserByEmail(@Nullable String email) {
-        return database.executeSelect(mapper, "select * from users where email = ?", email)
-                .stream()
-                .findFirst()
-                .orElse(null);
-    }
-
-
-    public User findUserById(int id) {
-        return database.executeSelect(mapper, "select * from users where id = ?", id)
-                .stream()
-                .findFirst()
-                .orElse(null);
-    }
-
-    public void saveUser(User user) {
-        database.execute(
-                "insert into users (username, password, last_activity_at, email) values (?,?,?,?)",
-                user.getUsername(),
-                user.getPassword(),
-                new Timestamp(user.getLastActivityAt().getTime()),
-                user.getEmail()
-        );
-
-    }
-
-    public void updateLastActivityAt(int userId) {
-        database.execute("update users set last_activity_at = now() where id = ?", userId);
-    }
-    public boolean hasMatch (String email){
-        User user = database.executeSelect(mapper, "select * from users where email = ?", email)
-                .stream()
-                .findFirst()
-                .orElse(null);
-        return user != null;
-    }
+    boolean existsByEmail (String email);
 }

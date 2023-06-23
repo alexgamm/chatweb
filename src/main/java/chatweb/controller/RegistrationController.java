@@ -48,7 +48,7 @@ public class RegistrationController {
             model.addAttribute("email", email);
             return "registration";
         }
-        if (userRepository.hasMatch(email)){
+        if (userRepository.existsByEmail(email)){
             model.addAttribute("error", "email is already taken");
             model.addAttribute("username", username);
             model.addAttribute("email", email);
@@ -66,7 +66,7 @@ public class RegistrationController {
             return "registration";
         }
         user = new User(0, username.toLowerCase(), email.toLowerCase(), PasswordUtils.hash(password), new Date());
-        userRepository.saveUser(user);
+        userRepository.save(user);
         user = userRepository.findUserByUsername(user.getUsername());
         verificationService.createAndSendVerification(user);
         //TODO handle email problems (if email was not sent)

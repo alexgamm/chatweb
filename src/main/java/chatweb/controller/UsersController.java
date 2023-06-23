@@ -17,7 +17,7 @@ public class UsersController {
 
     @GetMapping
     public UserListResponse users() {
-        List<UserListResponse.User> list = userRepository.getAllUsers().stream()
+        List<UserListResponse.User> list = userRepository.findAll().stream()
                 .map(user -> new UserListResponse.User(user.getUsername(), user.getLastActivityAt()))
                 .toList();
         return new UserListResponse(list);

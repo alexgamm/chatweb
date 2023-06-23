@@ -1,41 +1,32 @@
 package chatweb.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.util.Date;
 
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "users")
+@Getter
 public class User {
-
-    private final int id;
-    private final String username;
-    private final String email;
-    private final String password;
-    private final Date lastActivityAt;
-
-    public User(int id, String username, String email, String password, Date lastActivityAt) {
-        this.id = id;
-        this.username = username;
-        this.email = email;
-        this.password = password;
-        this.lastActivityAt = lastActivityAt;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public Date getLastActivityAt() {
-        return lastActivityAt;
-    }
+    @Id
+    @Column(name = "id")
+    private int id;
+    @Column(name = "username")
+    private String username;
+    @Column(name = "email")
+    private String email;
+    @Column(name = "password")
+    private String password;
+    @Column(name = "last_activity_at")
+    private Date lastActivityAt;
 }
+
 
