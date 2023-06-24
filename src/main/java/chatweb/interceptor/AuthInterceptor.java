@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -21,13 +22,15 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        User user = Arrays.stream(request.getCookies())
-                .filter(cookie -> cookie.getName().equals("sessionId"))
-                .findFirst()
-                .map(Cookie::getValue)
-                // с чем работаем -> что возвращаем
-                .map(sessionId -> sessionRepository.findSessionById(sessionId))
-                .map(session -> userRepository.findUserById(session.getUserId()))
+        User user = Optional.ofNullable(request.getCookies())
+                .flatMap(cookies -> Arrays.stream(cookies)
+                        .filter(cookie -> cookie.getName().equals("sessionId"))
+                        .findFirst()
+                        .map(Cookie::getValue)
+                        // с чем работаем -> что возвращаем
+                        .map(sessionId -> sessionRepository.findSessionById(sessionId))
+                        .map(session -> userRepository.findUserById(session.getUserId()))
+                )
                 .orElseThrow(() -> new UnauthorizedException());
         // сохраняем user в контекст запроса
         request.setAttribute("user", user);

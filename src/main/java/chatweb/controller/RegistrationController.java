@@ -2,7 +2,6 @@ package chatweb.controller;
 
 import chatweb.entity.User;
 import chatweb.repository.UserRepository;
-import chatweb.service.EmailService;
 import chatweb.service.GoogleOAuthService;
 import chatweb.service.VerificationService;
 import chatweb.utils.PasswordUtils;
@@ -48,7 +47,7 @@ public class RegistrationController {
             model.addAttribute("email", email);
             return "registration";
         }
-        if (userRepository.existsByEmail(email)){
+        if (userRepository.existsByEmail(email)) {
             model.addAttribute("error", "email is already taken");
             model.addAttribute("username", username);
             model.addAttribute("email", email);
@@ -65,9 +64,9 @@ public class RegistrationController {
             model.addAttribute("username", username);
             return "registration";
         }
-        user = new User(0, username.toLowerCase(), email.toLowerCase(), PasswordUtils.hash(password), new Date());
-        userRepository.save(user);
-        user = userRepository.findUserByUsername(user.getUsername());
+        user = new User(null, username.toLowerCase(), email.toLowerCase(), PasswordUtils.hash(password), new Date());
+        user = userRepository.save(user);
+
         verificationService.createAndSendVerification(user);
         //TODO handle email problems (if email was not sent)
         return "redirect:/verification?email=" + user.getEmail().toLowerCase();

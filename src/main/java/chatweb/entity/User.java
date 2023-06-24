@@ -1,9 +1,6 @@
 package chatweb.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,8 +14,10 @@ import java.util.Date;
 @Getter
 public class User {
     @Id
+    @SequenceGenerator(name = "users_id_seq", sequenceName = "users_id_seq", allocationSize = 1)
+    @GeneratedValue(generator = "users_id_seq", strategy = GenerationType.SEQUENCE)
     @Column(name = "id")
-    private int id;
+    private Integer id;
     @Column(name = "username")
     private String username;
     @Column(name = "email")

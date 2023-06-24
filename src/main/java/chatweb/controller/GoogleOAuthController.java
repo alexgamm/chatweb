@@ -42,12 +42,12 @@ public class GoogleOAuthController extends AuthController {
         User user = userRepository.findUserByEmail(userInfo.getEmail().toLowerCase());
         if (user == null) {
             String username = userInfo.getEmail().split("@")[0];
-            user = new User(0, username, userInfo.getEmail().toLowerCase(), null, new Date());
-            userRepository.save(user);
-            user = userRepository.findUserByUsername(user.getUsername());
+            user = new User(null, username, userInfo.getEmail().toLowerCase(), null, new Date());
+            user = userRepository.save(user);
         }
         Verification verification = verificationService.findVerification(user.getId());
         if (verification == null) {
+            //TODO return newly created verification
             verificationService.createVerification(user.getId(), "");
             verification = verificationService.findVerification(user.getId());
         }
