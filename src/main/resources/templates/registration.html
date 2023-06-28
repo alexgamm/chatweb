@@ -11,7 +11,7 @@
                 </label>
                 <input class="input input-bordered {{#error}}input-error{{/error}}" type="text"
                        id="username"
-                       name="username" value="{{#username}}{{username}}{{/username}}">
+                       name="username" value="{{#username}}{{username}}{{/username}}" required>
             </div>
             <div class="form-control">
                 <label class="label" for="email">
@@ -19,7 +19,7 @@
                 </label>
                 <input class="input input-bordered {{#error}}input-error{{/error}}" type="email"
                        id="email"
-                       name="email" value="{{#email}}{{email}}{{/email}}">
+                       name="email" value="{{#email}}{{email}}{{/email}}" required>
             </div>
             <div class="form-control">
                 <label class="label" for="password">
@@ -41,7 +41,7 @@
                     <input class="input input-bordered w-full {{#error}}input-error{{/error}}"
                            type="password"
                            id="password"
-                           name="password">
+                           name="password" required>
                 </div>
             </div>
             <div class="form-control">
@@ -49,7 +49,7 @@
                     <span class="label-text">repeat password</span>
                 </label>
                 <input class="input input-bordered {{#error}}input-error{{/error}}" type="password"
-                       id="repeat-password">
+                       id="repeat-password" required>
             </div>
             <span id="error-text" class="text-error">{{#error}}{{error}}{{/error}}</span>
             <div class="form-control mt-6">

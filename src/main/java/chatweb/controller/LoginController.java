@@ -8,6 +8,7 @@ import chatweb.service.GoogleOAuthService;
 import chatweb.service.VerificationService;
 import chatweb.utils.PasswordUtils;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,8 +44,9 @@ public class LoginController extends AuthController {
         User user = userRepository.findUserByUsername(username);
         if (user == null || password == null || !PasswordUtils.check(password, user.getPassword())) {
             model.addAttribute("username", username);
-            model.addAttribute("error", true);
-            return "login"; // TODO set status code
+            model.addAttribute("error", "invalid credentials");
+            response.setStatus(HttpStatus.BAD_REQUEST.value());
+            return "login";
         }
         Verification verification = verificationService.findVerification(user.getId());
         if (verification == null) {
