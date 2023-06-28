@@ -22,4 +22,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     void updateLastActivityAt(int userId);
 
     boolean existsByEmail(String email);
+
+    @Modifying
+    @Query("update User u set u.username = :newUsername where u.id =:userId")
+    void updateUsername(int userId, String newUsername);
 }

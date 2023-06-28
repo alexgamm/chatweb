@@ -1,16 +1,17 @@
 package chatweb.model;
 
-import chatweb.entity.Message;
+import java.util.Date;
 
 public class NewMessage extends Event {
-    private final Message message;
+    private final MessageDto message;
 
-    public NewMessage(Message message) {
+
+    public NewMessage(MessageDto message) {
         super(EventType.NEW_MESSAGE, message.getSendDate());
         this.message = message;
     }
 
-    public Message getMessage() {
+    public MessageDto getMessage() {
         return message;
     }
 }

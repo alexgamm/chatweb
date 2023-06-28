@@ -19,8 +19,12 @@ public class Message {
     private String id;
     @Column(name = "message")
     private String message;
-    @Column(name = "username")
-    private String username;
+
+    @Setter
+    @OneToOne()
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
+
     @Setter
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "replied_message_id", referencedColumnName = "id")

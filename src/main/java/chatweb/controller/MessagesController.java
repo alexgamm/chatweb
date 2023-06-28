@@ -2,10 +2,13 @@ package chatweb.controller;
 
 import chatweb.entity.Message;
 import chatweb.entity.User;
+import chatweb.mapper.MessageMapper;
+import chatweb.model.MessageDto;
 import chatweb.model.MessagesResponse;
 import chatweb.model.NewMessage;
 import chatweb.model.SendMessageRequest;
 import chatweb.repository.MessageRepository;
+import chatweb.repository.UserRepository;
 import chatweb.service.EventsService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +29,7 @@ public class MessagesController {
 
     private final MessageRepository messageRepository;
     private final EventsService eventsService;
+    private final UserRepository userRepository;
 
     @GetMapping
     public MessagesResponse getMessages(
@@ -37,13 +41,7 @@ public class MessagesController {
                 : messageRepository.findBySendDateBeforeOrderBySendDateDesc(new Date(from), Pageable.ofSize(count));
         return new MessagesResponse(
                 messages.stream()
-                        .map(message -> new MessagesResponse.Message(
-                                message.getUsername(),
-                                message.getMessage(),
-                                message.getId(),
-                                message.getSendDate(),
-                                message.getRepliedMessage() // TODO Use dto to prevent infinite relations
-                        ))
+                        .map(message -> MessageMapper.messageToMessageDto(message)) // TODO Use dto to prevent infinite relations
                         .toList()
         );
     }
@@ -60,15 +58,17 @@ public class MessagesController {
                 .flatMap(repliedMessageId -> messageRepository.findById(repliedMessageId))
                 .orElse(null);
         User user = (User) request.getAttribute("user");
-        Message message = new Message(
+        Message message = messageRepository.save(new Message(
                 randomUUID().toString(),
                 body.getMessage(),
-                user.getUsername(),
+                user,
                 repliedMessage,
                 new Date()
-        );
-        messageRepository.save(message);
-        eventsService.addEvent(new NewMessage(message));
+        ));
+
+        MessageDto messageDto = MessageMapper.messageToMessageDto(message);
+
+        eventsService.addEvent(new NewMessage(messageDto));
         return ResponseEntity.ok("");
     }
 }

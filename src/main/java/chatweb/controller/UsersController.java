@@ -1,13 +1,21 @@
 package chatweb.controller;
 
+import chatweb.entity.User;
+import chatweb.exception.ApiErrorException;
+import chatweb.model.ApiError;
 import chatweb.model.UserListResponse;
 import chatweb.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/users")
@@ -21,5 +29,25 @@ public class UsersController {
                 .map(user -> new UserListResponse.User(user.getUsername(), user.getLastActivityAt()))
                 .toList();
         return new UserListResponse(list);
+    }
+
+    @PatchMapping
+    @Transactional
+    public ResponseEntity<String> changeUsername(@RequestBody User input, HttpServletRequest request) throws ApiErrorException {
+        User user = (User) request.getAttribute("user");
+        if (input.getUsername().equals("")) {
+            throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "invalid username"));
+        }
+        if (userRepository.findUserByUsername(input.getUsername()) != null) {
+            throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "username is already taken"));
+        }
+        userRepository.updateUsername(user.getId(), input.getUsername());
+        return ResponseEntity.ok("");
+    }
+
+    @ExceptionHandler(ApiErrorException.class)
+    public ApiError changeUsernameException(HttpServletResponse response, ApiErrorException ex){
+        response.setStatus(ex.getApiError().getStatusCode().value());
+        return ex.getApiError();
     }
 }

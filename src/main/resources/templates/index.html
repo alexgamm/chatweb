@@ -21,7 +21,7 @@
                 <span></span>
             </div>
         </div>
-        <form>
+        <form id="message-input-form">
             <input class="input input-bordered input-primary w-full" id="message-input" type="text"
                    placeholder="type something..." autocomplete="off">
         </form>
@@ -51,7 +51,8 @@
     </div>
 
 </div>
-<label for="drawer-toggle" class="fixed top-4 right-4 btn btn-sm bg-opacity-30 btn-square hover:bg-opacity-30 bg-black hover:bg-black border-none lg:hidden">
+<label for="drawer-toggle"
+       class="fixed top-4 right-4 btn btn-sm bg-opacity-30 btn-square hover:bg-opacity-30 bg-black hover:bg-black border-none lg:hidden">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-5 h-5 stroke-current">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
     </svg>
@@ -69,27 +70,37 @@
                       clip-rule="evenodd"></path>
             </svg>
         </button>
-        <div class="p-6 text-center">
+        <div id="username-change-window" class="p-6 text-center">
             <svg aria-hidden="false" class="mx-auto mb-4 fill-violet-400 text-gray-400 w-14 h-14 dark:text-gray-200"
                  xmlns="http://www.w3.org/2000/svg"
                  viewBox="0 0 24 24">
                 <path d="M20,11H23V13H20V11M1,11H4V13H1V11M13,1V4H11V1H13M4.92,3.5L7.05,5.64L5.63,7.05L3.5,4.93L4.92,3.5M16.95,5.63L19.07,3.5L20.5,4.93L18.37,7.05L16.95,5.63M12,6A6,6 0 0,1 18,12C18,14.22 16.79,16.16 15,17.2V19A1,1 0 0,1 14,20H10A1,1 0 0,1 9,19V17.2C7.21,16.16 6,14.22 6,12A6,6 0 0,1 12,6M14,21V22A1,1 0 0,1 13,23H11A1,1 0 0,1 10,22V21H14M11,18H13V15.87C14.73,15.43 16,13.86 16,12A4,4 0 0,0 12,8A4,4 0 0,0 8,12C8,13.86 9.27,15.43 11,15.87V18Z"/>
             </svg>
             <h3 class="mb-5 text-lg font-normal text-gray-400">Make up a new name</h3>
-            <input class="block h-10 mb-4 w-full input input-bordered" type="text"
-                   id="username"
-                   name="username">
-            <button type="button" class="block w-full mb-2 btn bg-violet-500 bg-opacity-60 border-transparent hover:bg-opacity-80
+            <form id="change-username-form">
+                <input class="form-control block h-10 mb-4 w-full input input-bordered" type="text"
+                       id="new-username"
+                       name="username">
+                <div id="submit-username-form-control" class="form-control">
+                    <button id="submit-new-username-button" type="submit" class="block w-full mb-2 btn bg-violet-500 bg-opacity-60 border-transparent hover:bg-opacity-80
                             hover:bg-violet-500 hover:border-transparent text-gray-300">Submit
-            </button>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
 </dialog>
 
 
+{{> post-body}}
+
+
 <script>
     const usernameModal = document.querySelector("#username_modal");
+    const newUsernameInput = document.querySelector("#new-username");
+    const submitUsernameFormControl = document.querySelector("#submit-username-form-control");
+    const usernameChangeWindow = document.querySelector("#username-change-window");
     const repliedMessageContainer = document.querySelector("#repliedMessageContainer");
     const contextMenu = document.querySelector("#contextMenu");
     const drawer = document.querySelector(".drawer");
@@ -202,7 +213,72 @@
             displayUsers();
         });
 
-    document.querySelector('form').addEventListener("submit", function (event) {
+    function updateName(body) {
+        fetch('/api/users', {
+            method: "PATCH",
+            body: JSON.stringify(body),
+            headers: {
+                "Content-Type": "application/json;charset=UTF8"
+            }
+        }).then(response => {
+            console.log('response.status: ', response.status);
+            console.log(response);
+            if (response.status === 200) {
+                updateNameNotification(response);
+            } else {
+                updateNameNotification(response);
+
+            }
+        })
+        // TODO faq
+        //     .catch(err => {
+        //     console.log(err.status);
+        //     updateNameNotification(err.status)
+        // });
+    }
+
+    function hideNotification(notification) {
+        notification.classList.add("hidden");
+    }
+
+    function updateNameNotification(response) {
+        if (response.status === 200) {
+            usernameChangeWindow.classList.add("hidden");
+            usernameModal.innerHTML = `
+                <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                     <div class="p-6 text-center">
+                            <svg class="mx-auto mb-4 fill-violet-400 text-gray-400 w-14 h-14 dark:text-gray-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path d="M12 2C6.5 2 2 6.5 2 12S6.5 22 12 22 22 17.5 22 12 17.5 2 12 2M12 20C7.59 20 4 16.41 4 12S7.59 4 12 4 20 7.59 20 12 16.41 20 12 20M16.59 7.58L10 14.17L7.41 11.59L6 13L10 17L18 9L16.59 7.58Z" />
+                            </svg>
+                            <h3 class="mb-5 text-lg font-normal text-gray-400">Username was changed successfully</h3>
+                     </div>
+                 </div>
+            `;
+            setTimeout(() => usernameModal.close(), 2500);
+        } else {
+            submitUsernameFormControl.innerHTML = "";
+            response.json().then(error => {
+                submitUsernameFormControl.innerHTML = `
+                        <div class="text-left">
+                             <h3 class="text-red-500 mb-3"> ${error.message} </h3>
+                        </div>
+                        <button id="submit-new-username-button" type="submit" class="block w-full mb-2 btn bg-violet-500 bg-opacity-60 border-transparent hover:bg-opacity-80
+                            hover:bg-violet-500 hover:border-transparent text-gray-300">Submit
+                        </button>
+                `;
+            })
+        }
+    }
+
+    document.querySelector('#change-username-form').addEventListener("submit", function (event) {
+        event.preventDefault();
+        const body = {username: newUsernameInput.value};
+        updateName(body);
+        newUsernameInput.value = "";
+
+    })
+
+    document.querySelector('#message-input-form').addEventListener("submit", function (event) {
         event.preventDefault();
         const message = messageInput.value;
         if (!message) {
@@ -329,4 +405,3 @@
             })
     }
 </script>
-{{> post-body}}

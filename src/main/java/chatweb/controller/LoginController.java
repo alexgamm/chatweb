@@ -44,7 +44,7 @@ public class LoginController extends AuthController {
         if (user == null || password == null || !PasswordUtils.check(password, user.getPassword())) {
             model.addAttribute("username", username);
             model.addAttribute("error", true);
-            return "login"; //TODO set status code
+            return "login"; // TODO set status code
         }
         Verification verification = verificationService.findVerification(user.getId());
         if (verification == null) {
