@@ -1,4 +1,6 @@
-package chatweb.model;
+package chatweb.model.api;
+
+import chatweb.model.event.Event;
 
 import java.util.List;
 

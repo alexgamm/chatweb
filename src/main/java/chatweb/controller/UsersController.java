@@ -2,8 +2,8 @@ package chatweb.controller;
 
 import chatweb.entity.User;
 import chatweb.exception.ApiErrorException;
-import chatweb.model.ApiError;
-import chatweb.model.UserListResponse;
+import chatweb.model.api.ApiError;
+import chatweb.model.api.UserListResponse;
 import chatweb.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,9 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("api/users")

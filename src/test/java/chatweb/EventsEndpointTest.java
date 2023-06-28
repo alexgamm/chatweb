@@ -2,9 +2,9 @@
 //
 //import chatweb.endpoint.EventsEndpoint;
 //import chatweb.entity.User;
-//import chatweb.model.EventsResponse;
+//import chatweb.model.api.EventsResponse;
 //import chatweb.entity.Message;
-//import chatweb.model.NewMessage;
+//import chatweb.model.api.NewMessage;
 //import chatweb.repository.SessionRepository;
 //import chatweb.repository.UserRepository;
 //import chatweb.service.EventsService;

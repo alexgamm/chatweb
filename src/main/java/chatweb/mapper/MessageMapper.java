@@ -1,7 +1,7 @@
 package chatweb.mapper;
 
 import chatweb.entity.Message;
-import chatweb.model.MessageDto;
+import chatweb.model.dto.MessageDto;
 
 public class MessageMapper {
     public static MessageDto messageToMessageDto(Message message) {

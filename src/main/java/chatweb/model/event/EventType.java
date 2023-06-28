@@ -1,4 +1,4 @@
-package chatweb.model;
+package chatweb.model.event;
 
 public enum EventType {
     NEW_MESSAGE,

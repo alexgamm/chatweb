@@ -1,7 +1,7 @@
 package chatweb.service;
 
 import chatweb.longpoll.LongPollFuture;
-import chatweb.model.Event;
+import chatweb.model.event.Event;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,6 @@
 package chatweb.longpoll;
 
-import chatweb.model.Event;
+import chatweb.model.event.Event;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

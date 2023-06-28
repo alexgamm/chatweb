@@ -1,4 +1,4 @@
-package chatweb.model;
+package chatweb.model.api;
 
 public class SendMessageRequest {
     private String message;

@@ -1,4 +1,4 @@
-package chatweb.model;
+package chatweb.model.event;
 
 import java.util.Date;
 

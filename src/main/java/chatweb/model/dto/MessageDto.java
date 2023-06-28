@@ -1,4 +1,4 @@
-package chatweb.model;
+package chatweb.model.dto;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

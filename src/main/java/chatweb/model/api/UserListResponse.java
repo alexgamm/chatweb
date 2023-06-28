@@ -1,4 +1,4 @@
-package chatweb.model;
+package chatweb.model.api;
 
 import java.util.Date;
 import java.util.List;

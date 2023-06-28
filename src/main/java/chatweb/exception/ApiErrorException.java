@@ -1,6 +1,6 @@
 package chatweb.exception;
 
-import chatweb.model.ApiError;
+import chatweb.model.api.ApiError;
 import lombok.Getter;
 
 @Getter

@@ -1,8 +1,8 @@
 package chatweb;
 
 import chatweb.entity.Message;
-import chatweb.model.NewMessage;
-import chatweb.model.SendMessageRequest;
+import chatweb.model.api.NewMessage;
+import chatweb.model.api.SendMessageRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;

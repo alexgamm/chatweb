@@ -1,4 +1,4 @@
-package chatweb.model;
+package chatweb.model.api;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

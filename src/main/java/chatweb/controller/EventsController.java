@@ -2,9 +2,9 @@ package chatweb.controller;
 
 import chatweb.entity.User;
 import chatweb.longpoll.LongPollFuture;
-import chatweb.model.Event;
-import chatweb.model.EventsResponse;
-import chatweb.model.UserActivity;
+import chatweb.model.event.Event;
+import chatweb.model.api.EventsResponse;
+import chatweb.model.event.UserActivity;
 import chatweb.repository.UserRepository;
 import chatweb.service.EventsService;
 import jakarta.servlet.http.HttpServletRequest;

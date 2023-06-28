@@ -284,6 +284,7 @@
         if (!message) {
             return;
         }
+        //{message:message} == {message}
         const body = {message};
         if (!repliedMessageContainer.classList.contains("hidden")) {
             body.repliedMessageId = repliedMessage.id;

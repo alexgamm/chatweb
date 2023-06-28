@@ -1,6 +1,8 @@
-package chatweb.model;
+package chatweb.model.api;
 
-import java.util.Date;
+import chatweb.model.dto.MessageDto;
+import chatweb.model.event.Event;
+import chatweb.model.event.EventType;
 
 public class NewMessage extends Event {
     private final MessageDto message;

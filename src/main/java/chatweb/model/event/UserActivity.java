@@ -1,5 +1,8 @@
-package chatweb.model;
+package chatweb.model.event;
 
+
+import chatweb.model.event.Event;
+import chatweb.model.event.EventType;
 
 import java.util.Date;
 
