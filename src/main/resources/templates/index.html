@@ -110,9 +110,9 @@
     const messagesContainerWrapper = document.querySelector(".messages-container-wrapper");
     const MESSAGES_COLORS = [
         'bg-primary',
-        'bg-primary-focus',
-        'bg-secondary',
-        'bg-secondary-focus',
+        'bg-indigo-700',
+        'bg-purple-800',
+        'bg-indigo-800',
     ];
     let users = [];
     const messages = {};
@@ -206,6 +206,10 @@
         return MESSAGES_COLORS[Math.floor(Math.random() * MESSAGES_COLORS.length)]
     }
 
+    function rainbowMessageColor() {
+        return 'bg-gradient-to-r from-orange-500 from-1% via-amber-400-accent via-50% to-purple-700 to-100%';
+    }
+
     fetch("/api/users")
         .then(r => r.json())
         .then(r => {
@@ -235,10 +239,6 @@
         //     console.log(err.status);
         //     updateNameNotification(err.status)
         // });
-    }
-
-    function hideNotification(notification) {
-        notification.classList.add("hidden");
     }
 
     function updateNameNotification(response) {
@@ -304,7 +304,7 @@
     function addMessage(message) {
         const repliedMessage = message.repliedMessage;
         let repliedMessageHTML = "";
-
+        const messageTest = message.message;
         if (message.repliedMessage) {
             repliedMessageHTML = `
                <div class="flex gap-2 w-auto bg-black bg-opacity-25 rounded-lg p-4 text-sm text-gray-300 mb-1">
@@ -321,7 +321,9 @@
                  <div class="chat-header font-bold mb-1 break-all">${message.username}</div>
                    <div oncontextmenu="showCustomContextMenu('${message.id}', event)"
                         onclick="hideCustomContextMenu()"
-                        class="chat-bubble w-auto max-w-4xl text-gray-200 break-all ${randomMessageColor()}">
+                        class="chat-bubble w-auto max-w-4xl text-gray-200 break-all
+                                ${messageTest.indexOf("гей") !== -1 || messageTest.indexOf("gay") !== -1 ? rainbowMessageColor() : randomMessageColor()}
+                              ">
                                ${repliedMessageHTML}
                                ${message.message}
                  </div>
@@ -404,5 +406,6 @@
                 }))
                 poll(ts);
             })
+
     }
 </script>
