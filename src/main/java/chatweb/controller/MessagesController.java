@@ -3,12 +3,11 @@ package chatweb.controller;
 import chatweb.entity.Message;
 import chatweb.entity.User;
 import chatweb.mapper.MessageMapper;
-import chatweb.model.dto.MessageDto;
 import chatweb.model.api.MessagesResponse;
 import chatweb.model.api.NewMessage;
 import chatweb.model.api.SendMessageRequest;
+import chatweb.model.dto.MessageDto;
 import chatweb.repository.MessageRepository;
-import chatweb.repository.UserRepository;
 import chatweb.service.EventsService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -25,11 +24,10 @@ import static java.util.UUID.randomUUID;
 @RestController
 @RequestMapping("api/messages")
 @RequiredArgsConstructor
-public class MessagesController {
+public class MessagesController implements ApiControllerHelper {
 
     private final MessageRepository messageRepository;
     private final EventsService eventsService;
-    private final UserRepository userRepository;
 
     @GetMapping
     public MessagesResponse getMessages(

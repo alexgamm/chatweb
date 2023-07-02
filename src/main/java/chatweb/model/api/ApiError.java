@@ -1,5 +1,6 @@
 package chatweb.model.api;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
@@ -11,5 +12,10 @@ public class ApiError {
     public ApiError(HttpStatus statusCode, String message) {
         this.statusCode = statusCode;
         this.message = message;
+    }
+
+    @JsonGetter
+    public int getStatusCode() {
+        return statusCode.value();
     }
 }

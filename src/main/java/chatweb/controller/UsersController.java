@@ -6,7 +6,6 @@ import chatweb.model.api.ApiError;
 import chatweb.model.api.UserListResponse;
 import chatweb.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,7 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("api/users")
 @RequiredArgsConstructor
-public class UsersController {
+public class UsersController implements ApiControllerHelper {
     private final UserRepository userRepository;
 
     @GetMapping
@@ -43,9 +42,4 @@ public class UsersController {
         return ResponseEntity.ok("");
     }
 
-    @ExceptionHandler(ApiErrorException.class)
-    public ApiError changeUsernameException(HttpServletResponse response, ApiErrorException ex){
-        response.setStatus(ex.getApiError().getStatusCode().value());
-        return ex.getApiError();
-    }
 }

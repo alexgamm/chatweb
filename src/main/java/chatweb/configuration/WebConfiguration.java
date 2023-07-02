@@ -17,6 +17,7 @@ public class WebConfiguration implements WebMvcConfigurer {
         registry.addInterceptor(authInterceptor)
                 .addPathPatterns("/**")
                 .excludePathPatterns("/login")
+                .excludePathPatterns("/api/login")
                 .excludePathPatterns("/registration")
                 .excludePathPatterns("/google/oauth/**")
                 .excludePathPatterns("/verification");
