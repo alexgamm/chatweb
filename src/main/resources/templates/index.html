@@ -2,6 +2,8 @@
 <div class="drawer drawer-mobile">
     <ul id="contextMenu" class="menu bg-base-100 w-56 hidden absolute z-10">
         <li id="replyButton"><a href="#">Reply</a></li>
+        <li id="deleteButton"><a href="#">Delete</a></li>
+
     </ul>
     <input id="drawer-toggle" type="checkbox" class="drawer-toggle"/>
 
@@ -116,8 +118,9 @@
     ];
     let users = [];
     const messages = {};
-    let repliedMessage;
+    let clickedMessage;
     let bottom = true;
+    let forDelete = false;
 
     usernameModal.addEventListener('pointerdown', (e) => {
         if (e.target.contains(usernameModal)) {
@@ -155,7 +158,7 @@
 
     function showCustomContextMenu(id, event) {
         contextMenu.classList.remove("hidden");
-        repliedMessage = messages[id];
+        clickedMessage = messages[id];
         contextMenu.style.left = event.pageX + "px";
         contextMenu.style.top = event.pageY + "px";
         event.preventDefault();
@@ -178,11 +181,35 @@
     function addRepliedMessageSection() {
         document.querySelector("#replyButton").addEventListener('click', () => {
             repliedMessageContainer.classList.remove("hidden");
-            document.querySelector("#repliedMessageSection span").innerHTML = repliedMessage.message;
+            document.querySelector("#repliedMessageSection span").innerHTML = clickedMessage.message;
 
         });
     }
 
+
+    function requestToDeleteMessage() {
+        document.querySelector("#deleteButton").addEventListener('click', () => {
+            forDelete = true;
+            const body = {};
+            if (forDelete === true) {
+                body.id = clickedMessage.id;
+                fetch("api/messages", {
+                    method: "DELETE",
+                    body: JSON.stringify(body),
+                    headers: {
+                        "Content-Type": "application/json;charset=UTF8"
+                    }
+                })
+                forDelete = false;
+            }
+        })
+    }
+
+    requestToDeleteMessage();
+
+    function deleteMessage(message) {
+        messages.delete(message);
+    }
 
     function displayUsers() {
         let userListHtml = "";
@@ -225,8 +252,6 @@
                 "Content-Type": "application/json;charset=UTF8"
             }
         }).then(response => {
-            console.log('response.status: ', response.status);
-            console.log(response);
             if (response.status === 200) {
                 updateNameNotification(response);
             } else {
@@ -277,7 +302,6 @@
         newUsernameInput.value = "";
 
     })
-
     document.querySelector('#message-input-form').addEventListener("submit", function (event) {
         event.preventDefault();
         const message = messageInput.value;
@@ -287,7 +311,7 @@
         //{message:message} == {message}
         const body = {message};
         if (!repliedMessageContainer.classList.contains("hidden")) {
-            body.repliedMessageId = repliedMessage.id;
+            body.repliedMessageId = clickedMessage.id;
             repliedMessageContainer.classList.add("hidden");
         }
         fetch("/api/messages", {
@@ -372,6 +396,7 @@
         poll(ts);
     });
 
+
     function poll(ts) {
         fetch(`/api/events?ts=${ts}`)
             .then(r => r.json())
@@ -398,6 +423,10 @@
                                 }, ...users];
                             }
                             break;
+                        // case "DELETE_MESSAGE":
+                        //     const messageForDelete = event.message;
+                        //     deleteMessage(messageForDelete);
+                        //    break;
                     }
                 }
                 requestAnimationFrame(() => messagesContainerWrapper.scrollTo({

@@ -14,4 +14,6 @@ public interface MessageRepository extends JpaRepository<Message, String> {
     List<Message> findBySendDateBeforeOrderBySendDateDesc(Date sendDate, Pageable pageable);
 
     List<Message> findByOrderBySendDateDesc(Pageable pageable);
+    Message findMessageById(String id);
+    void deleteMessageById(String id);
 }

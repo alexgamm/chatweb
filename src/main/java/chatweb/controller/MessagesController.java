@@ -7,9 +7,11 @@ import chatweb.model.api.MessagesResponse;
 import chatweb.model.api.NewMessage;
 import chatweb.model.api.SendMessageRequest;
 import chatweb.model.dto.MessageDto;
+import chatweb.model.event.DeleteMessage;
 import chatweb.repository.MessageRepository;
 import chatweb.service.EventsService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -67,6 +69,25 @@ public class MessagesController implements ApiControllerHelper {
         MessageDto messageDto = MessageMapper.messageToMessageDto(message);
 
         eventsService.addEvent(new NewMessage(messageDto));
+        return ResponseEntity.ok("");
+    }
+
+    @DeleteMapping
+    @Transactional
+    public ResponseEntity<String> deleteMessage(@RequestBody SendMessageRequest body, HttpServletRequest request) {
+        if (body.getId() == null || body.getId().isBlank()) {
+            return ResponseEntity.badRequest().body("no message for delete");
+        }
+        Message message = messageRepository.findMessageById(body.getId());
+        User user = (User) request.getAttribute("user");
+        if (message == null) {
+            return ResponseEntity.badRequest().body("no message for delete");
+        }
+        if (!user.getId().equals(message.getUser().getId())) {
+            return ResponseEntity.badRequest().body("you can delete only your messages");
+        }
+        messageRepository.deleteMessageById(message.getId());
+        eventsService.addEvent(new DeleteMessage(message));
         return ResponseEntity.ok("");
     }
 }
