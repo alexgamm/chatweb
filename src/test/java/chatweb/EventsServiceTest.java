@@ -3,7 +3,7 @@
 //import chatweb.model.event.Event;
 //import chatweb.model.event.EventType;
 //import chatweb.entity.Message;
-//import chatweb.model.api.NewMessage;
+//import chatweb.model.event.NewMessage;
 //import chatweb.service.EventsService;
 //import org.junit.jupiter.api.Assertions;
 //import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package chatweb.model.api;
+package chatweb.model.event;
 
 import chatweb.model.dto.MessageDto;
 import chatweb.model.event.Event;

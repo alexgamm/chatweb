@@ -4,5 +4,5 @@ public enum EventType {
     NEW_MESSAGE,
     USER_ACTIVITY,
     REPLY,
-    DELETE_MESSAGE
+    DELETED_MESSAGE
 }

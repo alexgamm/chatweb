@@ -190,15 +190,9 @@
     function requestToDeleteMessage() {
         document.querySelector("#deleteButton").addEventListener('click', () => {
             forDelete = true;
-            const body = {};
             if (forDelete === true) {
-                body.id = clickedMessage.id;
-                fetch("api/messages", {
+                fetch(`api/messages/${clickedMessage.id}`, {
                     method: "DELETE",
-                    body: JSON.stringify(body),
-                    headers: {
-                        "Content-Type": "application/json;charset=UTF8"
-                    }
                 })
                 forDelete = false;
             }
@@ -207,8 +201,9 @@
 
     requestToDeleteMessage();
 
-    function deleteMessage(message) {
-        messages.delete(message);
+    function deleteMessage(messageId) {
+        delete messages[messageId];
+        document.querySelector(`[data-message-id="${messageId}"]`).remove();
     }
 
     function displayUsers() {
@@ -341,7 +336,7 @@
         `
         }
         let messageHTML = `
-               <div class="chat chat-start">
+               <div class="chat chat-start" data-message-id="${message.id}">
                  <div class="chat-header font-bold mb-1 break-all">${message.username}</div>
                    <div oncontextmenu="showCustomContextMenu('${message.id}', event)"
                         onclick="hideCustomContextMenu()"
@@ -423,10 +418,9 @@
                                 }, ...users];
                             }
                             break;
-                        // case "DELETE_MESSAGE":
-                        //     const messageForDelete = event.message;
-                        //     deleteMessage(messageForDelete);
-                        //    break;
+                        case "DELETED_MESSAGE":
+                            deleteMessage(event.messageId);
+                            break;
                     }
                 }
                 requestAnimationFrame(() => messagesContainerWrapper.scrollTo({

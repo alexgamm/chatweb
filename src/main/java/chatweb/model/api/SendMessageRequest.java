@@ -7,6 +7,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SendMessageRequest {
     private String message;
-    private String id;
     private String repliedMessageId;
 }

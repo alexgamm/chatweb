@@ -2,18 +2,22 @@ package chatweb.controller;
 
 import chatweb.entity.Message;
 import chatweb.entity.User;
+import chatweb.exception.ApiErrorException;
 import chatweb.mapper.MessageMapper;
+import chatweb.model.api.ApiError;
+import chatweb.model.api.MessageIdResponse;
 import chatweb.model.api.MessagesResponse;
-import chatweb.model.api.NewMessage;
 import chatweb.model.api.SendMessageRequest;
 import chatweb.model.dto.MessageDto;
-import chatweb.model.event.DeleteMessage;
+import chatweb.model.event.DeletedMessage;
+import chatweb.model.event.NewMessage;
 import chatweb.repository.MessageRepository;
 import chatweb.service.EventsService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,10 +53,10 @@ public class MessagesController implements ApiControllerHelper {
     //@RequestBody SendMessageRequest body - позволяет спарсить тело зепроса в нашу модель
     //TODO for v.dybysov remain what RespEntity is
     @PostMapping
-    public ResponseEntity<String> sendMessage(@RequestBody SendMessageRequest body, HttpServletRequest request) {
+    public MessageIdResponse sendMessage(@RequestBody SendMessageRequest body, HttpServletRequest request) throws ApiErrorException {
         if (body.getMessage() == null || body.getMessage().isBlank()) {
             // ResponseEntity<String> = в парамтипе тело ответа, later =  Response.badRequest("missing message")
-            return ResponseEntity.badRequest().body("missing message");
+            throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "missing message"));
         }
         Message repliedMessage = Optional.ofNullable(body.getRepliedMessageId())
                 .flatMap(repliedMessageId -> messageRepository.findById(repliedMessageId))
@@ -65,30 +69,24 @@ public class MessagesController implements ApiControllerHelper {
                 repliedMessage,
                 new Date()
         ));
-
         MessageDto messageDto = MessageMapper.messageToMessageDto(message);
-
         eventsService.addEvent(new NewMessage(messageDto));
-        return ResponseEntity.ok("");
+        return new MessageIdResponse(message.getId());
     }
 
-    @DeleteMapping
+    @DeleteMapping("{messageId}")
     @Transactional
-    public ResponseEntity<String> deleteMessage(@RequestBody SendMessageRequest body, HttpServletRequest request) {
-        if (body.getId() == null || body.getId().isBlank()) {
-            return ResponseEntity.badRequest().body("no message for delete");
-        }
-        Message message = messageRepository.findMessageById(body.getId());
-        User user = (User) request.getAttribute("user");
+    public MessageIdResponse deleteMessage(@PathVariable String messageId, @RequestAttribute User user) throws ApiErrorException {
+        Message message = messageRepository.findMessageById(messageId);
         if (message == null) {
-            return ResponseEntity.badRequest().body("no message for delete");
+            throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "no message for delete"));
         }
         if (!user.getId().equals(message.getUser().getId())) {
-            return ResponseEntity.badRequest().body("you can delete only your messages");
+            throw new ApiErrorException(new ApiError(HttpStatus.FORBIDDEN, "you can delete only your messages"));
         }
         messageRepository.deleteMessageById(message.getId());
-        eventsService.addEvent(new DeleteMessage(message));
-        return ResponseEntity.ok("");
+        eventsService.addEvent(new DeletedMessage(message.getId()));
+        return new MessageIdResponse(messageId);
     }
 }
 
