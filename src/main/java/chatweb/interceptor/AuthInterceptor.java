@@ -26,16 +26,20 @@ public class AuthInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         User user;
-        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authHeader != null && !authHeader.isEmpty()) { // TODO use Optional
-            String[] parts = authHeader.split(" ");
-            if (parts.length != 2) {
-                throw new UnauthorizedException();
-            }
-            String token = parts[1];
+        String accessToken = Optional.ofNullable(request.getHeader(HttpHeaders.AUTHORIZATION))
+                .map(header -> {
+                    String[] parts = header.split(" ");
+                    if (parts.length != 2) {
+                        return null;
+                    }
+                    return parts[1];
+                })
+                .filter(token -> !token.isBlank())
+                .orElse(request.getParameter("access_token"));
+        if (accessToken != null && !accessToken.isEmpty()) {
             int userId;
             try {
-                userId = jwtService.decodeToken(token);
+                userId = jwtService.decodeToken(accessToken);
             } catch (Throwable e) {
                 throw new UnauthorizedException();
             }

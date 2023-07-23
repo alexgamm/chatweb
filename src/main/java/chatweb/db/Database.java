@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
+//TODO remove
 public class Database {
     private final Connection connection;
 

@@ -2,14 +2,15 @@ package chatweb.controller;
 
 import chatweb.entity.User;
 import chatweb.exception.ApiErrorException;
+import chatweb.mapper.UserMapper;
 import chatweb.model.api.ApiError;
 import chatweb.model.api.UserListResponse;
+import chatweb.model.dto.UserDto;
 import chatweb.repository.UserRepository;
-import jakarta.servlet.http.HttpServletRequest;
+import chatweb.service.EventsService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,19 +20,29 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UsersController implements ApiControllerHelper {
     private final UserRepository userRepository;
+    private final EventsService eventsService;
 
     @GetMapping
     public UserListResponse users() {
         List<UserListResponse.User> list = userRepository.findAll().stream()
-                .map(user -> new UserListResponse.User(user.getUsername(), user.getLastActivityAt()))
+                .map(user -> new UserListResponse.User(
+                        user.getId(),
+                        user.getUsername(),
+                        user.getLastActivityAt(),
+                        eventsService.hasEmitters(user.getId())
+                ))
                 .toList();
         return new UserListResponse(list);
     }
 
+    @GetMapping("me")
+    public UserDto getMe(@RequestAttribute User user) {
+        return UserMapper.userToUserDto(user);
+    }
+
     @PatchMapping
     @Transactional
-    public ResponseEntity<String> changeUsername(@RequestBody User input, HttpServletRequest request) throws ApiErrorException {
-        User user = (User) request.getAttribute("user");
+    public UserDto changeUsername(@RequestBody User input, @RequestAttribute User user) throws ApiErrorException {
         if (input.getUsername().equals("")) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "invalid username"));
         }
@@ -39,7 +50,8 @@ public class UsersController implements ApiControllerHelper {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "username is already taken"));
         }
         userRepository.updateUsername(user.getId(), input.getUsername());
-        return ResponseEntity.ok("");
+        user = userRepository.findUserById(user.getId());
+        return UserMapper.userToUserDto(user);
     }
 
 }

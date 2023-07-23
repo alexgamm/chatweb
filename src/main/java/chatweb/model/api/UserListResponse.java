@@ -1,34 +1,23 @@
 package chatweb.model.api;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 import java.util.Date;
 import java.util.List;
 
+@RequiredArgsConstructor
+@Getter
 public class UserListResponse {
 
-    public static class User {
-        private final String username;
-        private final Date lastActivityAt;
-
-        public User(String username, Date lastActivityAt) {
-            this.username = username;
-            this.lastActivityAt = lastActivityAt;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public Date getLastActivityAt() {
-            return lastActivityAt;
-        }
-    }
     private final List<User> users;
 
-    public UserListResponse(List<User> users) {
-        this.users = users;
-    }
-
-    public List<User> getUsers() {
-        return users;
+    @RequiredArgsConstructor
+    @Getter
+    public static class User {
+        private final int id;
+        private final String username;
+        private final Date lastActivityAt;
+        private final boolean online;
     }
 }

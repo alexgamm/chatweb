@@ -32,6 +32,9 @@ public class PasswordUtils {
     }
 
     public static boolean check(String password, String hashedPassword) {
+        if (password == null || hashedPassword == null) {
+            return false;
+        }
         String[] split = hashedPassword.split(":");
         if (split.length != 2) {
             return false;

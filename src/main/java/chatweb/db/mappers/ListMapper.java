@@ -4,7 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
+//TODO remove
 public interface ListMapper<T> {
     default List<T> map(ResultSet rs) throws SQLException {
         List<T> list = new ArrayList<>();
