@@ -5,33 +5,34 @@
 
   const { post } = useApi();
   let state = "idle";
-  let username = "";
+  let email = "";
   let password = "";
   let errorMessage = "";
-  $: canSubmit = !!username && !!password && state === "idle" && !errorMessage;
+  $: canSubmit = !!email && !!password && state === "idle" && !errorMessage;
   const submit = async () => {
     if (!canSubmit) {
       return;
     }
     state = "pending";
+    let responseBody;
     try {
-      const { needVerification, accessToken } = await post("/api/login", {
-        username,
+      responseBody = await post("/api/login", {
+        email,
         password,
       });
-      if (needVerification) {
-        //  navigate("/verification?email=");
-        // TODO: redirect w/ email
-        console.error("need verification");
-        return;
-      }
-      localStorage.setItem("token", accessToken);
-      navigate("/");
     } catch (error) {
       errorMessage = error;
+      return;
     } finally {
       state = "idle";
     }
+    const { needVerification, accessToken } = responseBody;
+    if (needVerification) {
+      navigate("/verification?email=" + email);
+      return;
+    }
+    localStorage.setItem("token", accessToken);
+    navigate("/");
   };
 </script>
 
@@ -45,14 +46,14 @@
       <GoogleOAuthButton />
       <div class="divider">or</div>
       <div class="form-control">
-        <label class="label" for="username">
-          <span class="label-text">username</span>
+        <label class="label" for="email">
+          <span class="label-text">email</span>
         </label>
         <input
           class="input input-bordered"
           type="text"
-          id="username"
-          bind:value={username}
+          id="email"
+          bind:value={email}
           on:input={() => (errorMessage = "")}
           required
         />

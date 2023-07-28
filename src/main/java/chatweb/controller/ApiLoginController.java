@@ -17,20 +17,24 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("api/login")
 @RequiredArgsConstructor
-public class ApiLoginController implements ApiControllerHelper{
+public class ApiLoginController implements ApiControllerHelper {
     private final UserRepository userRepository;
     private final VerificationService verificationService;
     private final JwtService jwtService;
 
     @PostMapping
     public LoginResponse login(@RequestBody LoginRequest body) throws ApiErrorException {
-        String username = body.getUsername();
         String password = body.getPassword();
-        User user = userRepository.findUserByUsername(username);
-        if (user == null || password == null || !PasswordUtils.check(password, user.getPassword())) {
+        User user = Optional.ofNullable(body.getEmail())
+                .map(String::toLowerCase)
+                .map(userRepository::findUserByEmail)
+                .orElse(null);
+        if (user == null || !PasswordUtils.check(password, user.getPassword())) {
             throw new ApiErrorException(new ApiError(HttpStatus.UNAUTHORIZED, "invalid credentials"));
         }
         Verification verification = verificationService.findVerification(user.getId());

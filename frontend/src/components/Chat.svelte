@@ -3,10 +3,9 @@
   import ChatMessage from "./ChatMessage.svelte";
   import useMessageColor from "../hooks/message-color";
   import { addEventHandler } from "../contexts/events";
-  import messages from "../stores/messages"; //TODO remove
   import useApi from "../hooks/api";
   const addColor = useMessageColor();
-
+  let messages = [];
   let contextMenuPosition = { x: 100, y: 20 };
   let showContextMenu = false;
   let messagesContainerWrapper;
@@ -34,7 +33,7 @@
   let selectedMessage;
   let loading = false;
   const sortMessages = () => {
-    $messages = $messages.sort((a, b) => a.sendDate - b.sendDate);
+    messages = messages.sort((a, b) => a.sendDate - b.sendDate);
   };
   const loadMessages = async (count, from) => {
     if (loading) {
@@ -50,17 +49,17 @@
       responseBody = await get(
         `/api/messages?${new URLSearchParams(params).toString()}`
       );
-    } catch (error){
+    } catch (error) {
       console.error("could not get messages", error); // TODO handle properly
       return;
     } finally {
       loading = false;
     }
-    $messages = [...$messages, ...responseBody.messages.map(addColor)];
+    messages = [...messages, ...responseBody.messages.map(addColor)];
     sortMessages();
     //map сам вызывает addColor
     await tick();
-    const scrollTop = $messages
+    const scrollTop = messages
       .slice(0, responseBody.messages.length)
       .reduce((acc, curr) => acc + curr.elemHeight, 0);
     messagesContainerWrapper.scrollTop = scrollTop;
@@ -74,7 +73,7 @@
         message: messageText,
         repliedMessageId: repliedMessage?.id,
       });
-    } catch(error) {
+    } catch (error) {
       console.error("could not send message", error); // TODO handle properly
       return;
     }
@@ -92,15 +91,15 @@
     await loadMessages(20);
     scrollBottom();
     addEventHandler("NEW_MESSAGE", (event) => {
-      if ($messages.find((message) => message.id === event.message.id)) {
+      if (messages.find((message) => message.id === event.message.id)) {
         return;
       }
-      $messages = [...$messages, addColor(event.message)];
+      messages = [...messages, addColor(event.message)];
       sortMessages();
       scrollBottom();
     });
     addEventHandler("CHANGE_USERNAME", (event) => {
-      $messages = $messages.map((message) =>
+      messages = messages.map((message) =>
         message.userId === event.userId
           ? { ...message, username: event.newUsername }
           : message
@@ -116,7 +115,7 @@
     if (scrollEvent.target.scrollTop === 0) {
       //target is messagesContWrapper
 
-      const from = $messages[0]?.sendDate;
+      const from = messages[0]?.sendDate;
       if (from) {
         loadMessages(20, from);
       }
@@ -130,7 +129,7 @@
   </div>
 
   <div class="messages-container flex flex-col justify-end min-h-full">
-    {#each $messages as message (message.id)}
+    {#each messages as message (message.id)}
       <ChatMessage
         {message}
         onContextMenu={(event) => {
