@@ -9,8 +9,8 @@ export const getUser = async () => {
 
   try {
     user.set(await get("/api/users/me"));
-  } catch {
-    alert("could not get user"); // TODO handle properly
+  } catch (error){
+    console.error("could not get user", error); // TODO handle properly
   }
 };
 

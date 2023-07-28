@@ -6,6 +6,7 @@ import chatweb.mapper.UserMapper;
 import chatweb.model.api.ApiError;
 import chatweb.model.api.UserListResponse;
 import chatweb.model.dto.UserDto;
+import chatweb.model.event.ChangeUsernameEvent;
 import chatweb.repository.UserRepository;
 import chatweb.service.EventsService;
 import jakarta.transaction.Transactional;
@@ -51,6 +52,7 @@ public class UsersController implements ApiControllerHelper {
         }
         userRepository.updateUsername(user.getId(), input.getUsername());
         user = userRepository.findUserById(user.getId());
+        eventsService.addEvent(new ChangeUsernameEvent(user.getId(), user.getUsername()));
         return UserMapper.userToUserDto(user);
     }
 

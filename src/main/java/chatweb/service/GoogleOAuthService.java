@@ -27,6 +27,7 @@ import java.util.List;
 public class GoogleOAuthService {
     private final static String TOKEN_URI = "https://oauth2.googleapis.com/token";
     private final static String USER_INFO_URI = "https://www.googleapis.com/oauth2/v2/userinfo";
+    private final static String OAUTH_URI = "https://accounts.google.com/o/oauth2/v2/auth";
     private final ObjectMapper objectMapper;
     private final GoogleOAuthProperties googleOAuthProperties;
     private final HttpClient httpClient = HttpClients.createDefault();
@@ -70,5 +71,18 @@ public class GoogleOAuthService {
         HttpResponse response = httpClient.execute(request);
         String responseBody = EntityUtils.toString(response.getEntity());
         return objectMapper.readValue(responseBody, UserInfo.class);
+    }
+    public String getOauthUrl(){
+        try {
+            return new URIBuilder(OAUTH_URI)
+                    .addParameter("client_id", googleOAuthProperties.getClientId())
+                    .addParameter("redirect_uri", googleOAuthProperties.getRedirectUri())
+                    .addParameter("response_type", "code")
+                    .addParameter("scope", "email")
+                    .build()
+                    .toString();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

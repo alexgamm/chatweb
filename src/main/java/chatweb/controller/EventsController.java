@@ -4,7 +4,7 @@ import chatweb.entity.User;
 import chatweb.longpoll.LongPollFuture;
 import chatweb.model.api.EventsResponse;
 import chatweb.model.event.Event;
-import chatweb.model.event.UserActivity;
+import chatweb.model.event.UserActivityEvent;
 import chatweb.repository.UserRepository;
 import chatweb.service.EventsService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,10 +36,10 @@ public class EventsController implements ApiControllerHelper {
         User user = (User) request.getAttribute("user");
         userRepository.updateLastActivityAt(user.getId());
         if (eventsService.getEvents().stream()
-                .noneMatch(event -> event instanceof UserActivity
-                        && ((UserActivity) event).getUsername().equals(user.getUsername())
-                        && !((UserActivity) event).isExpired())) {
-            eventsService.addEvent(new UserActivity(user.getUsername()));
+                .noneMatch(event -> event instanceof UserActivityEvent
+                        && ((UserActivityEvent) event).getUsername().equals(user.getUsername())
+                        && !((UserActivityEvent) event).isExpired())) {
+            eventsService.addEvent(new UserActivityEvent(user.getUsername()));
         }
         return longPollFuture.thenApply(eventList -> new EventsResponse(eventList));
     }

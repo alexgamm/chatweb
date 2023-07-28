@@ -9,8 +9,8 @@ import chatweb.model.api.MessageIdResponse;
 import chatweb.model.api.MessagesResponse;
 import chatweb.model.api.SendMessageRequest;
 import chatweb.model.dto.MessageDto;
-import chatweb.model.event.DeletedMessage;
-import chatweb.model.event.NewMessage;
+import chatweb.model.event.DeletedMessageEvent;
+import chatweb.model.event.NewMessageEvent;
 import chatweb.repository.MessageRepository;
 import chatweb.service.EventsService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,7 +18,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -70,7 +69,7 @@ public class MessagesController implements ApiControllerHelper {
                 new Date()
         ));
         MessageDto messageDto = MessageMapper.messageToMessageDto(message);
-        eventsService.addEvent(new NewMessage(messageDto));
+        eventsService.addEvent(new NewMessageEvent(messageDto));
         return new MessageIdResponse(message.getId());
     }
 
@@ -85,7 +84,7 @@ public class MessagesController implements ApiControllerHelper {
             throw new ApiErrorException(new ApiError(HttpStatus.FORBIDDEN, "you can delete only your messages"));
         }
         messageRepository.deleteMessageById(message.getId());
-        eventsService.addEvent(new DeletedMessage(message.getId()));
+        eventsService.addEvent(new DeletedMessageEvent(message.getId()));
         return new MessageIdResponse(messageId);
     }
 }

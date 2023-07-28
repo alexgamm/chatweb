@@ -1,3 +1,5 @@
+import { navigate } from "svelte-routing";
+
 const useApi = () => {
   const accessToken = localStorage.getItem("token");
   const request = async (url, { method, body, useToken }) => {
@@ -12,6 +14,9 @@ const useApi = () => {
     const response = await fetch(url, fetchParams);
     const responseBody = await response.json();
     if (!response.ok) {
+      if(response.status === 401){
+        navigate("/login");
+      }
       throw responseBody.message;
     }
     return responseBody;

@@ -10,8 +10,9 @@ import java.util.Date;
 public class MessageDto {
 
     private final String id;
-    private final String message;
+    private final int userId;
     private final String username;
+    private final String message;
     private final MessageDto repliedMessage;
     private final Date sendDate;
 }

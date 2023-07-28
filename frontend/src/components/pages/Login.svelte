@@ -1,6 +1,7 @@
 <script>
   import { Link, navigate } from "svelte-routing";
   import useApi from "../../hooks/api";
+  import GoogleOAuthButton from "../GoogleOAuthButton.svelte";
 
   const { post } = useApi();
   let state = "idle";
@@ -19,16 +20,16 @@
         password,
       });
       if (needVerification) {
-        //  return "redirect:/verification?email=" + user.getEmail().toLowerCase();
         //  navigate("/verification?email=");
         // TODO: redirect w/ email
-        alert("need verification");
+        console.error("need verification");
         return;
       }
       localStorage.setItem("token", accessToken);
       navigate("/");
     } catch (error) {
       errorMessage = error;
+    } finally {
       state = "idle";
     }
   };
@@ -37,11 +38,11 @@
 <main class="flex justify-center items-center h-screen flex-col">
   <h1 class="text-3xl mb-10">Please sign in</h1>
   <form
-    class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100"
+    class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-neutral-focus"
     on:submit|preventDefault={submit}
   >
     <div class="card-body">
-      google-oauth-button
+      <GoogleOAuthButton />
       <div class="divider">or</div>
       <div class="form-control">
         <label class="label" for="username">

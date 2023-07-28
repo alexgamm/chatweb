@@ -1,7 +1,5 @@
 <script>
   import useApi from "../../hooks/api";
-  import messages from "../../stores/messages";
-  import user from "../../stores/user";
   import usernameModal from "../../stores/username-modal";
   import wait from "../utils/wait";
   const {
@@ -27,12 +25,6 @@
       return;
     }
     state = "success";
-    // TODO use events
-    $messages = $messages.map((message) =>
-      message.username === $user.username
-        ? { ...message, username: newUsername }
-        : message
-    );
     await wait(3000);
     $usernameModal.close();
     await wait(300);

@@ -3,7 +3,7 @@
   import ChatMessage from "./ChatMessage.svelte";
   import useMessageColor from "../hooks/message-color";
   import { addEventHandler } from "../contexts/events";
-  import messages from "../stores/messages";
+  import messages from "../stores/messages"; //TODO remove
   import useApi from "../hooks/api";
   const addColor = useMessageColor();
 
@@ -50,8 +50,8 @@
       responseBody = await get(
         `/api/messages?${new URLSearchParams(params).toString()}`
       );
-    } catch {
-      alert("could not get messages"); // TODO handle properly
+    } catch (error){
+      console.error("could not get messages", error); // TODO handle properly
       return;
     } finally {
       loading = false;
@@ -74,8 +74,8 @@
         message: messageText,
         repliedMessageId: repliedMessage?.id,
       });
-    } catch {
-      alert("could not send message"); // TODO handle properly
+    } catch(error) {
+      console.error("could not send message", error); // TODO handle properly
       return;
     }
     messageText = "";
@@ -98,6 +98,13 @@
       $messages = [...$messages, addColor(event.message)];
       sortMessages();
       scrollBottom();
+    });
+    addEventHandler("CHANGE_USERNAME", (event) => {
+      $messages = $messages.map((message) =>
+        message.userId === event.userId
+          ? { ...message, username: event.newUsername }
+          : message
+      );
     });
   });
 </script>

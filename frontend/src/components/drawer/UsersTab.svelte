@@ -5,14 +5,18 @@
   const {
     authorized: { get },
   } = useApi();
+  let loading = false;
   let users = [];
 
   const loadUsers = async () => {
+    loading = true;
     try {
       const responseBody = await get("/api/users");
       users = responseBody.users;
-    } catch {
-      alert("could not get users"); // TODO handle properly
+    } catch (error){
+      console.error("could not get users", error); // TODO handle properly
+    } finally {
+      loading = false;
     }
   };
   onMount(() => {
@@ -27,24 +31,37 @@
         loadUsers();
       }
     });
+    addEventHandler("CHANGE_USERNAME", (event) => {
+      users = users.map((user) =>
+        user.id === event.userId
+          ? { ...user, username: event.newUsername }
+          : user
+      );
+    });
   });
 </script>
 
-<ul class="menu p-4 w-full text-base-content" data-tab="user-list">
-  {#each users as user}
-    <li class="mb-2">
-      <a
-        class={`flex justify-between ${
-          user.online ? "bg-primary bg-opacity-10" : "bg-base-100"
-        }`}
-      >
-        <strong>{user.username}</strong>
-        <i
-          class={`w-3 h-3 rounded-full ${
-            user.online ? "bg-primary" : "bg-gray-400"
+{#if loading}
+  <div class="flex justify-center items-center h-16">
+    <span class="loading loading-spinner text-primary" />
+  </div>
+{:else}
+  <ul class="menu p-4 w-full text-base-content" data-tab="user-list">
+    {#each users as user}
+      <li class="mb-2">
+        <a
+          class={`flex justify-between ${
+            user.online ? "bg-primary bg-opacity-10" : "bg-base-100"
           }`}
-        />
-      </a>
-    </li>
-  {/each}
-</ul>
+        >
+          <strong>{user.username}</strong>
+          <i
+            class={`w-3 h-3 rounded-full ${
+              user.online ? "bg-primary" : "bg-gray-400"
+            }`}
+          />
+        </a>
+      </li>
+    {/each}
+  </ul>
+{/if}

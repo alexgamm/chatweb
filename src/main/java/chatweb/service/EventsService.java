@@ -2,7 +2,7 @@ package chatweb.service;
 
 import chatweb.longpoll.LongPollFuture;
 import chatweb.model.event.Event;
-import chatweb.model.event.UserOnline;
+import chatweb.model.event.UserOnlineEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -72,7 +72,7 @@ public class EventsService {
             return value;
         });
         if (emitters.getOrDefault(userId, Collections.emptySet()).size() == 1) {
-            addEvent(new UserOnline(userId, true));
+            addEvent(new UserOnlineEvent(userId, true));
         }
         return emitter;
     }
@@ -84,7 +84,7 @@ public class EventsService {
         });
         emitters.values().removeIf(Set::isEmpty);
         if (!hasEmitters(userId)) {
-            addEvent(new UserOnline(userId, false));
+            addEvent(new UserOnlineEvent(userId, false));
         }
     }
 

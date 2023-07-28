@@ -19,8 +19,10 @@ public class WebConfiguration implements WebMvcConfigurer {
                 .excludePathPatterns("/login")
                 .excludePathPatterns("/api/login")
                 .excludePathPatterns("/api/registration")
+                .excludePathPatterns("/api/verification")
                 .excludePathPatterns("/registration")
                 .excludePathPatterns("/google/oauth/**")
+                .excludePathPatterns("/api/google/oauth/**")
                 .excludePathPatterns("/verification");
     }
 }

@@ -7,8 +7,9 @@ public class MessageMapper {
     public static MessageDto messageToMessageDto(Message message) {
         return new MessageDto(
                 message.getId(),
-                message.getMessage(),
+                message.getUser().getId(),
                 message.getUser().getUsername(),
+                message.getMessage(),
                 message.getRepliedMessage() == null ? null : messageToMessageDto(message.getRepliedMessage()),
                 message.getSendDate()
         );
