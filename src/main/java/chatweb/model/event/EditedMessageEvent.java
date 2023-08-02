@@ -7,10 +7,10 @@ import java.util.Date;
 
 @Getter
 public class EditedMessageEvent extends Event {
-    private final MessageDto messageDto;
+    private final MessageDto message;
 
-    public EditedMessageEvent(MessageDto messageDto) {
+    public EditedMessageEvent(MessageDto message) {
         super(EventType.EDITED_MESSAGE, new Date());
-        this.messageDto = messageDto;
+        this.message = message;
     }
 }
