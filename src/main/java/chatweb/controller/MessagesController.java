@@ -10,6 +10,7 @@ import chatweb.model.api.MessagesResponse;
 import chatweb.model.api.SendMessageRequest;
 import chatweb.model.dto.MessageDto;
 import chatweb.model.event.DeletedMessageEvent;
+import chatweb.model.event.EditedMessageEvent;
 import chatweb.model.event.NewMessageEvent;
 import chatweb.repository.MessageRepository;
 import chatweb.service.EventsService;
@@ -76,7 +77,7 @@ public class MessagesController implements ApiControllerHelper {
     @DeleteMapping("{messageId}")
     @Transactional
     public MessageIdResponse deleteMessage(@PathVariable String messageId, @RequestAttribute User user) throws ApiErrorException {
-        Message message = messageRepository.findMessageById(messageId);
+        Message message = messageRepository.findById(messageId).orElse(null);
         if (message == null) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "no message for delete"));
         }
@@ -86,6 +87,26 @@ public class MessagesController implements ApiControllerHelper {
         messageRepository.deleteMessageById(message.getId());
         eventsService.addEvent(new DeletedMessageEvent(message.getId()));
         return new MessageIdResponse(messageId);
+    }
+
+    @PatchMapping("{messageId}")
+    @Transactional
+    public MessageDto editMessage(@PathVariable String messageId, @RequestBody MessageDto body, @RequestAttribute User user) throws ApiErrorException {
+        if (body.getMessage() == null) {
+            throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "message text is required"));
+        }
+        Message message = messageRepository.findById(messageId).orElse(null);
+        if (message == null) {
+            throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "no message for edit"));
+        }
+        if (!user.getId().equals(message.getUser().getId())) {
+            throw new ApiErrorException(new ApiError(HttpStatus.FORBIDDEN, "you can edit only your messages"));
+        }
+        message.setMessage(body.getMessage());
+        messageRepository.save(message);
+        MessageDto messageDto = MessageMapper.messageToMessageDto(message);
+        eventsService.addEvent(new EditedMessageEvent(messageDto));
+        return messageDto;
     }
 }
 

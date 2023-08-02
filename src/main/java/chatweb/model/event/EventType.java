@@ -6,5 +6,6 @@ public enum EventType {
     USER_ONLINE,
     CHANGE_USERNAME,
     REPLY,
+    EDITED_MESSAGE,
     DELETED_MESSAGE
 }

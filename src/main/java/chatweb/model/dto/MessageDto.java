@@ -1,18 +1,22 @@
 package chatweb.model.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Date;
 
+
 @Getter
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 public class MessageDto {
 
-    private final String id;
-    private final int userId;
-    private final String username;
-    private final String message;
-    private final MessageDto repliedMessage;
-    private final Date sendDate;
+    private String id;
+    private int userId;
+    private String username;
+    private String message;
+    private MessageDto repliedMessage;
+    private Date sendDate;
 }

@@ -17,6 +17,7 @@ public class Message {
     @Id
     @Column(name = "id")
     private String id;
+    @Setter
     @Column(name = "message")
     private String message;
 
