@@ -1,10 +1,12 @@
 package chatweb.model.event;
 
 import chatweb.model.dto.MessageDto;
+import lombok.Getter;
 
 import java.util.Date;
 import java.util.Set;
 
+@Getter
 public class ReactionEvent extends Event {
     private final String messageId;
     private final Set<MessageDto.Reaction> reactions;
