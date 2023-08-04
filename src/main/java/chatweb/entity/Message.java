@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.Set;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,6 +18,7 @@ public class Message {
     @Id
     @Column(name = "id")
     private String id;
+
     @Setter
     @Column(name = "message")
     private String message;
@@ -27,9 +29,14 @@ public class Message {
     private User user;
 
     @Setter
+    @OneToMany(mappedBy = "message")
+    private Set<Reaction> reactions;
+
+    @Setter
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "replied_message_id", referencedColumnName = "id")
     private Message repliedMessage;
+
     @Column(name = "send_date")
     private Date sendDate;
 

@@ -7,5 +7,6 @@ public enum EventType {
     CHANGE_USERNAME,
     REPLY,
     EDITED_MESSAGE,
+    REACTION,
     DELETED_MESSAGE
 }

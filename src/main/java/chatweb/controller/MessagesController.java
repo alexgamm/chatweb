@@ -1,18 +1,18 @@
 package chatweb.controller;
 
 import chatweb.entity.Message;
+import chatweb.entity.Reaction;
 import chatweb.entity.User;
 import chatweb.exception.ApiErrorException;
 import chatweb.mapper.MessageMapper;
-import chatweb.model.api.ApiError;
-import chatweb.model.api.MessageIdResponse;
-import chatweb.model.api.MessagesResponse;
-import chatweb.model.api.SendMessageRequest;
+import chatweb.model.api.*;
 import chatweb.model.dto.MessageDto;
 import chatweb.model.event.DeletedMessageEvent;
 import chatweb.model.event.EditedMessageEvent;
 import chatweb.model.event.NewMessageEvent;
+import chatweb.model.event.ReactionEvent;
 import chatweb.repository.MessageRepository;
+import chatweb.repository.ReactionRepository;
 import chatweb.service.EventsService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -21,9 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static java.util.UUID.randomUUID;
 
@@ -34,6 +32,7 @@ public class MessagesController implements ApiControllerHelper {
 
     private final MessageRepository messageRepository;
     private final EventsService eventsService;
+    private final ReactionRepository reactionRepository;
 
     @GetMapping
     public MessagesResponse getMessages(
@@ -66,6 +65,7 @@ public class MessagesController implements ApiControllerHelper {
                 randomUUID().toString(),
                 body.getMessage(),
                 user,
+                Collections.emptySet(),
                 repliedMessage,
                 new Date()
         ));
@@ -106,6 +106,48 @@ public class MessagesController implements ApiControllerHelper {
         messageRepository.save(message);
         MessageDto messageDto = MessageMapper.messageToMessageDto(message);
         eventsService.addEvent(new EditedMessageEvent(messageDto));
+        return messageDto;
+    }
+
+    @PutMapping("{messageId}/reactions")
+    public MessageDto toggleReaction(
+            @PathVariable String messageId,
+            @RequestBody ReactionRequest body,
+            @RequestAttribute User user
+    ) throws ApiErrorException {
+        if (body.getReaction() == null || body.getReaction().isBlank()) {
+            throw new ApiErrorException(new ApiError(
+                    HttpStatus.BAD_REQUEST,
+                    "reaction is required"
+            ));
+        }
+        Message message = messageRepository.findById(messageId).orElse(null);
+        if (message == null) {
+            throw new ApiErrorException(new ApiError(
+                    HttpStatus.BAD_REQUEST,
+                    "cannot put reaction without message"
+            ));
+        }
+        Reaction existingReaction = message.getReactions().stream()
+                .filter(r -> r.getReaction().equals(body.getReaction())
+                        && r.getUserId() == user.getId())
+                .findFirst().orElse(null);
+        if (existingReaction == null) {
+            Reaction reaction = new Reaction(
+                    UUID.randomUUID().toString(),
+                    message,
+                    user.getId(),
+                    body.getReaction()
+            );
+            reactionRepository.save(reaction);
+            message.getReactions().add(reaction);
+        } else {
+            reactionRepository.delete(existingReaction);
+            message.getReactions().remove(existingReaction);
+        }
+        messageRepository.save(message);
+        MessageDto messageDto = MessageMapper.messageToMessageDto(message);
+        eventsService.addEvent(new ReactionEvent(messageDto.getId(), messageDto.getReactions()));
         return messageDto;
     }
 }
