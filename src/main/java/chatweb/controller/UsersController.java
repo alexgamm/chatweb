@@ -4,14 +4,17 @@ import chatweb.entity.User;
 import chatweb.exception.ApiErrorException;
 import chatweb.mapper.UserMapper;
 import chatweb.model.api.ApiError;
+import chatweb.model.api.EmptyResponse;
 import chatweb.model.api.UserListResponse;
 import chatweb.model.dto.UserDto;
 import chatweb.model.event.ChangeUsernameEvent;
+import chatweb.model.event.UserTypingEvent;
 import chatweb.repository.UserRepository;
 import chatweb.service.EventsService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -56,4 +59,9 @@ public class UsersController implements ApiControllerHelper {
         return UserMapper.userToUserDto(user);
     }
 
+    @PutMapping("me/typing")
+    public ResponseEntity<EmptyResponse> getTyping(@RequestAttribute User user) {
+        eventsService.addEvent(new UserTypingEvent(user.getId()));
+        return ResponseEntity.ok(new EmptyResponse());
+    }
 }
