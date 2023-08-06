@@ -1,16 +1,21 @@
 <script>
-  import { onMount, tick } from "svelte";
-  import ChatMessage from "./ChatMessage.svelte";
-  import useMessageColor from "../hooks/message-color";
-  import { addEventHandler } from "../contexts/events";
+  import { onMount } from "svelte";
   import useApi from "../hooks/api";
-  const addColor = useMessageColor();
-  let messages = [];
-  let contextMenuPosition = { x: 100, y: 20 };
+  import user from "../stores/user";
+  import ChatMessageList from "./ChatMessageList.svelte";
+  import MessageContextMenu from "./MessageContextMenu.svelte";
+  import CloseIcon from "./icons/CloseIcon.svelte";
+  import EditIcon from "./icons/EditIcon.svelte";
+  import ReplyIcon from "./icons/ReplyIcon.svelte";
+  import useDebounce from "../utils/debounce";
+
+  const typingDebounce = useDebounce(300);
+
+  let contextMenuPosition = { x: 0, y: 0 };
   let showContextMenu = false;
-  let messagesContainerWrapper;
+
   const {
-    authorized: { get, post },
+    authorized: { post, patch, put, del },
   } = useApi();
 
   onMount(() => {
@@ -30,169 +35,107 @@
 
   let messageText = "";
   let repliedMessage;
+  let editedMessage;
   let selectedMessage;
-  let loading = false;
-  const sortMessages = () => {
-    messages = messages.sort((a, b) => a.sendDate - b.sendDate);
-  };
-  const loadMessages = async (count, from) => {
-    if (loading) {
-      return;
-    }
-    const params = { count };
-    if (from) {
-      params.from = from;
-    }
-    loading = true;
-    let responseBody;
-    try {
-      responseBody = await get(
-        `/api/messages?${new URLSearchParams(params).toString()}`
-      );
-    } catch (error) {
-      console.error("could not get messages", error); // TODO handle properly
-      return;
-    } finally {
-      loading = false;
-    }
-    messages = [...messages, ...responseBody.messages.map(addColor)];
-    sortMessages();
-    //map сам вызывает addColor
-    await tick();
-    const scrollTop = messages
-      .slice(0, responseBody.messages.length)
-      .reduce((acc, curr) => acc + curr.elemHeight, 0);
-    messagesContainerWrapper.scrollTop = scrollTop;
-  };
-  const sendMessage = async () => {
-    if (!messageText) {
+  const submit = async () => {
+    if (!messageText || editedMessage?.message === messageText) {
       return;
     }
     try {
-      await post("/api/messages", {
-        message: messageText,
-        repliedMessageId: repliedMessage?.id,
-      });
+      if (editedMessage) {
+        await patch(`/api/messages/${editedMessage.id}`, {
+          message: messageText,
+        });
+      } else {
+        await post("/api/messages", {
+          message: messageText,
+          repliedMessageId: repliedMessage?.id,
+        });
+      }
     } catch (error) {
-      console.error("could not send message", error); // TODO handle properly
+      console.error("could not send/edit message", error); // TODO handle properly
       return;
     }
     messageText = "";
     repliedMessage = null;
+    editedMessage = null;
   };
-  const scrollBottom = () =>
-    requestAnimationFrame(() =>
-      messagesContainerWrapper.scrollTo({
-        top: messagesContainerWrapper.scrollHeight,
-        behavior: "smooth",
-      })
-    );
-  onMount(async () => {
-    await loadMessages(20);
-    scrollBottom();
-    addEventHandler("NEW_MESSAGE", (event) => {
-      if (messages.find((message) => message.id === event.message.id)) {
-        return;
+  const onInput = () =>
+    typingDebounce(async () => {
+      try {
+        await put("/api/users/me/typing");
+      } catch (error) {
+        console.error("could not send typing", error);
       }
-      messages = [...messages, addColor(event.message)];
-      sortMessages();
-      scrollBottom();
     });
-    addEventHandler("CHANGE_USERNAME", (event) => {
-      messages = messages.map((message) =>
-        message.userId === event.userId
-          ? { ...message, username: event.newUsername }
-          : message
-      );
-    });
-  });
+  const deleteMessage = async (id) => {
+    try {
+      await del(`/api/messages/${id}`);
+    } catch (error) {
+      console.error("could not delete message", error); // TODO handle properly
+    }
+  };
+
+  const sendReaction = async (messageId, reaction) => {
+    try {
+      await put(`/api/messages/${messageId}/reactions`, { reaction });
+    } catch (error) {
+      console.error("could not send reaction", error);
+    }
+  };
 </script>
 
-<div
-  class="messages-container-wrapper flex-1 min-h-0 overflow-auto py-2"
-  bind:this={messagesContainerWrapper}
-  on:scroll={(scrollEvent) => {
-    if (scrollEvent.target.scrollTop === 0) {
-      //target is messagesContWrapper
-
-      const from = messages[0]?.sendDate;
-      if (from) {
-        loadMessages(20, from);
-      }
-    }
+<ChatMessageList
+  onContextMenu={({ x, y, message }) => {
+    showContextMenu = true;
+    contextMenuPosition = { x, y };
+    selectedMessage = message;
   }}
->
-  <div class="flex justify-center min-h-16">
-    {#if loading}
-      <span class="loading loading-spinner text-primary" />
+  onReaction={sendReaction}
+/>
+{#if repliedMessage || editedMessage}
+  <div class="alert shadow-lg bg-primary bg-opacity-20 mb-4">
+    {#if repliedMessage}
+      <ReplyIcon />
     {/if}
-  </div>
-
-  <div class="messages-container flex flex-col justify-end min-h-full">
-    {#each messages as message (message.id)}
-      <ChatMessage
-        {message}
-        onContextMenu={(event) => {
-          showContextMenu = true;
-          contextMenuPosition = { x: event.pageX, y: event.pageY };
-          selectedMessage = message;
+    {#if editedMessage}
+      <EditIcon />
+    {/if}
+    <span>{repliedMessage?.message ?? editedMessage?.message}</span>
+    {#if editedMessage}
+      <button
+        class="hover:opacity-70"
+        on:click={() => {
+          editedMessage = null;
+          messageText = "";
         }}
-      />
-    {/each}
-  </div>
-</div>
-{#if repliedMessage}
-  <div class="alert shadow-lg">
-    <svg
-      class="h-5 w-5 text-gray-500"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
-      />
-    </svg>
-    <span>{repliedMessage.message}</span>
+      >
+        <CloseIcon />
+      </button>
+    {/if}
   </div>
 {/if}
 
-<form on:submit|preventDefault={sendMessage}>
+<form on:submit|preventDefault={submit}>
   <input
     class="input input-bordered input-primary w-full"
     type="text"
     placeholder="type something..."
     autocomplete="off"
     bind:value={messageText}
+    on:input={onInput}
   />
 </form>
-
-<div
-  class={`bg-base-100 absolute rounded-lg ${!showContextMenu ? "hidden" : ""}`}
-  style={`left: ${contextMenuPosition.x}px; top: ${contextMenuPosition.y}px`}
->
-  <button
-    class="btn bg-violet-900 hover:bg-opacity-70 border-none hover:bg-violet-900 normal-case pr-9 text-gray-300 text-base w-40 z-10"
-    on:click={() => {
-      repliedMessage = selectedMessage;
-    }}
-  >
-    <svg
-      class="h-5 w-5 text-gray-300"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
-      />
-    </svg>
-    Reply
-  </button>
-</div>
+<MessageContextMenu
+  show={showContextMenu}
+  position={contextMenuPosition}
+  onReply={() => (repliedMessage = selectedMessage)}
+  canEdit={$user?.id === selectedMessage?.userId}
+  onEdit={() => {
+    editedMessage = selectedMessage;
+    messageText = editedMessage.message;
+  }}
+  canDelete={$user?.id === selectedMessage?.userId}
+  onDelete={() => deleteMessage(selectedMessage.id)}
+  onReaction={(reaction) => sendReaction(selectedMessage.id, reaction)}
+/>

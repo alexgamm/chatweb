@@ -1,25 +1,39 @@
+import user from "../stores/user";
+import USER_COLORS from "../utils/user-colors";
+
 const useMessageColor = () => {
-  const MESSAGES_COLORS = [
-    "bg-primary",
-    "bg-indigo-700",
-    "bg-purple-800",
-    "bg-indigo-800",
-  ];
+  const userColors = {};
+  user.subscribe((user) => {
+    if (user) {
+      userColors[user.id] = USER_COLORS[user.color];
+    }
+  });
+
   const randomMessageColor = () => {
-    return MESSAGES_COLORS[Math.floor(Math.random() * MESSAGES_COLORS.length)];
+    const colors = Object.values(USER_COLORS);
+    return colors[Math.floor(Math.random() * colors.length)];
   };
 
   const rainbowMessageColor = () => {
     return "bg-gradient-to-r from-orange-500 from-1% via-amber-400-accent via-50% to-purple-700 to-100%";
   };
+  const isGay = (message) =>
+    message.message.toLowerCase().includes("гей") ||
+    message.message.toLowerCase().includes("gay");
+  const color = (message) => {
+    if (isGay(message)) {
+      return rainbowMessageColor();
+    } else {
+      if (!userColors[message.userId]) {
+        userColors[message.userId] = randomMessageColor();
+      }
+      return userColors[message.userId];
+    }
+  };
   const addColor = (message) => {
     return {
       ...message,
-      color:
-        message.message.indexOf("гей") !== -1 ||
-        message.message.indexOf("gay") !== -1
-          ? rainbowMessageColor()
-          : randomMessageColor(),
+      color: color(message),
     };
   };
   return addColor;

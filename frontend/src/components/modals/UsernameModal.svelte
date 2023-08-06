@@ -1,7 +1,7 @@
 <script>
   import useApi from "../../hooks/api";
   import usernameModal from "../../stores/username-modal";
-  import wait from "../utils/wait";
+  import wait from "../../utils/wait";
   const {
     authorized: { patch },
   } = useApi();

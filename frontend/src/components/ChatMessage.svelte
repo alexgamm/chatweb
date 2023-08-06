@@ -1,6 +1,9 @@
 <script>
+  import ChatMessageReactions from "./ChatMessageReactions.svelte";
+
   export let message;
   export let onContextMenu;
+  export let onReaction;
 </script>
 
 <div class="chat chat-start" bind:clientHeight={message.elemHeight}>
@@ -25,5 +28,6 @@
       </div>
     {/if}
     {message.message}
+    <ChatMessageReactions reactions={message.reactions ?? []} {onReaction} />
   </div>
 </div>

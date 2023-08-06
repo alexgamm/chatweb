@@ -14,7 +14,7 @@ const useApi = () => {
     const response = await fetch(url, fetchParams);
     const responseBody = await response.json();
     if (!response.ok) {
-      if(response.status === 401){
+      if (response.status === 401) {
         navigate("/login");
       }
       throw responseBody.message;
@@ -30,6 +30,9 @@ const useApi = () => {
         request(url, { method: "POST", body, useToken: true }),
       patch: (url, body) =>
         request(url, { method: "PATCH", body, useToken: true }),
+      put: (url, body) => request(url, { method: "PUT", body, useToken: true }),
+      del: (url) =>
+        request(url, { method: "DELETE", body: null, useToken: true }),
     },
   };
 };

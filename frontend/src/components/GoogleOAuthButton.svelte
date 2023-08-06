@@ -30,6 +30,7 @@
 <button
   class="btn bg-white bg-opacity-10 border-transparent hover:bg-opacity-5
   hover:bg-white hover:border-transparent mb-2 w-full"
+  type="button"
   on:click={openOAuthWindow}
 >
   <svg

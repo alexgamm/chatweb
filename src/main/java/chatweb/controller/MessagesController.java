@@ -90,7 +90,6 @@ public class MessagesController implements ApiControllerHelper {
     }
 
     @PatchMapping("{messageId}")
-    @Transactional
     public MessageDto editMessage(@PathVariable String messageId, @RequestBody MessageDto body, @RequestAttribute User user) throws ApiErrorException {
         if (body.getMessage() == null) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "message text is required"));
