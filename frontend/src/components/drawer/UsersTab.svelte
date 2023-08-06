@@ -46,18 +46,23 @@
       );
     });
     addEventHandler("USER_TYPING", (event) => {
+      const user = $users.find(({ id }) => id === event.userId);
+      if (!user) {
+        return;
+      }
+      if (user.typingTimeout) {
+        clearTimeout(user.typingTimeout);
+      }
+      const typingTimeout = setTimeout(() => {
+        updateUser(
+          (user) => user.id === event.userId,
+          () => ({ ...user, typing: false })
+        );
+      }, 3000);
       updateUser(
         (user) => user.id === event.userId,
-        (user) => ({ ...user, typing: true })
+        (user) => ({ ...user, typing: true, typingTimeout })
       );
-      setTimeout(() => {
-        typingDebounce(() => {
-          updateUser(
-            (user) => user.id === event.userId,
-            (user) => ({ ...user, typing: false })
-          );
-        });
-      }, 3000);
     });
   });
 </script>
@@ -76,10 +81,10 @@
           }`}
           href="#"
         >
-          <strong class={user.online ? "animate-pulse" : ""}>
+          <strong class={user.typing ? "animate-pulse" : ""}>
             {user.username}
           </strong>
-          <div class="flex justify-between items-center gap-4">
+          <div class="flex justify-between items-center gap-4 h-4">
             {#if user.typing}
               <span class="loading loading-dots loading-md opacity-60" />
             {/if}
