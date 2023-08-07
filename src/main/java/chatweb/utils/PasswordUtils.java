@@ -50,6 +50,6 @@ public class PasswordUtils {
     }
 
     public static boolean validate(String password) {
-        return password != null && !password.isBlank() && password.length() > 6;
+        return password != null && !password.isBlank() && password.length() >= 6;
     }
 }
