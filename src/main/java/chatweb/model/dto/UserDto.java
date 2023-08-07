@@ -1,13 +1,17 @@
 package chatweb.model.dto;
 
+import chatweb.model.user.UserColor;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 public class UserDto {
-    private final int id;
-    private final String username;
-    private final String email;
-    private final boolean hasPassword;
+    private int id;
+    private String username;
+    private String email;
+    private boolean hasPassword;
+    private UserColor color;
 }

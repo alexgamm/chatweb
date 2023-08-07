@@ -6,6 +6,7 @@ public enum EventType {
     USER_ONLINE,
     USER_TYPING,
     CHANGE_USERNAME,
+    CHANGE_COLOR,
     REPLY,
     EDITED_MESSAGE,
     REACTION,

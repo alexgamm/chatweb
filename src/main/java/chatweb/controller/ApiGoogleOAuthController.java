@@ -11,6 +11,7 @@ import chatweb.repository.UserRepository;
 import chatweb.service.GoogleOAuthService;
 import chatweb.service.JwtService;
 import chatweb.service.VerificationService;
+import chatweb.utils.UserColorUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -45,7 +46,14 @@ public class ApiGoogleOAuthController implements ApiControllerHelper {
         User user = userRepository.findUserByEmail(userInfo.getEmail().toLowerCase());
         if (user == null) {
             String username = userInfo.getEmail().split("@")[0];
-            user = new User(null, username, userInfo.getEmail().toLowerCase(), null, new Date());
+            user = new User(
+                    null,
+                    username,
+                    userInfo.getEmail().toLowerCase(),
+                    null,
+                    new Date(),
+                    UserColorUtils.getRandomColor()
+            );
             user = userRepository.save(user);
         }
         Verification verification = verificationService.findVerification(user.getId());

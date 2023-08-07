@@ -1,6 +1,7 @@
 package chatweb.repository;
 
 import chatweb.entity.User;
+import chatweb.model.user.UserColor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -28,4 +29,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Modifying
     @Query("update User u set u.username = :newUsername where u.id =:userId")
     void updateUsername(int userId, String newUsername);
+
+    @Modifying
+    @Query("update User u set u.color = :color where u.id =:userId")
+    void updateColor(int userId, UserColor color);
 }

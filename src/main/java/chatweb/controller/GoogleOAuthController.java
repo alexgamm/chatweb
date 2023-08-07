@@ -7,6 +7,7 @@ import chatweb.repository.SessionRepository;
 import chatweb.repository.UserRepository;
 import chatweb.service.GoogleOAuthService;
 import chatweb.service.VerificationService;
+import chatweb.utils.UserColorUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,7 +43,7 @@ public class GoogleOAuthController extends AuthController {
         User user = userRepository.findUserByEmail(userInfo.getEmail().toLowerCase());
         if (user == null) {
             String username = userInfo.getEmail().split("@")[0];
-            user = new User(null, username, userInfo.getEmail().toLowerCase(), null, new Date());
+            user = new User(null, username, userInfo.getEmail().toLowerCase(), null, new Date(), UserColorUtils.getRandomColor());
             user = userRepository.save(user);
         }
         Verification verification = verificationService.findVerification(user.getId());

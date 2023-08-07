@@ -5,6 +5,7 @@ import chatweb.repository.UserRepository;
 import chatweb.service.GoogleOAuthService;
 import chatweb.service.VerificationService;
 import chatweb.utils.PasswordUtils;
+import chatweb.utils.UserColorUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.stereotype.Controller;
@@ -64,7 +65,7 @@ public class RegistrationController {
             model.addAttribute("username", username);
             return "registration";
         }
-        user = new User(null, username.toLowerCase(), email.toLowerCase(), PasswordUtils.hash(password), new Date());
+        user = new User(null, username.toLowerCase(), email.toLowerCase(), PasswordUtils.hash(password), new Date(), UserColorUtils.getRandomColor());
         user = userRepository.save(user);
 
         verificationService.createAndSendVerification(user);

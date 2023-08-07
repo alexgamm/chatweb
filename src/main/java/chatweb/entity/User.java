@@ -1,5 +1,6 @@
 package chatweb.entity;
 
+import chatweb.model.user.UserColor;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,6 +27,9 @@ public class User {
     private String password;
     @Column(name = "last_activity_at")
     private Date lastActivityAt;
+    @Column(name = "color")
+    @Enumerated(EnumType.STRING)
+    private UserColor color;
 }
 
 

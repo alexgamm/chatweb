@@ -8,6 +8,7 @@ import chatweb.model.api.ChangePasswordRequest;
 import chatweb.model.api.EmptyResponse;
 import chatweb.model.api.UserListResponse;
 import chatweb.model.dto.UserDto;
+import chatweb.model.event.ChangeUserColorEvent;
 import chatweb.model.event.ChangeUsernameEvent;
 import chatweb.model.event.UserTypingEvent;
 import chatweb.repository.UserRepository;
@@ -54,7 +55,7 @@ public class UsersController implements ApiControllerHelper {
 
     @PutMapping("me/username")
     @Transactional
-    public UserDto changeUsername(@RequestBody User input, @RequestAttribute User user) throws ApiErrorException {
+    public UserDto changeUsername(@RequestBody UserDto input, @RequestAttribute User user) throws ApiErrorException {
         if (input.getUsername().equals("")) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "invalid username"));
         }
@@ -81,5 +82,16 @@ public class UsersController implements ApiControllerHelper {
         }
         userRepository.updatePassword(PasswordUtils.hash(body.getNewPassword()), user.getId());
         return ResponseEntity.ok(new EmptyResponse());
+    }
+
+    @PutMapping("me/color")
+    @Transactional
+    public UserDto changeColor(@RequestBody UserDto body, @RequestAttribute User user) throws ApiErrorException {
+        if (body.getColor() == null) {
+            throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "color is required"));
+        }
+        userRepository.updateColor(user.getId(), body.getColor());
+        eventsService.addEvent(new ChangeUserColorEvent(user.getId(), user.getColor()));
+        return UserMapper.userToUserDto(userRepository.findUserById(user.getId()));
     }
 }

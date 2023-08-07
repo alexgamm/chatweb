@@ -38,7 +38,7 @@ public class EventsService {
     }
 
     public void addEvent(Function<Integer, Event> eventSupplier) {
-        events.add(eventSupplier.apply(null));
+        //  events.add(eventSupplier.apply(null));
         Set<LongPollFuture> currentLongPollFutures = new HashSet<>(longPollFutures);
         longPollFutures.clear();
         currentLongPollFutures.stream().forEach(future -> future.complete(getEvents(future.getTs())));
