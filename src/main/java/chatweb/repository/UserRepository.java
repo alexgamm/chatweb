@@ -19,6 +19,10 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query("update User u set u.lastActivityAt = CURRENT_TIMESTAMP where u.id = :userId")
     void updateLastActivityAt(int userId);
 
+    @Modifying
+    @Query("update User u set u.password = :password where u.id = :userId")
+    void updatePassword(String password, int userId);
+
     boolean existsByEmail(String email);
 
     @Modifying

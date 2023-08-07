@@ -4,6 +4,7 @@ import chatweb.entity.User;
 import chatweb.exception.ApiErrorException;
 import chatweb.mapper.UserMapper;
 import chatweb.model.api.ApiError;
+import chatweb.model.api.ChangePasswordRequest;
 import chatweb.model.api.EmptyResponse;
 import chatweb.model.api.UserListResponse;
 import chatweb.model.dto.UserDto;
@@ -11,6 +12,7 @@ import chatweb.model.event.ChangeUsernameEvent;
 import chatweb.model.event.UserTypingEvent;
 import chatweb.repository.UserRepository;
 import chatweb.service.EventsService;
+import chatweb.utils.PasswordUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -44,7 +46,7 @@ public class UsersController implements ApiControllerHelper {
         return UserMapper.userToUserDto(user);
     }
 
-    @PatchMapping
+    @PutMapping("me/username")
     @Transactional
     public UserDto changeUsername(@RequestBody User input, @RequestAttribute User user) throws ApiErrorException {
         if (input.getUsername().equals("")) {
@@ -62,6 +64,22 @@ public class UsersController implements ApiControllerHelper {
     @PutMapping("me/typing")
     public ResponseEntity<EmptyResponse> getTyping(@RequestAttribute User user) {
         eventsService.addEvent(new UserTypingEvent(user.getId()));
+        return ResponseEntity.ok(new EmptyResponse());
+    }
+
+    @PutMapping("me/password")
+    @Transactional
+    public ResponseEntity<EmptyResponse> changePassword(
+            @RequestBody ChangePasswordRequest body,
+            @RequestAttribute User user
+    ) throws ApiErrorException {
+        if (body.getNewPassword() == null || body.getNewPassword().isBlank()) {
+            throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "invalid input"));
+        }
+        if (!PasswordUtils.check(body.getOldPassword(), user.getPassword())) {
+            throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "invalid password"));
+        }
+        userRepository.updatePassword(PasswordUtils.hash(body.getNewPassword()), user.getId());
         return ResponseEntity.ok(new EmptyResponse());
     }
 }

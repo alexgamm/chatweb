@@ -24,13 +24,11 @@ public class MessageDto {
     private Set<Reaction> reactions;
 
     @Getter
+    @RequiredArgsConstructor
     public static class Reaction {
         private final String reaction;
         private final int count;
+        private final boolean hasOwn;
 
-        public Reaction(String reaction, int count) {
-            this.reaction = reaction;
-            this.count = count;
-        }
     }
 }

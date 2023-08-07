@@ -1,6 +1,5 @@
 package chatweb.model.event;
 
-import chatweb.model.dto.UserDto;
 import lombok.Getter;
 
 import java.util.Date;

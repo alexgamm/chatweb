@@ -9,4 +9,5 @@ public class UserDto {
     private final int id;
     private final String username;
     private final String email;
+    private final boolean hasPassword;
 }

@@ -37,14 +37,15 @@ public class MessagesController implements ApiControllerHelper {
     @GetMapping
     public MessagesResponse getMessages(
             @RequestParam(required = false, defaultValue = "20") int count,
-            @RequestParam(required = false) Long from
+            @RequestParam(required = false) Long from,
+            @RequestAttribute User user
     ) {
         List<Message> messages = from == null
                 ? messageRepository.findByOrderBySendDateDesc(Pageable.ofSize(count))
                 : messageRepository.findBySendDateBeforeOrderBySendDateDesc(new Date(from), Pageable.ofSize(count));
         return new MessagesResponse(
                 messages.stream()
-                        .map(message -> MessageMapper.messageToMessageDto(message)) // TODO Use dto to prevent infinite relations
+                        .map(message -> MessageMapper.messageToMessageDto(message, user))
                         .toList()
         );
     }
@@ -52,7 +53,10 @@ public class MessagesController implements ApiControllerHelper {
     //@RequestBody SendMessageRequest body - позволяет спарсить тело зепроса в нашу модель
     //TODO for v.dybysov remain what RespEntity is
     @PostMapping
-    public MessageIdResponse sendMessage(@RequestBody SendMessageRequest body, HttpServletRequest request) throws ApiErrorException {
+    public MessageIdResponse sendMessage(
+            @RequestBody SendMessageRequest body,
+            @RequestAttribute User user
+    ) throws ApiErrorException {
         if (body.getMessage() == null || body.getMessage().isBlank()) {
             // ResponseEntity<String> = в парамтипе тело ответа, later =  Response.badRequest("missing message")
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "missing message"));
@@ -60,7 +64,6 @@ public class MessagesController implements ApiControllerHelper {
         Message repliedMessage = Optional.ofNullable(body.getRepliedMessageId())
                 .flatMap(repliedMessageId -> messageRepository.findById(repliedMessageId))
                 .orElse(null);
-        User user = (User) request.getAttribute("user");
         Message message = messageRepository.save(new Message(
                 randomUUID().toString(),
                 body.getMessage(),
@@ -69,14 +72,17 @@ public class MessagesController implements ApiControllerHelper {
                 repliedMessage,
                 new Date()
         ));
-        MessageDto messageDto = MessageMapper.messageToMessageDto(message);
+        MessageDto messageDto = MessageMapper.messageToMessageDto(message, user);
         eventsService.addEvent(new NewMessageEvent(messageDto));
         return new MessageIdResponse(message.getId());
     }
 
     @DeleteMapping("{messageId}")
     @Transactional
-    public MessageIdResponse deleteMessage(@PathVariable String messageId, @RequestAttribute User user) throws ApiErrorException {
+    public MessageIdResponse deleteMessage(
+            @PathVariable String messageId,
+            @RequestAttribute User user
+    ) throws ApiErrorException {
         Message message = messageRepository.findById(messageId).orElse(null);
         if (message == null) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "no message for delete"));
@@ -90,7 +96,11 @@ public class MessagesController implements ApiControllerHelper {
     }
 
     @PatchMapping("{messageId}")
-    public MessageDto editMessage(@PathVariable String messageId, @RequestBody MessageDto body, @RequestAttribute User user) throws ApiErrorException {
+    public MessageDto editMessage(
+            @PathVariable String messageId,
+            @RequestBody MessageDto body,
+            @RequestAttribute User user
+    ) throws ApiErrorException {
         if (body.getMessage() == null) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "message text is required"));
         }
@@ -103,7 +113,7 @@ public class MessagesController implements ApiControllerHelper {
         }
         message.setMessage(body.getMessage());
         messageRepository.save(message);
-        MessageDto messageDto = MessageMapper.messageToMessageDto(message);
+        MessageDto messageDto = MessageMapper.messageToMessageDto(message, user);
         eventsService.addEvent(new EditedMessageEvent(messageDto));
         return messageDto;
     }
@@ -145,7 +155,7 @@ public class MessagesController implements ApiControllerHelper {
             message.getReactions().remove(existingReaction);
         }
         messageRepository.save(message);
-        MessageDto messageDto = MessageMapper.messageToMessageDto(message);
+        MessageDto messageDto = MessageMapper.messageToMessageDto(message, user);
         eventsService.addEvent(new ReactionEvent(messageDto.getId(), messageDto.getReactions()));
         return messageDto;
     }
