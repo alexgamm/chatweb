@@ -92,7 +92,7 @@ public class UsersController implements ApiControllerHelper {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "color is required"));
         }
         userRepository.updateColor(user.getId(), body.getColor());
-        eventsService.addEvent(new ChangeUserColorEvent(user.getId(), user.getColor()));
+        eventsService.addEvent(new ChangeUserColorEvent(user.getId(), body.getColor()));
         return UserMapper.userToUserDto(userRepository.findUserById(user.getId()));
     }
 }
