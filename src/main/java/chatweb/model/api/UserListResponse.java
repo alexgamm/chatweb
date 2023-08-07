@@ -1,5 +1,6 @@
 package chatweb.model.api;
 
+import chatweb.model.user.UserColor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -19,5 +20,6 @@ public class UserListResponse {
         private final String username;
         private final Date lastActivityAt;
         private final boolean online;
+        private final UserColor color;
     }
 }

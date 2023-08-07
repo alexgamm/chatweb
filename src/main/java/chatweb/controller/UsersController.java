@@ -36,7 +36,8 @@ public class UsersController implements ApiControllerHelper {
                         user.getId(),
                         user.getUsername(),
                         user.getLastActivityAt(),
-                        eventsService.hasEmitters(user.getId())
+                        eventsService.hasEmitters(user.getId()),
+                        user.getColor()
                 ))
                 .toList();
         return new UserListResponse(list);
