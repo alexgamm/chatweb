@@ -1,5 +1,9 @@
 package chatweb.utils;
 
+import chatweb.exception.ApiErrorException;
+import chatweb.model.api.ApiError;
+import org.springframework.http.HttpStatus;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -43,5 +47,9 @@ public class PasswordUtils {
         String saltAndPasswordHex = split[1];
         byte[] saltAndPassword = sha512(HEX_FORMAT.parseHex(saltHex), password);
         return HEX_FORMAT.formatHex(saltAndPassword).equals(saltAndPasswordHex);
+    }
+
+    public static boolean validate(String password) {
+        return password != null && !password.isBlank() && password.length() > 6;
     }
 }

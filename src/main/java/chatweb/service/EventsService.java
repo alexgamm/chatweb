@@ -12,6 +12,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,7 +34,11 @@ public class EventsService {
     }
 
     public void addEvent(Event event) {
-        events.add(event);
+        addEvent((userId) -> event);
+    }
+
+    public void addEvent(Function<Integer, Event> eventSupplier) {
+        events.add(eventSupplier.apply(null));
         Set<LongPollFuture> currentLongPollFutures = new HashSet<>(longPollFutures);
         longPollFutures.clear();
         currentLongPollFutures.stream().forEach(future -> future.complete(getEvents(future.getTs())));
@@ -42,6 +47,7 @@ public class EventsService {
             if (userEmitters.isEmpty()) {
                 return;
             }
+            Event event = eventSupplier.apply(userId);
             userEmitters.forEach(emitter -> {
                 SseEmitter.SseEventBuilder builder = SseEmitter.event()
                         .data(event)

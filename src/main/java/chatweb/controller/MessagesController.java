@@ -155,9 +155,11 @@ public class MessagesController implements ApiControllerHelper {
             message.getReactions().remove(existingReaction);
         }
         messageRepository.save(message);
-        MessageDto messageDto = MessageMapper.messageToMessageDto(message, user);
-        eventsService.addEvent(new ReactionEvent(messageDto.getId(), messageDto.getReactions()));
-        return messageDto;
+        eventsService.addEvent((userId) -> new ReactionEvent(
+                message.getId(),
+                MessageMapper.groupReactions(message.getReactions(), userId)
+        ));
+        return MessageMapper.messageToMessageDto(message, user);
     }
 }
 

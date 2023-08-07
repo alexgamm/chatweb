@@ -21,18 +21,18 @@ public class MessageMapper {
                         : messageToMessageDto(message.getRepliedMessage(), null),
                 message.getSendDate(),
                 // we don't need reactions if user == null (for replied message mapping recursion)
-                user == null ? null : groupReactions(message.getReactions(), user)
+                user == null ? null : groupReactions(message.getReactions(), user.getId())
         );
     }
 
-    private static Set<MessageDto.Reaction> groupReactions(Set<Reaction> reactions, User user) {
+    public static Set<MessageDto.Reaction> groupReactions(Set<Reaction> reactions, int userId) {
         return reactions.stream()
                 .collect(Collectors.groupingBy(Reaction::getReaction))
                 .entrySet().stream()
                 .map(entry -> new MessageDto.Reaction(
                         entry.getKey(),
                         entry.getValue().size(),
-                        entry.getValue().stream().anyMatch(reaction -> reaction.getUserId() == user.getId())
+                        entry.getValue().stream().anyMatch(reaction -> reaction.getUserId() == userId)
                 ))
                 .collect(Collectors.toSet());
     }

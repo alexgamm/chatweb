@@ -42,7 +42,7 @@ public class ApiRegistrationController implements ApiControllerHelper {
         if (userRepository.existsByEmail(email)) {
             throw new ApiErrorException(new ApiError(HttpStatus.CONFLICT, "email is already taken"));
         }
-        if (password == null || password.length() < 6) {
+        if (!PasswordUtils.validate(password)) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "password is missing or short"));
         }
         User user = userRepository.findUserByUsername(username);
