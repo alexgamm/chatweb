@@ -8,9 +8,12 @@
   import EditIcon from "./icons/EditIcon.svelte";
   import ReplyIcon from "./icons/ReplyIcon.svelte";
   import useDebounce from "../utils/debounce";
+  import { reactionsOrder, toggleReaction } from "../utils/reactions";
 
   const typingDebounce = useDebounce(300);
 
+  let messages = [];
+  let submitting = false;
   let contextMenuPosition = { x: 0, y: 0 };
   let showContextMenu = false;
 
@@ -38,9 +41,10 @@
   let editedMessage;
   let selectedMessage;
   const submit = async () => {
-    if (!messageText || editedMessage?.message === messageText) {
+    if (submitting || !messageText || editedMessage?.message === messageText) {
       return;
     }
+    submitting = true;
     try {
       if (editedMessage) {
         await patch(`/api/messages/${editedMessage.id}`, {
@@ -55,6 +59,8 @@
     } catch (error) {
       console.error("could not send/edit message", error); // TODO handle properly
       return;
+    } finally {
+      submitting = false;
     }
     messageText = "";
     repliedMessage = null;
@@ -78,6 +84,16 @@
 
   const sendReaction = async (messageId, reaction) => {
     try {
+      messages = messages.map((msg) =>
+        msg.id === messageId
+          ? {
+              ...msg,
+              reactions: toggleReaction(msg.reactions, reaction).sort(
+                reactionsOrder
+              ),
+            }
+          : msg
+      );
       await put(`/api/messages/${messageId}/reactions`, { reaction });
     } catch (error) {
       console.error("could not send reaction", error);
@@ -86,6 +102,7 @@
 </script>
 
 <ChatMessageList
+  bind:messages
   onContextMenu={({ x, y, message }) => {
     showContextMenu = true;
     contextMenuPosition = { x, y };
@@ -124,6 +141,7 @@
     autocomplete="off"
     bind:value={messageText}
     on:input={onInput}
+    disabled={submitting}
   />
 </form>
 <MessageContextMenu

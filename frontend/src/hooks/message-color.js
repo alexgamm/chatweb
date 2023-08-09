@@ -1,19 +1,6 @@
-import user from "../stores/user";
 import USER_COLORS from "../utils/user-colors";
 
-const useMessageColor = () => {
-  const userColors = {};
-  user.subscribe((user) => {
-    if (user) {
-      userColors[user.id] = USER_COLORS[user.color];
-    }
-  });
-
-  const randomMessageColor = () => {
-    const colors = Object.values(USER_COLORS);
-    return colors[Math.floor(Math.random() * colors.length)];
-  };
-
+const useMessageColor = (userColors) => {
   const rainbowMessageColor = () => {
     return "bg-gradient-to-r from-orange-500 from-1% via-amber-400-accent via-50% to-purple-700 to-100%";
   };
@@ -24,10 +11,7 @@ const useMessageColor = () => {
     if (isGay(message)) {
       return rainbowMessageColor();
     } else {
-      if (!userColors[message.userId]) {
-        userColors[message.userId] = randomMessageColor();
-      }
-      return userColors[message.userId];
+      return USER_COLORS[userColors[message.userId]];
     }
   };
   const addColor = (message) => {

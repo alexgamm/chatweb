@@ -142,24 +142,21 @@ public class MessagesController implements ApiControllerHelper {
                         && r.getUserId() == user.getId())
                 .findFirst().orElse(null);
         if (existingReaction == null) {
-            Reaction reaction = new Reaction(
-                    UUID.randomUUID().toString(),
+            message.getReactions().add(new Reaction(
+                    null,
                     message,
                     user.getId(),
                     body.getReaction()
-            );
-            reactionRepository.save(reaction);
-            message.getReactions().add(reaction);
+            ));
         } else {
-            reactionRepository.delete(existingReaction);
             message.getReactions().remove(existingReaction);
         }
-        messageRepository.save(message);
+        Message saved = messageRepository.save(message);
         eventsService.addEvent((userId) -> new ReactionEvent(
-                message.getId(),
-                MessageMapper.groupReactions(message.getReactions(), userId)
+                saved.getId(),
+                MessageMapper.groupReactions(saved.getReactions(), userId)
         ));
-        return MessageMapper.messageToMessageDto(message, user);
+        return MessageMapper.messageToMessageDto(saved, user);
     }
 }
 

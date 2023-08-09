@@ -1,48 +1,55 @@
 <script>
   import { onMount } from "svelte";
+  import { fade } from "svelte/transition";
   import { addEventHandler } from "../../contexts/events";
   import useApi from "../../hooks/api";
-  import { fade } from "svelte/transition";
-  import useHeavyList from "../../hooks/heavy-list";
-  import useDebounce from "../../utils/debounce";
+  import USER_COLORS from "../../utils/user-colors";
+  import users from "../../stores/users";
+  import useHeavyPush from "../../hooks/heavy-list";
   const {
     authorized: { get },
   } = useApi();
   let loading = false;
-  const [users, setUsers, updateUser] = useHeavyList();
-  const typingDebounce = useDebounce();
+  const heavyPush = useHeavyPush();
 
   const loadUsers = async () => {
     loading = true;
     try {
-      const { users } = await get("/api/users");
-      setUsers(users);
+      const { users: list } = await get("/api/users");
+      $users = list;
+      sortUsers();
     } catch (error) {
       console.error("could not get users", error); // TODO handle properly
     } finally {
       loading = false;
     }
   };
+  const sortUsers = () => {
+    $users = $users.sort((a, b) => +b.online - +a.online);
+  };
   onMount(() => {
     loadUsers();
 
     addEventHandler("USER_ONLINE", (event) => {
       if ($users.find((user) => user.id === event.userId)) {
-        updateUser(
-          (user) => user.id === event.userId,
-          (user) => ({ ...user, online: event.online })
+        $users = $users.map((user) =>
+          user.id === event.userId ? { ...user, online: event.online } : user
         );
+        sortUsers();
       } else {
         loadUsers();
       }
     });
     addEventHandler("CHANGE_USERNAME", (event) => {
-      setUsers(
-        $users.map((user) =>
-          user.id === event.userId
-            ? { ...user, username: event.newUsername }
-            : user
-        )
+      $users = $users.map((user) =>
+        user.id === event.userId
+          ? { ...user, username: event.newUsername }
+          : user
+      );
+    });
+    addEventHandler("CHANGE_COLOR", (event) => {
+      $users = $users.map((user) =>
+        user.id === event.userId ? { ...user, color: event.color } : user
       );
     });
     addEventHandler("USER_TYPING", (event) => {
@@ -54,14 +61,14 @@
         clearTimeout(user.typingTimeout);
       }
       const typingTimeout = setTimeout(() => {
-        updateUser(
-          (user) => user.id === event.userId,
-          () => ({ ...user, typing: false })
+        $users = $users.map((user) =>
+          user.id === event.userId ? { ...user, typing: false } : user
         );
       }, 3000);
-      updateUser(
-        (user) => user.id === event.userId,
-        (user) => ({ ...user, typing: true, typingTimeout })
+      $users = $users.map((user) =>
+        user.id === event.userId
+          ? { ...user, typing: true, typingTimeout }
+          : user
       );
     });
   });
@@ -72,28 +79,33 @@
     <span class="loading loading-spinner text-primary" />
   </div>
 {:else}
-  <ul class="menu p-4 w-full text-base-content" data-tab="user-list">
+  <ul class="p-4 w-full text-base-content overflow-y-auto">
     {#each $users as user}
       <li class="mb-2" in:fade>
         <a
-          class={`flex justify-between ${
-            user.online ? "bg-primary bg-opacity-10" : "bg-base-100"
+          class={`flex justify-between items-center py-2 px-4 rounded-lg text-sm ${
+            user.online
+              ? `${USER_COLORS[user.color]} bg-opacity-10`
+              : "bg-base-100"
           }`}
           href="#"
         >
-          <strong class={user.typing ? "animate-pulse" : ""}>
-            {user.username}
-          </strong>
-          <div class="flex justify-between items-center gap-4 h-4">
+          <div class="flex justify-between items-center gap-2 h-4">
+            <strong class={user.typing ? "animate-pulse" : ""}>
+              {user.username}
+            </strong>
             {#if user.typing}
-              <span class="loading loading-dots loading-md opacity-60" />
+              <span
+                class="loading loading-dots loading-md text-gray-300 animate-pulse opacity-75"
+              />
             {/if}
-            <i
-              class={`w-3 h-3 rounded-full ${
-                user.online ? "bg-primary" : "bg-gray-400"
-              }`}
-            />
           </div>
+
+          <i
+            class={`w-3 h-3 rounded-full ${
+              user.online ? USER_COLORS[user.color] : "bg-gray-400"
+            }`}
+          />
         </a>
       </li>
     {/each}

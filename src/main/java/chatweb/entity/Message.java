@@ -29,7 +29,7 @@ public class Message {
     private User user;
 
     @Setter
-    @OneToMany(mappedBy = "message")
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Reaction> reactions;
 
     @Setter

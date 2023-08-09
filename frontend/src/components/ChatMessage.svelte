@@ -7,7 +7,12 @@
 </script>
 
 <div class="chat chat-start" bind:clientHeight={message.elemHeight}>
-  <div class="chat-header font-bold mb-1 break-all">{message.username}</div>
+  <div class="chat-header font-bold mb-1 break-all">
+    {message.username}
+    <time class="text-xs font-normal opacity-50">
+      {message.sendDateFormatted}
+    </time>
+  </div>
   <div
     class={`chat-bubble w-auto max-w-4xl text-gray-200 break-all ${message.color}`}
     on:contextmenu|preventDefault={onContextMenu}

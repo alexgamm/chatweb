@@ -1,7 +1,7 @@
 <script>
+  import REACTIONS from "../utils/reactions";
   import EditIcon from "./icons/EditIcon.svelte";
 
-  const REACTIONS = ["❤️", "🚑", "🤔", "😂", "🤬"];
   export let show;
   export let canEdit;
   export let canDelete;

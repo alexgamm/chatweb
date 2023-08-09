@@ -14,7 +14,7 @@
   let activeTab = tabs[0];
 </script>
 
-<div class="h-full bg-base-200 pt-10 w-full lg:pt-0 lg:w-80">
+<div class="flex flex-col h-full bg-base-200 pt-10 w-full lg:pt-0 lg:w-80">
   <div class="tabs tabs-boxed p-4 w-full flex">
     {#each tabs as tab}
       <a

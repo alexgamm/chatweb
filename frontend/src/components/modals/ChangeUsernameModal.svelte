@@ -1,22 +1,23 @@
 <script>
   import useApi from "../../hooks/api";
-  import usernameModal from "../../stores/username-modal";
+  import changeUsernameModal from "../../stores/change-username-modal";
+  import user, { getUser } from "../../stores/user";
   import wait from "../../utils/wait";
+  import Modal from "./Modal.svelte";
   const {
-    authorized: { patch },
+    authorized: { put },
   } = useApi();
   let state = "idle";
   let newUsername = "";
   let errorMessage = "";
   $: canSubmit = !!newUsername && state === "idle";
-
-  const changeUsername = async () => {
+  const submit = async () => {
     if (!canSubmit) {
       return;
     }
     state = "pending";
     try {
-      await patch("/api/users", {
+      await put("/api/users/me/username", {
         username: newUsername,
       });
     } catch (error) {
@@ -26,17 +27,17 @@
     }
     state = "success";
     await wait(3000);
-    $usernameModal.close();
+    $changeUsernameModal.close();
     await wait(300);
     state = "idle";
     newUsername = "";
+    getUser();
   };
 </script>
 
-<dialog
-  class="modal"
-  bind:this={$usernameModal}
-  on:close={() => {
+<Modal
+  modal={changeUsernameModal}
+  onClose={() => {
     errorMessage = "";
     newUsername = "";
   }}
@@ -47,7 +48,7 @@
       class="absolute top-3 right-2.5 text-gray-400 bg-transparent
                     rounded-lg text-sm p-1.5 ml-auto inline-flex items-center
                     hover:bg-gray-800 hover:text-white"
-      on:click={() => $usernameModal.close()}
+      on:click={() => $changeUsernameModal.close()}
     >
       <svg
         aria-hidden="true"
@@ -93,13 +94,13 @@
         <h3 class="mb-5 text-lg font-normal text-gray-400">
           Make up a new name
         </h3>
-        <form on:submit|preventDefault={changeUsername}>
+        <form on:submit|preventDefault={submit}>
           <input
             class="form-control block h-10 mb-4 w-full input input-bordered"
             type="text"
-            name="username"
             on:input={() => (errorMessage = "")}
             bind:value={newUsername}
+            placeholder={$user?.username ?? ""}
           />
           <div class="form-control">
             <span class="text-red-500 mb-3">{errorMessage}</span>
@@ -122,4 +123,4 @@
   <form method="dialog" class="modal-backdrop">
     <button />
   </form>
-</dialog>
+</Modal>

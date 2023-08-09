@@ -1,23 +1,26 @@
 <script>
   import { onMount, tick } from "svelte";
-  import ChatMessage from "./ChatMessage.svelte";
-  import useMessageColor from "../hooks/message-color";
   import { addEventHandler } from "../contexts/events";
   import useApi from "../hooks/api";
-  import user from "../stores/user";
+  import useMessageColor from "../hooks/message-color";
+  import { userColors } from "../stores/users";
+  import { reactionsOrder } from "../utils/reactions";
+  import ChatMessage from "./ChatMessage.svelte";
+  import setSendDate from "../utils/message-send-date";
 
   export let onContextMenu;
   export let onReaction;
+  export let messages;
 
   const {
     authorized: { get },
   } = useApi();
-  const addColor = useMessageColor();
-  let messages = [];
   let messagesContainerWrapper;
   let loading = false;
 
-  $: if ($user?.color) {
+  $: addColor = useMessageColor($userColors);
+
+  $: if (addColor) {
     messages = messages.map(addColor);
   }
 
@@ -44,7 +47,16 @@
     } finally {
       loading = false;
     }
-    messages = [...messages, ...responseBody.messages.map(addColor)];
+    messages = [
+      ...messages,
+      ...responseBody.messages
+        .map(addColor)
+        .map(setSendDate)
+        .map((msg) => {
+          msg.reactions = msg.reactions?.sort(reactionsOrder);
+          return msg;
+        }),
+    ];
     sortMessages();
     //map сам вызывает addColor
     await tick();
@@ -60,14 +72,13 @@
       behavior: "smooth",
     });
   };
-  onMount(async () => {
-    await loadMessages(20);
-    scrollBottom();
+  onMount(() => {
+    loadMessages(20).then(scrollBottom);
     addEventHandler("NEW_MESSAGE", (event) => {
       if (messages.find((message) => message.id === event.message.id)) {
         return;
       }
-      messages = [...messages, addColor(event.message)];
+      messages = [...messages, setSendDate(addColor(event.message))];
       sortMessages();
       scrollBottom();
     });
@@ -93,11 +104,15 @@
         message.id === event.messageId
           ? {
               ...message,
-              reactions: event.reactions.sort((a, b) => b.count - a.count),
+              reactions: event.reactions.sort(reactionsOrder),
             }
           : message
       );
     });
+    const setSendDateInterval = setInterval(() => {
+      messages = messages.map(setSendDate);
+    }, 15_000);
+    return () => clearInterval(setSendDateInterval);
   });
 </script>
 
