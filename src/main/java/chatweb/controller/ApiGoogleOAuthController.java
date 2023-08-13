@@ -4,7 +4,7 @@ import chatweb.entity.User;
 import chatweb.entity.Verification;
 import chatweb.exception.ApiErrorException;
 import chatweb.model.api.ApiError;
-import chatweb.model.api.GoogleOAuthTokenRequest;
+import chatweb.model.google.GoogleOAuthTokenRequest;
 import chatweb.model.api.LoginResponse;
 import chatweb.model.google.UserInfo;
 import chatweb.repository.UserRepository;

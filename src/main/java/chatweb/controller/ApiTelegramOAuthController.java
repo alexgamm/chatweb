@@ -3,12 +3,13 @@ package chatweb.controller;
 import chatweb.entity.User;
 import chatweb.entity.Verification;
 import chatweb.exception.ApiErrorException;
+import chatweb.exception.telegram.TelegramOAuthException;
 import chatweb.model.api.ApiError;
-import chatweb.model.api.GoogleOAuthTokenRequest;
 import chatweb.model.api.LoginResponse;
 import chatweb.model.google.UserInfo;
+import chatweb.model.telegram.TelegramAuthTokenRequest;
+import chatweb.model.telegram.TelegramOAuthResult;
 import chatweb.repository.UserRepository;
-import chatweb.service.GoogleOAuthService;
 import chatweb.service.JwtService;
 import chatweb.service.TelegramOAuthService;
 import chatweb.service.VerificationService;
@@ -36,20 +37,22 @@ public class ApiTelegramOAuthController implements ApiControllerHelper {
     }
 
     @PostMapping("token")
-    public LoginResponse token(@RequestBody GoogleOAuthTokenRequest body) throws ApiErrorException {
-        UserInfo userInfo;
+    public LoginResponse token(@RequestBody TelegramAuthTokenRequest body) throws ApiErrorException {
+        TelegramOAuthResult userInfo;
         try {
-            userInfo = telegramOAuthService.getUserInfo(null);
-        } catch (IOException e) {
-            throw new ApiErrorException(new ApiError(HttpStatus.SERVICE_UNAVAILABLE, "external error"));
+            userInfo = telegramOAuthService.parseOAuthResult(body.getAuthResult());
+        }  catch (TelegramOAuthException e) {
+            throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "auth error"));
         }
-        User user = userRepository.findUserByEmail(userInfo.getEmail().toLowerCase());
+        //TODO change logic with similar username
+        String email = String.format("%s@t.me", userInfo.getId());
+        User user = userRepository.findUserByEmail(email);
         if (user == null) {
-            String username = userInfo.getEmail().split("@")[0];
+            String username = userInfo.getUsername();
             user = new User(
                     null,
                     username,
-                    userInfo.getEmail().toLowerCase(),
+                    email,
                     null,
                     new Date(),
                     UserColorUtils.getRandomColor()

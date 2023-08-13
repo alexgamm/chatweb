@@ -1,45 +1,62 @@
 package chatweb.service;
 
-import chatweb.configuration.properties.GoogleOAuthProperties;
 import chatweb.configuration.properties.TelegramOAuthProperties;
-import chatweb.model.google.OAuthTokenResponse;
-import chatweb.model.google.UserInfo;
+import chatweb.exception.telegram.TelegramOAuthException;
+import chatweb.model.telegram.TelegramOAuthResult;
+import chatweb.utils.HashUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.List;
+import java.util.Base64;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static chatweb.utils.HashUtils.sha256;
 
 @Service
 @EnableConfigurationProperties(TelegramOAuthProperties.class)
 @RequiredArgsConstructor
 public class TelegramOAuthService {
+    private final static TypeReference<Map<String, ?>> AUTH_RESULT_TR = new TypeReference<>() {
+    };
     private final static String OAUTH_URI = "https://oauth.telegram.org/auth";
     private final ObjectMapper objectMapper;
     private final TelegramOAuthProperties telegramOAuthProperties;
 
-    public UserInfo getUserInfo(String authResult) throws IOException {
-        return null;
+    public TelegramOAuthResult parseOAuthResult(String authResult) throws TelegramOAuthException {
+        TelegramOAuthResult result;
+        String payload;
+        try {
+            String authResultJson = new String(Base64.getDecoder().decode(authResult));
+            Map<String, ?> fields = objectMapper.readValue(authResultJson, AUTH_RESULT_TR);
+            payload = fields.entrySet().stream()
+                    .filter(en -> !en.getKey().equals("hash"))
+                    .sorted(Map.Entry.comparingByKey())
+                    .map(en -> en.getKey() + "=" + en.getValue())
+                    .collect(Collectors.joining("\n"));
+            result = objectMapper.readValue(authResultJson, TelegramOAuthResult.class);
+        } catch (Throwable e) {
+            throw new TelegramOAuthException(e);
+        }
+        byte[] secretKey = sha256(telegramOAuthProperties.getBotToken());
+        String hash = HashUtils.hmacSha256(payload, secretKey);
+        if (!hash.equals(result.getHash())) {
+            throw new TelegramOAuthException("invalid hash");
+        }
+        return result;
     }
 
     public String getOauthUrl() {
         try {
             return new URIBuilder(OAUTH_URI)
                     .addParameter("bot_id", telegramOAuthProperties.getBotId())
-                    .addParameter("public_key", telegramOAuthProperties.getPublicKey())
                     .addParameter("origin", telegramOAuthProperties.getRedirectUri())
                     .build()
                     .toString();

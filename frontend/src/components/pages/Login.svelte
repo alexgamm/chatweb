@@ -2,6 +2,7 @@
   import { Link, navigate } from "svelte-routing";
   import useApi from "../../hooks/api";
   import GoogleOAuthButton from "../GoogleOAuthButton.svelte";
+  import TelegramOAuthButton from "../TelegramOAuthButton.svelte";
 
   const { post } = useApi();
   let state = "idle";
@@ -43,7 +44,11 @@
     on:submit|preventDefault={submit}
   >
     <div class="card-body">
-      <GoogleOAuthButton />
+      <div class="flex gap-2 flex-wrap mb-2">
+        <h3 class="w-full text-center mb-2">Continue with</h3>
+        <GoogleOAuthButton />
+        <TelegramOAuthButton />
+      </div>
       <div class="divider">or</div>
       <div class="form-control">
         <label class="label" for="email">

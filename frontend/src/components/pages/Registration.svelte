@@ -3,6 +3,7 @@
   import useApi from "../../hooks/api";
   import GoogleOAuthButton from "../GoogleOAuthButton.svelte";
   import RepeatPasswordGroup from "../RepeatPasswordGroup.svelte";
+  import TelegramOAuthButton from "../TelegramOAuthButton.svelte";
 
   let errorMessage = "";
   let username = "";
@@ -52,7 +53,11 @@
     on:submit|preventDefault={submit}
   >
     <div class="card-body">
-      <GoogleOAuthButton />
+      <div class="flex gap-2 flex-wrap mb-2">
+        <h3 class="w-full text-center mb-2">Continue with</h3>
+        <GoogleOAuthButton />
+        <TelegramOAuthButton />
+      </div>
       <div class="divider">or</div>
       <div class="form-control">
         <label class="label" for="username">

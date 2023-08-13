@@ -1,4 +1,4 @@
-package chatweb.model.api;
+package chatweb.model.google;
 
 import lombok.Getter;
 
