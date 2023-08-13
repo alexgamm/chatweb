@@ -8,4 +8,4 @@ RUN mkdir ${SERVICE_PATH}
 COPY build/libs/${JAR_NAME} ${SERVICE_PATH}
 
 WORKDIR ${SERVICE_PATH}
-CMD exec java -jar ${JAR_NAME}
+CMD exec java ${JAVA_OPTS} -jar ${JAR_NAME}
