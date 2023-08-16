@@ -54,10 +54,10 @@ public class AuthInterceptor implements HandlerInterceptor {
                             .findFirst()
                             .map(Cookie::getValue)
                             // с чем работаем -> что возвращаем
-                            .map(sessionId -> sessionRepository.findSessionById(sessionId))
+                            .flatMap(sessionRepository::findById)
                             .map(session -> userRepository.findUserById(session.getUserId()))
                     )
-                    .orElseThrow(() -> new UnauthorizedException());
+                    .orElseThrow(UnauthorizedException::new);
         }
         // сохраняем user в контекст запроса
         request.setAttribute("user", user);
