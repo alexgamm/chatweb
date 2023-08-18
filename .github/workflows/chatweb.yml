@@ -1,0 +1,19 @@
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: npm install, build
+        working-directory: ./frontend
+        run: |
+          npm install
+          npm run build
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: ./frontend/dist
