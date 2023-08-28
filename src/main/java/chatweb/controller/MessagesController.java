@@ -5,7 +5,11 @@ import chatweb.entity.Reaction;
 import chatweb.entity.User;
 import chatweb.exception.ApiErrorException;
 import chatweb.mapper.MessageMapper;
-import chatweb.model.api.*;
+import chatweb.model.api.ApiError;
+import chatweb.model.api.MessageIdResponse;
+import chatweb.model.api.MessagesResponse;
+import chatweb.model.api.ReactionRequest;
+import chatweb.model.api.SendMessageRequest;
 import chatweb.model.dto.MessageDto;
 import chatweb.model.event.DeletedMessageEvent;
 import chatweb.model.event.EditedMessageEvent;
@@ -14,14 +18,26 @@ import chatweb.model.event.ReactionEvent;
 import chatweb.repository.MessageRepository;
 import chatweb.repository.ReactionRepository;
 import chatweb.service.EventsService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 import static java.util.UUID.randomUUID;
 
@@ -40,12 +56,13 @@ public class MessagesController implements ApiControllerHelper {
             @RequestParam(required = false) Long from,
             @RequestAttribute User user
     ) {
+        // TODO ?
         List<Message> messages = from == null
                 ? messageRepository.findByOrderBySendDateDesc(Pageable.ofSize(count))
                 : messageRepository.findBySendDateBeforeOrderBySendDateDesc(new Date(from), Pageable.ofSize(count));
         return new MessagesResponse(
                 messages.stream()
-                        .map(message -> MessageMapper.messageToMessageDto(message, user))
+                        .map(message -> MessageMapper.messageToMessageDto(message, user, message.getRepliedMessage() != null))
                         .toList()
         );
     }
@@ -72,7 +89,7 @@ public class MessagesController implements ApiControllerHelper {
                 repliedMessage,
                 new Date()
         ));
-        MessageDto messageDto = MessageMapper.messageToMessageDto(message, user);
+        MessageDto messageDto = MessageMapper.messageToMessageDto(message, user, message.getRepliedMessage() != null);
         eventsService.addEvent(new NewMessageEvent(messageDto));
         return new MessageIdResponse(message.getId());
     }
@@ -113,7 +130,8 @@ public class MessagesController implements ApiControllerHelper {
         }
         message.setMessage(body.getMessage());
         messageRepository.save(message);
-        MessageDto messageDto = MessageMapper.messageToMessageDto(message, user);
+        // TODO check personal event
+        MessageDto messageDto = MessageMapper.messageToMessageDto(message, user, message.getRepliedMessage() != null);
         eventsService.addEvent(new EditedMessageEvent(messageDto));
         return messageDto;
     }
@@ -156,7 +174,7 @@ public class MessagesController implements ApiControllerHelper {
                 saved.getId(),
                 MessageMapper.groupReactions(saved.getReactions(), userId)
         ));
-        return MessageMapper.messageToMessageDto(saved, user);
+        return MessageMapper.messageToMessageDto(saved, user, saved.getRepliedMessage() != null);
     }
 }
 

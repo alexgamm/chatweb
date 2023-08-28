@@ -10,15 +10,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MessageMapper {
-    public static MessageDto messageToMessageDto(Message message, User user) {
+    public static MessageDto messageToMessageDto(Message message, User user, boolean needReplyMessage) {
         return new MessageDto(
                 message.getId(),
                 message.getUser().getId(),
                 message.getUser().getUsername(),
                 message.getMessage(),
-                user == null || message.getRepliedMessage() == null
+                user == null && !needReplyMessage
                         ? null
-                        : messageToMessageDto(message.getRepliedMessage(), null),
+                        : messageToMessageDto(message.getRepliedMessage(), null, false),
                 message.getSendDate(),
                 // we don't need reactions if user == null (for replied message mapping recursion)
                 user == null ? null : groupReactions(message.getReactions(), user.getId())
@@ -30,6 +30,7 @@ public class MessageMapper {
                 .collect(Collectors.groupingBy(Reaction::getReaction))
                 .entrySet().stream()
                 .map(entry -> new MessageDto.Reaction(
+                        //TODO
                         entry.getKey(),
                         entry.getValue().size(),
                         entry.getValue().stream().anyMatch(reaction -> reaction.getUserId() == userId)
