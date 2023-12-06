@@ -71,18 +71,23 @@ public class ChatGPTService {
     }
 
     public void handleMessage(chatweb.entity.Message message) {
+        String mention = "@" + chatGPTProperties.getUsername();
         User user = getOrCreateUser();
-        if (!message.getMessage().contains("@" + chatGPTProperties.getUsername())
-                && Optional.ofNullable(message.getRepliedMessage())
+        boolean isChatGPTMentioned = message.getMessage().startsWith(mention);
+        boolean isReplyToChatGPT = Optional.ofNullable(message.getRepliedMessage())
                 .map(chatweb.entity.Message::getUser)
                 .map(User::getId)
-                .map(id -> !id.equals(user.getId()))
-                .orElse(true)) {
+                .map(id -> id.equals(user.getId()))
+                .orElse(false);
+        if (!isChatGPTMentioned && !isReplyToChatGPT) {
             return;
         }
         taskScheduler.schedule(() -> {
             try {
-                String completionContent = getCompletionContent(message.getMessage());
+                String messageToComplete = isChatGPTMentioned
+                        ? message.getMessage().replace(mention, "")
+                        : message.getMessage();
+                String completionContent = getCompletionContent(messageToComplete);
                 chatweb.entity.Message completionMessage = messageRepository.save(new chatweb.entity.Message(
                         UUID.randomUUID().toString(),
                         completionContent,
@@ -91,7 +96,7 @@ public class ChatGPTService {
                         message,
                         new Date()
                 ));
-                eventsService.addEvent(new NewMessageEvent(MessageMapper.messageToMessageDto(completionMessage, null, true)));
+                eventsService.addEvent(new NewMessageEvent(MessageMapper.messageToMessageDto(completionMessage, null, false)));
             } catch (IOException | ChatCompletionException e) {
                 // TODO handle properly
                 throw new RuntimeException(e);

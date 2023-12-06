@@ -5,24 +5,35 @@ import chatweb.entity.Reaction;
 import chatweb.entity.User;
 import chatweb.model.dto.MessageDto;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MessageMapper {
-    public static MessageDto messageToMessageDto(Message message, User user, boolean needReplyMessage) {
+    public static MessageDto messageToMessageDto(
+            Message message,
+            User user,
+            boolean includeRepliedMessage,
+            boolean includeReactions
+    ) {
         return new MessageDto(
                 message.getId(),
                 message.getUser().getId(),
                 message.getUser().getUsername(),
                 message.getMessage(),
-                user == null && !needReplyMessage
-                        ? null
-                        : messageToMessageDto(message.getRepliedMessage(), null, false),
+                includeRepliedMessage
+                        ? messageToMessageDto(message.getRepliedMessage(), user, false, false)
+                        : null,
                 message.getSendDate(),
-                // we don't need reactions if user == null (for replied message mapping recursion)
-                user == null ? null : groupReactions(message.getReactions(), user.getId())
+                includeReactions ? groupReactions(message.getReactions(), user.getId()) : null
         );
+    }
+
+    public static MessageDto messageToMessageDto(
+            Message message,
+            User user,
+            boolean includeReactions
+    ) {
+        return messageToMessageDto(message, user, message.getRepliedMessage() != null, includeReactions);
     }
 
     public static Set<MessageDto.Reaction> groupReactions(Set<Reaction> reactions, int userId) {

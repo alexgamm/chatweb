@@ -5,34 +5,20 @@ import chatweb.entity.Reaction;
 import chatweb.entity.User;
 import chatweb.exception.ApiErrorException;
 import chatweb.mapper.MessageMapper;
-import chatweb.model.api.ApiError;
-import chatweb.model.api.MessageIdResponse;
-import chatweb.model.api.MessagesResponse;
-import chatweb.model.api.ReactionRequest;
-import chatweb.model.api.SendMessageRequest;
+import chatweb.model.api.*;
 import chatweb.model.dto.MessageDto;
 import chatweb.model.event.DeletedMessageEvent;
 import chatweb.model.event.EditedMessageEvent;
 import chatweb.model.event.NewMessageEvent;
 import chatweb.model.event.ReactionEvent;
 import chatweb.repository.MessageRepository;
-import chatweb.repository.ReactionRepository;
+import chatweb.service.ChatGPTService;
 import chatweb.service.EventsService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.Date;
@@ -48,7 +34,7 @@ public class MessagesController implements ApiControllerHelper {
 
     private final MessageRepository messageRepository;
     private final EventsService eventsService;
-    private final ReactionRepository reactionRepository;
+    private final ChatGPTService chatGPTService;
 
     @GetMapping
     public MessagesResponse getMessages(
@@ -62,7 +48,7 @@ public class MessagesController implements ApiControllerHelper {
                 : messageRepository.findBySendDateBeforeOrderBySendDateDesc(new Date(from), Pageable.ofSize(count));
         return new MessagesResponse(
                 messages.stream()
-                        .map(message -> MessageMapper.messageToMessageDto(message, user, message.getRepliedMessage() != null))
+                        .map(message -> MessageMapper.messageToMessageDto(message, user, true))
                         .toList()
         );
     }
@@ -83,14 +69,15 @@ public class MessagesController implements ApiControllerHelper {
                 .orElse(null);
         Message message = messageRepository.save(new Message(
                 randomUUID().toString(),
-                body.getMessage(),
+                body.getMessage().trim(),
                 user,
                 Collections.emptySet(),
                 repliedMessage,
                 new Date()
         ));
-        MessageDto messageDto = MessageMapper.messageToMessageDto(message, user, message.getRepliedMessage() != null);
+        MessageDto messageDto = MessageMapper.messageToMessageDto(message, user, false);
         eventsService.addEvent(new NewMessageEvent(messageDto));
+        chatGPTService.handleMessage(message);
         return new MessageIdResponse(message.getId());
     }
 
@@ -128,10 +115,10 @@ public class MessagesController implements ApiControllerHelper {
         if (!user.getId().equals(message.getUser().getId())) {
             throw new ApiErrorException(new ApiError(HttpStatus.FORBIDDEN, "you can edit only your messages"));
         }
-        message.setMessage(body.getMessage());
+        message.setMessage(body.getMessage().trim());
         messageRepository.save(message);
         // TODO check personal event
-        MessageDto messageDto = MessageMapper.messageToMessageDto(message, user, message.getRepliedMessage() != null);
+        MessageDto messageDto = MessageMapper.messageToMessageDto(message, user, true);
         eventsService.addEvent(new EditedMessageEvent(messageDto));
         return messageDto;
     }
@@ -174,7 +161,7 @@ public class MessagesController implements ApiControllerHelper {
                 saved.getId(),
                 MessageMapper.groupReactions(saved.getReactions(), userId)
         ));
-        return MessageMapper.messageToMessageDto(saved, user, saved.getRepliedMessage() != null);
+        return MessageMapper.messageToMessageDto(saved, user, true);
     }
 }
 
