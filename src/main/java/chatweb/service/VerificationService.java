@@ -35,7 +35,7 @@ public class VerificationService {
         verificationRepository.updateVerified(userId);
     }
 
-    public void createVerification(int userId, String code) {
-        verificationRepository.save(new Verification(userId, code, false));
+    public Verification createVerification(int userId, String code) {
+        return verificationRepository.save(new Verification(userId, code, false));
     }
 }

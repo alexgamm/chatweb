@@ -4,7 +4,6 @@ import chatweb.configuration.properties.TelegramOAuthProperties;
 import chatweb.exception.telegram.TelegramOAuthException;
 import chatweb.model.telegram.TelegramOAuthResult;
 import chatweb.utils.HashUtils;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.client.utils.URIBuilder;
@@ -13,10 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.net.URISyntaxException;
 import java.util.Base64;
-import java.util.Comparator;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static chatweb.utils.HashUtils.sha256;
 
@@ -24,8 +21,6 @@ import static chatweb.utils.HashUtils.sha256;
 @EnableConfigurationProperties(TelegramOAuthProperties.class)
 @RequiredArgsConstructor
 public class TelegramOAuthService {
-    private final static TypeReference<Map<String, ?>> AUTH_RESULT_TR = new TypeReference<>() {
-    };
     private final static String OAUTH_URI = "https://oauth.telegram.org/auth";
     private final ObjectMapper objectMapper;
     private final TelegramOAuthProperties telegramOAuthProperties;
@@ -34,14 +29,17 @@ public class TelegramOAuthService {
         TelegramOAuthResult result;
         String payload;
         try {
-            String authResultJson = new String(Base64.getDecoder().decode(authResult));
-            Map<String, ?> fields = objectMapper.readValue(authResultJson, AUTH_RESULT_TR);
+            Map<String, Object> fields = objectMapper.readValue(
+                    new String(Base64.getDecoder().decode(authResult)),
+                    objectMapper.getTypeFactory()
+                            .constructParametricType(Map.class, String.class, Object.class)
+            );
+            result = objectMapper.convertValue(fields, TelegramOAuthResult.class);
             payload = fields.entrySet().stream()
                     .filter(en -> !en.getKey().equals("hash"))
                     .sorted(Map.Entry.comparingByKey())
                     .map(en -> en.getKey() + "=" + en.getValue())
                     .collect(Collectors.joining("\n"));
-            result = objectMapper.readValue(authResultJson, TelegramOAuthResult.class);
         } catch (Throwable e) {
             throw new TelegramOAuthException(e);
         }

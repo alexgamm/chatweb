@@ -6,7 +6,6 @@ import chatweb.exception.ApiErrorException;
 import chatweb.exception.telegram.TelegramOAuthException;
 import chatweb.model.api.ApiError;
 import chatweb.model.api.LoginResponse;
-import chatweb.model.google.UserInfo;
 import chatweb.model.telegram.TelegramAuthTokenRequest;
 import chatweb.model.telegram.TelegramOAuthResult;
 import chatweb.repository.UserRepository;
@@ -17,7 +16,11 @@ import chatweb.utils.UserColorUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.util.Date;
@@ -41,7 +44,7 @@ public class ApiTelegramOAuthController implements ApiControllerHelper {
         TelegramOAuthResult userInfo;
         try {
             userInfo = telegramOAuthService.parseOAuthResult(body.getAuthResult());
-        }  catch (TelegramOAuthException e) {
+        } catch (TelegramOAuthException e) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "auth error"));
         }
         //TODO change logic with similar username
@@ -61,9 +64,7 @@ public class ApiTelegramOAuthController implements ApiControllerHelper {
         }
         Verification verification = verificationService.findVerification(user.getId());
         if (verification == null) {
-            //TODO return newly created verification
-            verificationService.createVerification(user.getId(), "");
-            verification = verificationService.findVerification(user.getId());
+            verification = verificationService.createVerification(user.getId(), "");
         }
         if (!verification.isVerified()) {
             verificationService.updateVerified(user.getId());
