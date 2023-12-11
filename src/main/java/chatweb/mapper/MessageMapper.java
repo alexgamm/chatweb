@@ -2,7 +2,6 @@ package chatweb.mapper;
 
 import chatweb.entity.Message;
 import chatweb.entity.Reaction;
-import chatweb.entity.User;
 import chatweb.model.dto.MessageDto;
 
 import java.util.Set;
@@ -11,7 +10,7 @@ import java.util.stream.Collectors;
 public class MessageMapper {
     public static MessageDto messageToMessageDto(
             Message message,
-            User user,
+            Integer userId,
             boolean includeRepliedMessage,
             boolean includeReactions
     ) {
@@ -21,19 +20,19 @@ public class MessageMapper {
                 message.getUser().getUsername(),
                 message.getMessage(),
                 includeRepliedMessage
-                        ? messageToMessageDto(message.getRepliedMessage(), user, false, false)
+                        ? messageToMessageDto(message.getRepliedMessage(), userId, false, false)
                         : null,
                 message.getSendDate(),
-                includeReactions ? groupReactions(message.getReactions(), user.getId()) : null
+                includeReactions ? groupReactions(message.getReactions(), userId) : null
         );
     }
 
     public static MessageDto messageToMessageDto(
             Message message,
-            User user,
+            Integer userId,
             boolean includeReactions
     ) {
-        return messageToMessageDto(message, user, message.getRepliedMessage() != null, includeReactions);
+        return messageToMessageDto(message, userId, message.getRepliedMessage() != null, includeReactions);
     }
 
     public static Set<MessageDto.Reaction> groupReactions(Set<Reaction> reactions, int userId) {
@@ -41,7 +40,6 @@ public class MessageMapper {
                 .collect(Collectors.groupingBy(Reaction::getReaction))
                 .entrySet().stream()
                 .map(entry -> new MessageDto.Reaction(
-                        //TODO
                         entry.getKey(),
                         entry.getValue().size(),
                         entry.getValue().stream().anyMatch(reaction -> reaction.getUserId() == userId)

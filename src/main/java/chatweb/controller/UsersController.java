@@ -18,7 +18,12 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -31,6 +36,7 @@ public class UsersController implements ApiControllerHelper {
 
     @GetMapping
     public UserListResponse users() {
+        // TODO introduce pagination
         List<UserListResponse.User> list = userRepository.findAll().stream()
                 .map(user -> new UserListResponse.User(
                         user.getId(),
@@ -51,7 +57,7 @@ public class UsersController implements ApiControllerHelper {
     @PutMapping("me/typing")
     public ResponseEntity<EmptyResponse> typing(@RequestAttribute User user) {
         eventsService.addEvent(new UserTypingEvent(user.getId()));
-        return ResponseEntity.ok(new EmptyResponse());
+        return ResponseEntity.ok(EmptyResponse.INSTANCE);
     }
 
     @PutMapping("me/username")
@@ -82,7 +88,7 @@ public class UsersController implements ApiControllerHelper {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "invalid password"));
         }
         userRepository.updatePassword(PasswordUtils.hash(body.getNewPassword()), user.getId());
-        return ResponseEntity.ok(new EmptyResponse());
+        return ResponseEntity.ok(EmptyResponse.INSTANCE);
     }
 
     @PutMapping("me/color")

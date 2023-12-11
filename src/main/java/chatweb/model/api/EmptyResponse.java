@@ -1,7 +1,6 @@
 package chatweb.model.api;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
-@JsonSerialize
+@SuppressWarnings("InstantiationOfUtilityClass")
 public class EmptyResponse {
+    public static final EmptyResponse INSTANCE = new EmptyResponse();
 }

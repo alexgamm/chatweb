@@ -49,23 +49,23 @@ public class EventsService {
         emitter.onTimeout(emitter::complete);
         emitter.onCompletion(() -> removeEmitter(userId, emitter));
         emitter.onError((e) -> removeEmitter(userId, emitter));
-        emitters.compute(userId, (key, value) -> { // лямда должна вернуть новое значение для этого ключа
-            if (value == null) {
-                value = new HashSet<>();
+        emitters.compute(userId, (key, userEmitters) -> { // лямда должна вернуть новое значение для этого ключа
+            if (userEmitters == null) {
+                userEmitters = new HashSet<>();
             }
-            value.add(emitter);
-            return value;
+            userEmitters.add(emitter);
+            return userEmitters;
         });
-        if (emitters.getOrDefault(userId, Collections.emptySet()).size() == 1) {
+        if (countEmitters(userId) == 1) {
             addEvent(new UserOnlineEvent(userId, true));
         }
         return emitter;
     }
 
     private void removeEmitter(int userId, SseEmitter emitter) {
-        emitters.computeIfPresent(userId, (key, value) -> {
-            value.remove(emitter);
-            return value;
+        emitters.computeIfPresent(userId, (key, userEmitters) -> {
+            userEmitters.remove(emitter);
+            return userEmitters;
         });
         emitters.values().removeIf(Set::isEmpty);
         if (!hasEmitters(userId)) {
@@ -73,8 +73,12 @@ public class EventsService {
         }
     }
 
+    private int countEmitters(int userId) {
+        return emitters.getOrDefault(userId, Collections.emptySet()).size();
+    }
+
     public boolean hasEmitters(int userId) {
-        return !emitters.getOrDefault(userId, Collections.emptySet()).isEmpty();
+        return countEmitters(userId) > 0;
     }
 
 }

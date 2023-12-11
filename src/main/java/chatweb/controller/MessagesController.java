@@ -42,18 +42,17 @@ public class MessagesController implements ApiControllerHelper {
             @RequestParam(required = false) Long from,
             @RequestAttribute User user
     ) {
-        // TODO ?
         List<Message> messages = from == null
                 ? messageRepository.findByOrderBySendDateDesc(Pageable.ofSize(count))
                 : messageRepository.findBySendDateBeforeOrderBySendDateDesc(new Date(from), Pageable.ofSize(count));
         return new MessagesResponse(
                 messages.stream()
-                        .map(message -> MessageMapper.messageToMessageDto(message, user, true))
+                        .map(message -> MessageMapper.messageToMessageDto(message, user.getId(), true))
                         .toList()
         );
     }
 
-    //@RequestBody SendMessageRequest body - позволяет спарсить тело зепроса в нашу модель
+    //@RequestBody SendMessageRequest body - позволяет спарсить тело запроса в нашу модель
     //TODO for v.dybysov remain what RespEntity is
     @PostMapping
     public MessageIdResponse sendMessage(
@@ -61,11 +60,10 @@ public class MessagesController implements ApiControllerHelper {
             @RequestAttribute User user
     ) throws ApiErrorException {
         if (body.getMessage() == null || body.getMessage().isBlank()) {
-            // ResponseEntity<String> = в парамтипе тело ответа, later =  Response.badRequest("missing message")
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "missing message"));
         }
         Message repliedMessage = Optional.ofNullable(body.getRepliedMessageId())
-                .flatMap(repliedMessageId -> messageRepository.findById(repliedMessageId))
+                .flatMap(messageRepository::findById)
                 .orElse(null);
         Message message = messageRepository.save(new Message(
                 randomUUID().toString(),
@@ -75,7 +73,7 @@ public class MessagesController implements ApiControllerHelper {
                 repliedMessage,
                 new Date()
         ));
-        MessageDto messageDto = MessageMapper.messageToMessageDto(message, user, false);
+        MessageDto messageDto = MessageMapper.messageToMessageDto(message, user.getId(), false);
         eventsService.addEvent(new NewMessageEvent(messageDto));
         chatGPTService.handleMessage(message);
         return new MessageIdResponse(message.getId());
@@ -117,9 +115,10 @@ public class MessagesController implements ApiControllerHelper {
         }
         message.setMessage(body.getMessage().trim());
         messageRepository.save(message);
-        // TODO check personal event
-        MessageDto messageDto = MessageMapper.messageToMessageDto(message, user, true);
-        eventsService.addEvent(new EditedMessageEvent(messageDto));
+        MessageDto messageDto = MessageMapper.messageToMessageDto(message, user.getId(), true);
+        eventsService.addEvent((userId) -> new EditedMessageEvent(
+                MessageMapper.messageToMessageDto(message, userId, true)
+        ));
         return messageDto;
     }
 
@@ -161,7 +160,7 @@ public class MessagesController implements ApiControllerHelper {
                 saved.getId(),
                 MessageMapper.groupReactions(saved.getReactions(), userId)
         ));
-        return MessageMapper.messageToMessageDto(saved, user, true);
+        return MessageMapper.messageToMessageDto(saved, user.getId(), true);
     }
 }
 
