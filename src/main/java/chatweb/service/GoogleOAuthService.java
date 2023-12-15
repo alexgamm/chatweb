@@ -3,24 +3,18 @@ package chatweb.service;
 import chatweb.configuration.properties.GoogleOAuthProperties;
 import chatweb.model.google.OAuthTokenResponse;
 import chatweb.model.google.UserInfo;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.List;
 
 @Service
 @EnableConfigurationProperties(GoogleOAuthProperties.class)
@@ -28,51 +22,45 @@ public class GoogleOAuthService {
     private final static String TOKEN_URI = "https://oauth2.googleapis.com/token";
     private final static String USER_INFO_URI = "https://www.googleapis.com/oauth2/v2/userinfo";
     private final static String OAUTH_URI = "https://accounts.google.com/o/oauth2/v2/auth";
-    private final ObjectMapper objectMapper;
     private final GoogleOAuthProperties googleOAuthProperties;
-    private final HttpClient httpClient = HttpClients.createDefault();
+    private final WebClient webClient = WebClient.create();
 
-    public GoogleOAuthService(ObjectMapper objectMapper, GoogleOAuthProperties googleOAuthProperties) {
-        this.objectMapper = objectMapper;
+
+    public GoogleOAuthService(GoogleOAuthProperties googleOAuthProperties) {
         this.googleOAuthProperties = googleOAuthProperties;
     }
 
-    public String getClientId() {
-        return googleOAuthProperties.getClientId();
-    }
+    public String getToken(String code) {
 
-    public String getRedirectUri() {
-        return googleOAuthProperties.getRedirectUri();
-    }
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("client_id", googleOAuthProperties.getClientId());
+        formData.add("client_secret", googleOAuthProperties.getClientSecret());
+        formData.add("code", code);
+        formData.add("grant_type", "authorization_code");
+        formData.add("redirect_uri", googleOAuthProperties.getRedirectUri());
 
-    public String getToken(String code) throws IOException {
-        HttpPost request = new HttpPost(TOKEN_URI);
-        List<NameValuePair> form = List.of(
-                new BasicNameValuePair("client_id", googleOAuthProperties.getClientId()),
-                new BasicNameValuePair("client_secret", googleOAuthProperties.getClientSecret()),
-                new BasicNameValuePair("code", code),
-                new BasicNameValuePair("grant_type", "authorization_code"),
-                new BasicNameValuePair("redirect_uri", googleOAuthProperties.getRedirectUri())
-        );
-        request.setEntity(new UrlEncodedFormEntity(form));
-        HttpResponse response = httpClient.execute(request);
-        String responseBody = EntityUtils.toString(response.getEntity());
-        OAuthTokenResponse oAuthTokenResponse = objectMapper.readValue(responseBody, OAuthTokenResponse.class);
-        return oAuthTokenResponse.getAccessToken();
+        return webClient.post()
+                .uri(TOKEN_URI)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters.fromFormData(formData))
+                .retrieve()
+                .bodyToMono(OAuthTokenResponse.class)
+                .map(OAuthTokenResponse::getAccessToken)
+                .block();
     }
 
     public UserInfo getUserInfo(String token) throws IOException {
-        HttpGet request;
-        try {
-            request = new HttpGet(new URIBuilder(USER_INFO_URI).addParameter("access_token", token).build());
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-        HttpResponse response = httpClient.execute(request);
-        String responseBody = EntityUtils.toString(response.getEntity());
-        return objectMapper.readValue(responseBody, UserInfo.class);
+        WebClient webClient = WebClient.create(USER_INFO_URI);
+        Mono<UserInfo> userInfo = webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .queryParam("access_token", token)
+                        .build())
+                .retrieve()
+                .bodyToMono(UserInfo.class);
+        return userInfo.block();
     }
-    public String getOauthUrl(){
+
+    public String getOauthUrl() {
         try {
             return new URIBuilder(OAUTH_URI)
                     .addParameter("client_id", googleOAuthProperties.getClientId())

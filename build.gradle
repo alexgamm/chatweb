@@ -25,6 +25,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework:spring-webflux:6.1.1'
 	implementation 'org.springframework.boot:spring-boot-starter-mustache'
 	annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
 	implementation 'org.apache.httpcomponents:httpclient:4.5.14'
