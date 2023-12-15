@@ -3,6 +3,7 @@ package chatweb.service;
 import chatweb.configuration.properties.GoogleOAuthProperties;
 import chatweb.model.google.OAuthTokenResponse;
 import chatweb.model.google.UserInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.http.client.utils.URIBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.http.MediaType;
@@ -11,24 +12,19 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 
 @Service
 @EnableConfigurationProperties(GoogleOAuthProperties.class)
+@RequiredArgsConstructor
 public class GoogleOAuthService {
     private final static String TOKEN_URI = "https://oauth2.googleapis.com/token";
     private final static String USER_INFO_URI = "https://www.googleapis.com/oauth2/v2/userinfo";
     private final static String OAUTH_URI = "https://accounts.google.com/o/oauth2/v2/auth";
     private final GoogleOAuthProperties googleOAuthProperties;
-    private final WebClient webClient = WebClient.create();
-
-
-    public GoogleOAuthService(GoogleOAuthProperties googleOAuthProperties) {
-        this.googleOAuthProperties = googleOAuthProperties;
-    }
+    private final WebClient webClient;
 
     public String getToken(String code) {
 
@@ -50,14 +46,14 @@ public class GoogleOAuthService {
     }
 
     public UserInfo getUserInfo(String token) throws IOException {
-        WebClient webClient = WebClient.create(USER_INFO_URI);
-        Mono<UserInfo> userInfo = webClient.get()
-                .uri(uriBuilder -> uriBuilder
+        WebClient.create(USER_INFO_URI);
+        return webClient.get()
+                .uri(USER_INFO_URI, uriBuilder -> uriBuilder
                         .queryParam("access_token", token)
                         .build())
                 .retrieve()
-                .bodyToMono(UserInfo.class);
-        return userInfo.block();
+                .bodyToMono(UserInfo.class)
+                .block();
     }
 
     public String getOauthUrl() {

@@ -37,8 +37,8 @@ public class ChatGPTService {
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
     private final EventsService eventsService;
+    private final WebClient webClient;
 
-    private final WebClient webClient = WebClient.create();
 
     public String getCompletionContent(String message) throws ChatCompletionException {
         ChatCompletionRequest completionRequest = new ChatCompletionRequest(
@@ -53,16 +53,18 @@ public class ChatGPTService {
                 .exchangeToMono(clientResponse -> {
                     if (clientResponse.statusCode().isError()) {
                         return clientResponse.bodyToMono(String.class)
-                                .flatMap(errorBody -> Mono.error(new ChatCompletionException(
-                                        String.format("Unsuccessful response: Status code: %d, Body: %s",
-                                                clientResponse.statusCode().value(), errorBody))));
+                                .flatMap(errorBody -> Mono.error(new ChatCompletionException(String
+                                        .format("Unsuccessful response: Status code: %d, Body: %s",
+                                                clientResponse.statusCode().value(), errorBody
+                                        ))));
                     } else {
                         return clientResponse.bodyToMono(ChatCompletionResponse.class);
                     }
                 })
                 .block();
 
-        return Optional.ofNullable(chatCompletionResponse).map(ChatCompletionResponse::getChoices)
+        return Optional.ofNullable(chatCompletionResponse)
+                .map(ChatCompletionResponse::getChoices)
                 .flatMap(list -> list.stream().findFirst())
                 .map(ChatCompletionResponse.Choice::getMessage)
                 .map(Message::getContent)
