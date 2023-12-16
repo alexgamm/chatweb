@@ -11,22 +11,16 @@ import chatweb.model.event.NewMessageEvent;
 import chatweb.repository.MessageRepository;
 import chatweb.repository.UserRepository;
 import chatweb.utils.UserColorUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.http.MediaType;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
@@ -39,35 +33,43 @@ import java.util.UUID;
 public class ChatGPTService {
     private final static String CHAT_COMPLETION_URI = "https://api.openai.com/v1/chat/completions";
     private final TaskScheduler taskScheduler;
-    private final ObjectMapper objectMapper;
     private final ChatGPTProperties chatGPTProperties;
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
     private final EventsService eventsService;
-    private final HttpClient httpClient = HttpClients.createDefault();
+    private final WebClient webClient;
 
-    public String getCompletionContent(String message) throws IOException, ChatCompletionException {
-        HttpPost request = new HttpPost(CHAT_COMPLETION_URI);
-        request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + chatGPTProperties.getToken());
+
+    public String getCompletionContent(String message) throws ChatCompletionException {
         ChatCompletionRequest completionRequest = new ChatCompletionRequest(
                 chatGPTProperties.getModel(),
                 Collections.singletonList(new Message("user", message))
         );
-        request.setEntity(new StringEntity(
-                objectMapper.writeValueAsString(completionRequest),
-                ContentType.APPLICATION_JSON
-        ));
-        HttpResponse response = httpClient.execute(request);
-        String responseBody = EntityUtils.toString(response.getEntity());
-        if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-            throw new ChatCompletionException("Unsuccessful response: " + responseBody);
-        }
-        ChatCompletionResponse chatCompletionResponse = objectMapper.readValue(responseBody, ChatCompletionResponse.class);
-        return chatCompletionResponse.getChoices().stream()
-                .findFirst()
+        ChatCompletionResponse chatCompletionResponse = webClient.post()
+                .uri(CHAT_COMPLETION_URI)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(completionRequest))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + chatGPTProperties.getToken())
+                .exchangeToMono(clientResponse -> {
+                    if (clientResponse.statusCode().isError()) {
+                        return clientResponse.bodyToMono(String.class)
+                                .map(errorBody -> String.format("Unsuccessful response: Status code: %d, Body: %s",
+                                        clientResponse.statusCode().value(), errorBody
+                                ))
+                                .map(ChatCompletionException::new)
+                                .flatMap(Mono::error);
+                    } else {
+                        return clientResponse.bodyToMono(ChatCompletionResponse.class);
+                    }
+                })
+                .block();
+
+        return Optional.ofNullable(chatCompletionResponse)
+                .map(ChatCompletionResponse::getChoices)
+                .flatMap(list -> list.stream().findFirst())
                 .map(ChatCompletionResponse.Choice::getMessage)
                 .map(Message::getContent)
-                .orElseThrow(() -> new ChatCompletionException("Empty choices were received"));
+                .orElseThrow(() -> new ChatCompletionException("Empty choices were received or response was null"));
     }
 
     public void handleMessage(chatweb.entity.Message message) {
@@ -97,7 +99,7 @@ public class ChatGPTService {
                         new Date()
                 ));
                 eventsService.addEvent(new NewMessageEvent(MessageMapper.messageToMessageDto(completionMessage, null, false)));
-            } catch (IOException | ChatCompletionException e) {
+            } catch (ChatCompletionException e) {
                 // TODO handle properly
                 throw new RuntimeException(e);
             }
