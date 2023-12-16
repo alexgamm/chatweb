@@ -1,0 +1,738 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="6408a9de-94f9-4d94-9ec5-1dd4d23fd5ea" name="Changes" comment="added personal events for message edit &amp; refactor">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradlew" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradlew.bat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/ChatwebApplication.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/configuration/JwtConfiguration.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/configuration/WebClientConfiguration.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/configuration/WebConfiguration.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/configuration/properties/ChatGPTProperties.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/configuration/properties/DatabaseProperties.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/configuration/properties/GoogleOAuthProperties.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/configuration/properties/JwtProperties.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/configuration/properties/SmtpProperties.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/configuration/properties/TelegramOAuthProperties.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/controller/ApiControllerHelper.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/controller/ApiGoogleOAuthController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/controller/ApiLoginController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/controller/ApiRegistrationController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/controller/ApiTelegramOAuthController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/controller/ApiVerificationController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/controller/EventsController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/controller/MessagesController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/controller/UsersController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/entity/Message.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/entity/Reaction.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/entity/Session.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/entity/User.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/entity/Verification.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/exception/ApiErrorException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/exception/DatabaseException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/exception/UnauthorizedException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/exception/chatgpt/ChatCompletionException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/exception/telegram/TelegramOAuthException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/interceptor/AuthInterceptor.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/mapper/MessageMapper.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/mapper/UserMapper.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/api/ApiError.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/api/ChangePasswordRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/api/EmptyResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/api/EventsResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/api/LoginRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/api/LoginResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/api/MessageIdResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/api/MessagesResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/api/ReactionRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/api/RegistrationRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/api/SendMessageRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/api/UserListResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/api/VerificationRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/chatgpt/ChatCompletionRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/chatgpt/ChatCompletionResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/chatgpt/Message.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/dto/MessageDto.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/dto/UserDto.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/event/ChangeUserColorEvent.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/event/ChangeUsernameEvent.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/event/DeletedMessageEvent.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/event/EditedMessageEvent.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/event/Event.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/event/EventType.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/event/NewMessageEvent.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/event/ReactionEvent.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/event/UserActivityEvent.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/event/UserOnlineEvent.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/event/UserTypingEvent.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/google/GoogleOAuthTokenRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/google/OAuthTokenResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/google/UserInfo.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/telegram/TelegramAuthTokenRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/telegram/TelegramOAuthResult.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/model/user/UserColor.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/repository/MessageRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/repository/ReactionRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/repository/SessionRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/repository/UserRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/repository/VerificationRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/service/ChatGPTService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/service/EmailService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/service/EventsService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/service/GoogleOAuthService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/service/JwtService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/service/TelegramOAuthService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/service/VerificationService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/utils/HashUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/utils/PasswordUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/chatweb/utils/UserColorUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/logback.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/google-oauth-button.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/login.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/post-body.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/pre-body.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/registration.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/verification.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/chatweb/AuthEndpointTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/chatweb/EventsEndpointTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/chatweb/EventsServiceTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/chatweb/JsonTest.java" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <task path="$PROJECT_DIR$">
+          <activation />
+        </task>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="chatweb" type="f1a62948:ProjectNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="chatweb" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="chatweb" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="application" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="chatweb" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="build" type="c8890929:TasksNode$1" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="HTML File" />
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="webclient" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RESET_MODE" value="HARD" />
+    <option name="UPDATE_TYPE" value="REBASE" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 4
+}</component>
+  <component name="ProjectId" id="2NL0eQz3AH8stbZbgX0aTV3mzQ3" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <OptionsSetting value="false" id="Update" />
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "TODO_SCOPE": "All Places",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "master",
+    "import_schema_mapping": "<schema-mapping>\n  <databases>\n    <list>\n      <schema-mapping-item>\n        <source-data-source-id>4355f54d-b813-4024-9fd8-7c4ca74a016c</source-data-source-id>\n        <source-path>database/&quot;chat&quot;</source-path>\n        <target-data-source-id>772d66f1-3358-43d5-b68f-7bff737deec9</target-data-source-id>\n        <target-path>database/&quot;chat&quot;/schema/&quot;public&quot;</target-path>\n      </schema-mapping-item>\n      <schema-mapping-item>\n        <source-data-source-id>772d66f1-3358-43d5-b68f-7bff737deec9</source-data-source-id>\n        <source-path>database/&quot;chat&quot;</source-path>\n        <target-data-source-id>772d66f1-3358-43d5-b68f-7bff737deec9</target-data-source-id>\n        <target-path>database/&quot;postgres&quot;/schema/&quot;public&quot;</target-path>\n      </schema-mapping-item>\n    </list>\n  </databases>\n</schema-mapping>",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "E:/Projects/Study/AG/http-server/backend",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "spring.configuration.checksum": "10061f659cef907ecd62f940c5bdf9cf",
+    "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql"
+    ]
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\Projects\Study\AG\http-server\src\main\resources\templates" />
+    </key>
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="chatweb" />
+    </key>
+    <key name="MoveInnerDialog.RECENTS_KEY">
+      <recent name="chatweb.model.chatgpt" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="chatweb.exception.chatgpt" />
+      <recent name="chatweb.model.chatgpt" />
+      <recent name="chatweb.configuration.properties" />
+      <recent name="chatweb.service" />
+      <recent name="chatweb.controller" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Spring Boot.ChatwebApplication">
+    <configuration name="ChatGPTService" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="chatweb.service.ChatGPTService" />
+      <module name="chatweb.main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="chatweb.service.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="EmailService" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="chatweb.service.EmailService" />
+      <module name="chat-web.main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="chatweb.service.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <envs>
+        <env name="DB_PASSWORD" value="FHcloT8EDjkCYJmZ" />
+        <env name="DB_URL" value="jdbc:postgresql://db.fttmjytobvwdvendhllp.supabase.co:5432/postgres" />
+        <env name="DB_USER" value="postgres" />
+        <env name="SMTP_EMAIL" value="noreply.mineful@gmail.com" />
+        <env name="SMTP_FROM_NAME" value="ChatWeb no-reply" />
+        <env name="SMTP_HOST" value="smtp.gmail.com" />
+        <env name="SMTP_PASSWORD" value="pfyhvkaavoxtcfcl" />
+        <env name="SMTP_PORT" value="465" />
+        <env name="GOOGLE_OAUTH_CLIENT_ID" value="703972449363-n8tt4siemj0nksbt66utequo7d5anhbr.apps.googleusercontent.com" />
+        <env name="GOOGLE_OAUTH_CLIENT_SECRET" value="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" />
+        <env name="GOOGLE_OAUTH_REDIRECT_URI" value="http://localhost/google/oauth/redirect" />
+      </envs>
+      <option name="MAIN_CLASS_NAME" value="chatweb.Main" />
+      <module name="chatweb.main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="chatweb.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="http-server [bootJar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="bootJar" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="http-server [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="--continuous" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="build" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="ChatwebApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <envs>
+        <env name="DB_PASSWORD" value="FHcloT8EDjkCYJmZ" />
+        <env name="DB_URL" value="jdbc:postgresql://db.fttmjytobvwdvendhllp.supabase.co:5432/postgres" />
+        <env name="DB_USER" value="postgres" />
+        <env name="GOOGLE_OAUTH_CLIENT_ID" value="703972449363-n8tt4siemj0nksbt66utequo7d5anhbr.apps.googleusercontent.com" />
+        <env name="GOOGLE_OAUTH_CLIENT_SECRET" value="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" />
+        <env name="GOOGLE_OAUTH_REDIRECT_URI" value="http://localhost:5173/google/oauth/redirect" />
+        <env name="JWT_SECRET" value="RXRZ3AAKrIouA8ORghfxBKI3bbYq66Kg" />
+        <env name="JWT_TOKEN_LIFETIME_SECONDS" value="604800" />
+        <env name="PORT" value="80" />
+        <env name="SMTP_EMAIL" value="noreply.mineful@gmail.com" />
+        <env name="SMTP_FROM_NAME" value="ChatWeb no-reply" />
+        <env name="SMTP_HOST" value="smtp.gmail.com" />
+        <env name="SMTP_PASSWORD" value="pfyhvkaavoxtcfcl" />
+        <env name="SMTP_PORT" value="465" />
+      </envs>
+      <module name="chatweb.main" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="chatweb.ChatwebApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Application.ChatGPTService" />
+      <item itemvalue="Application.EmailService" />
+      <item itemvalue="Application.Main" />
+      <item itemvalue="Gradle.http-server [bootJar]" />
+      <item itemvalue="Gradle.http-server [build]" />
+      <item itemvalue="Spring Boot.ChatwebApplication" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Gradle.http-server [build]" />
+        <item itemvalue="Gradle.http-server [bootJar]" />
+        <item itemvalue="Application.Main" />
+        <item itemvalue="Application.EmailService" />
+        <item itemvalue="Application.ChatGPTService" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="6408a9de-94f9-4d94-9ec5-1dd4d23fd5ea" name="Changes" comment="" />
+      <created>1679428150326</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1679428150326</updated>
+      <workItem from="1679428151404" duration="2614000" />
+      <workItem from="1679830282126" duration="1068000" />
+      <workItem from="1679831624206" duration="17408000" />
+      <workItem from="1680112106630" duration="8130000" />
+      <workItem from="1680208320263" duration="8277000" />
+      <workItem from="1680375077816" duration="10086000" />
+      <workItem from="1680725383688" duration="2475000" />
+      <workItem from="1680808327640" duration="34170000" />
+      <workItem from="1681287119623" duration="3219000" />
+      <workItem from="1681324794493" duration="2868000" />
+      <workItem from="1681372629250" duration="599000" />
+      <workItem from="1681408908793" duration="8472000" />
+      <workItem from="1681459681139" duration="20575000" />
+      <workItem from="1681649224019" duration="16616000" />
+      <workItem from="1681927252297" duration="10263000" />
+      <workItem from="1682096612335" duration="10091000" />
+      <workItem from="1682107507108" duration="1200000" />
+      <workItem from="1682865887461" duration="9909000" />
+      <workItem from="1683037060696" duration="11154000" />
+      <workItem from="1683290799918" duration="599000" />
+      <workItem from="1683649892854" duration="3634000" />
+      <workItem from="1683702975825" duration="597000" />
+      <workItem from="1683800559594" duration="599000" />
+      <workItem from="1684070549585" duration="5902000" />
+      <workItem from="1684167960898" duration="145000" />
+      <workItem from="1684168118790" duration="624000" />
+      <workItem from="1684392635028" duration="599000" />
+      <workItem from="1684435443314" duration="3022000" />
+      <workItem from="1684484204352" duration="6701000" />
+      <workItem from="1684775409547" duration="2218000" />
+      <workItem from="1684790865187" duration="599000" />
+      <workItem from="1684868526689" duration="604000" />
+      <workItem from="1684935511824" duration="600000" />
+      <workItem from="1684999103148" duration="598000" />
+      <workItem from="1685901070848" duration="5308000" />
+      <workItem from="1685947283304" duration="600000" />
+      <workItem from="1686078856460" duration="5680000" />
+      <workItem from="1686163291367" duration="6213000" />
+      <workItem from="1686230208159" duration="9939000" />
+      <workItem from="1686400512508" duration="19102000" />
+      <workItem from="1686568306195" duration="12000" />
+      <workItem from="1686750054422" duration="29000" />
+      <workItem from="1686750091909" duration="223000" />
+      <workItem from="1686815884583" duration="13000" />
+      <workItem from="1686853369055" duration="12132000" />
+      <workItem from="1687018210269" duration="24528000" />
+      <workItem from="1687275967655" duration="5813000" />
+      <workItem from="1687367356304" duration="7827000" />
+      <workItem from="1687515290179" duration="598000" />
+      <workItem from="1687529178686" duration="124000" />
+      <workItem from="1687541092941" duration="8846000" />
+      <workItem from="1687633780474" duration="13704000" />
+      <workItem from="1687978599766" duration="3125000" />
+      <workItem from="1688070246691" duration="1105000" />
+      <workItem from="1688147972010" duration="6444000" />
+      <workItem from="1688207118058" duration="9215000" />
+      <workItem from="1688290627669" duration="12421000" />
+      <workItem from="1688457841739" duration="6110000" />
+      <workItem from="1688586642355" duration="7423000" />
+      <workItem from="1688631492105" duration="3005000" />
+      <workItem from="1688754436931" duration="783000" />
+      <workItem from="1688898595081" duration="8000" />
+      <workItem from="1689010797227" duration="6164000" />
+      <workItem from="1689186575932" duration="3521000" />
+      <workItem from="1689235936997" duration="4779000" />
+      <workItem from="1689423314372" duration="38559000" />
+      <workItem from="1689770062792" duration="91066000" />
+      <workItem from="1690396853524" duration="7886000" />
+      <workItem from="1690564272691" duration="9254000" />
+      <workItem from="1691949902313" duration="2316000" />
+      <workItem from="1692110712773" duration="1285000" />
+      <workItem from="1692207466082" duration="6901000" />
+      <workItem from="1692261799788" duration="7229000" />
+      <workItem from="1692381359062" duration="2685000" />
+      <workItem from="1692865746926" duration="597000" />
+      <workItem from="1697547778387" duration="702000" />
+      <workItem from="1697736010036" duration="952000" />
+      <workItem from="1697737673329" duration="1234000" />
+      <workItem from="1698996200680" duration="623000" />
+      <workItem from="1701893721513" duration="7462000" />
+      <workItem from="1701972708190" duration="5525000" />
+      <workItem from="1702136815248" duration="12507000" />
+      <workItem from="1702297859049" duration="1203000" />
+      <workItem from="1702301939463" duration="57000" />
+      <workItem from="1702317512721" duration="1703000" />
+      <workItem from="1702551174688" duration="5223000" />
+    </task>
+    <task id="LOCAL-00001" summary="initial">
+      <created>1681294141627</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1681294141627</updated>
+    </task>
+    <task id="LOCAL-00002" summary="longpoll and daisyui sweet stuff">
+      <created>1681677267694</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1681677267694</updated>
+    </task>
+    <task id="LOCAL-00003" summary="add user online">
+      <created>1681933533794</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1681933533794</updated>
+    </task>
+    <task id="LOCAL-00004" summary="start WebServer integration">
+      <created>1682107329190</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1682107329190</updated>
+    </task>
+    <task id="LOCAL-00005" summary="fixed online display + added UserActivity lifetime">
+      <created>1683142895794</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1683142895794</updated>
+    </task>
+    <task id="LOCAL-00006" summary="add logback">
+      <created>1683652649262</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1683652649262</updated>
+    </task>
+    <task id="LOCAL-00007" summary="fixed messages display + started to add emails">
+      <created>1686083940675</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1686083940675</updated>
+    </task>
+    <task id="LOCAL-00008" summary="add verification message">
+      <created>1686169262935</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1686169262935</updated>
+    </task>
+    <task id="LOCAL-00009" summary="add verification for users + add otp input in verification.html">
+      <created>1686259542633</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1686259542633</updated>
+    </task>
+    <task id="LOCAL-00010" summary="created google sign up">
+      <created>1686856785476</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1686856785476</updated>
+    </task>
+    <task id="LOCAL-00011" summary="add spring splendor">
+      <created>1687122506908</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1687122506909</updated>
+    </task>
+    <task id="LOCAL-00012" summary="finished Spring integration">
+      <created>1687290857383</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1687290857383</updated>
+    </task>
+    <task id="LOCAL-00013" summary="add tabs in menu">
+      <created>1687641590344</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1687641590344</updated>
+    </task>
+    <task id="LOCAL-00014" summary="fixed bugs with user save and cookies">
+      <created>1687641738779</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1687641738779</updated>
+    </task>
+    <task id="LOCAL-00015" summary="Dockerfile">
+      <created>1687641752915</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1687641752915</updated>
+    </task>
+    <task id="LOCAL-00016" summary="moving out (model package)">
+      <created>1687978898440</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1687978898440</updated>
+    </task>
+    <task id="LOCAL-00017" summary="fixed tiny bugs">
+      <created>1687988206319</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1687988206319</updated>
+    </task>
+    <task id="LOCAL-00018" summary="add jwt authorization">
+      <created>1688312733060</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1688312733060</updated>
+    </task>
+    <task id="LOCAL-00019" summary="multiple sessions for user fix">
+      <created>1688497329284</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1688497329284</updated>
+    </task>
+    <task id="LOCAL-00020" summary="fixed messages deletion">
+      <created>1688603128679</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1688603128679</updated>
+    </task>
+    <task id="LOCAL-00021" summary="almost finished svelte app">
+      <created>1690564505668</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1690564505669</updated>
+    </task>
+    <task id="LOCAL-00022" summary=" finished svelte version">
+      <created>1690576332016</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1690576332016</updated>
+    </task>
+    <task id="LOCAL-00023" summary="tg auth">
+      <created>1691950360968</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1691950360968</updated>
+    </task>
+    <task id="LOCAL-00024" summary="java opts for dockerfile">
+      <created>1691950375637</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1691950375637</updated>
+    </task>
+    <task id="LOCAL-00025" summary="deleted some old piece of code">
+      <created>1692219247329</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1692219247329</updated>
+    </task>
+    <task id="LOCAL-00026" summary="deleted some old piece of code">
+      <created>1692304050846</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1692304050846</updated>
+    </task>
+    <task id="LOCAL-00027" summary="chatgpt completions base">
+      <created>1692477255615</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1692477255615</updated>
+    </task>
+    <task id="LOCAL-00028" summary="removed longpoll &amp; refactor">
+      <option name="closed" value="true" />
+      <created>1701900093122</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1701900093122</updated>
+    </task>
+    <task id="LOCAL-00029" summary="added personal events for message edit &amp; refactor">
+      <option name="closed" value="true" />
+      <created>1702317945433</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1702317945433</updated>
+    </task>
+    <option name="localTasksCounter" value="30" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="add logback" />
+    <MESSAGE value="fixed messages display + started to add emails" />
+    <MESSAGE value="add verification message" />
+    <MESSAGE value="add verification for users + add otp input in verification.html" />
+    <MESSAGE value="created google sign up" />
+    <MESSAGE value="add spring splendor" />
+    <MESSAGE value="finished Spring integration" />
+    <MESSAGE value="add tabs in menu" />
+    <MESSAGE value="fixed bugs with user save and cookies" />
+    <MESSAGE value="Dockerfile" />
+    <MESSAGE value="moving out (modals package)" />
+    <MESSAGE value="moving out (model package)" />
+    <MESSAGE value="fixed tiny bugs" />
+    <MESSAGE value="add jwt authorization" />
+    <MESSAGE value="multiple sessions for user fix" />
+    <MESSAGE value="fixed messages deletion" />
+    <MESSAGE value="almost finished svelte app" />
+    <MESSAGE value=" finished svelte version" />
+    <MESSAGE value="tg auth" />
+    <MESSAGE value="java opts for dockerfile" />
+    <MESSAGE value="deleted some old piece of code" />
+    <MESSAGE value="chatgpt completions base" />
+    <MESSAGE value="Remove unused LongPollFuture related methods and update verification methods.&#10;&#10;This commit removes the LongPollFuture class and all related methods as they were no longer being used in the chat application. The long-polling mechanism was replaced by server-sent events for delivering chat messages in real-time, which necessitated this removal. Additionally, this commit refines the solution for handling verifications. Now, the createVerification method in VerificationService directly returns a Verification object instead of finding it again after creation. The corresponding usage in ApiGoogleOAuthController and ApiTelegramOAuthController is also updated accordingly. This change improves performance and readability." />
+    <MESSAGE value="removed longpoll &amp; refactor" />
+    <MESSAGE value="added personal events for message edit &amp; refactor" />
+    <option name="LAST_COMMIT_MESSAGE" value="added personal events for message edit &amp; refactor" />
+  </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="GradleRunConfiguration">
+        <watch expression="HttpUtils.getCookies(exchange)" />
+      </configuration>
+    </watches-manager>
+  </component>
+</project>
