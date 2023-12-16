@@ -46,7 +46,6 @@ public class GoogleOAuthService {
     }
 
     public UserInfo getUserInfo(String token) throws IOException {
-        WebClient.create(USER_INFO_URI);
         return webClient.get()
                 .uri(USER_INFO_URI, uriBuilder -> uriBuilder
                         .queryParam("access_token", token)

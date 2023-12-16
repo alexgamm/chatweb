@@ -53,10 +53,11 @@ public class ChatGPTService {
                 .exchangeToMono(clientResponse -> {
                     if (clientResponse.statusCode().isError()) {
                         return clientResponse.bodyToMono(String.class)
-                                .flatMap(errorBody -> Mono.error(new ChatCompletionException(String
-                                        .format("Unsuccessful response: Status code: %d, Body: %s",
-                                                clientResponse.statusCode().value(), errorBody
-                                        ))));
+                                .map(errorBody -> String.format("Unsuccessful response: Status code: %d, Body: %s",
+                                        clientResponse.statusCode().value(), errorBody
+                                ))
+                                .map(ChatCompletionException::new)
+                                .flatMap(Mono::error);
                     } else {
                         return clientResponse.bodyToMono(ChatCompletionResponse.class);
                     }
