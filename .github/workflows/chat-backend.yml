@@ -13,6 +13,3 @@ jobs:
     with:
       app-name: chat
     secrets: inherit
-    defaults:
-      run:
-        working-directory: ./backend
