@@ -1,4 +1,4 @@
-FROM openjdk:17-jdk-slim-buster
+FROM eclipse-temurin:17-jdk-alpine
 
 ARG APP_NAME
 ENV SERVICE_PATH /opt/${APP_NAME}

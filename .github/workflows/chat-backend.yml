@@ -8,7 +8,7 @@ on:
       - "backend/**"
 
 jobs:
-  deploy:
+  deploy-chat:
     uses: ./.github/workflows/backend.yml
     with:
       app-name: chat
