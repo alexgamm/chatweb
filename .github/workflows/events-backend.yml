@@ -1,4 +1,9 @@
-on: workflow_dispatch
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'backend/**'
+  workflow_dispatch:
 
 jobs:
   deploy-events-backend:
