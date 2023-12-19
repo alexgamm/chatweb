@@ -4,10 +4,12 @@ on:
   push:
     branches:
       - master
+    paths:
+      - "backend/**"
 
 jobs:
   deploy:
-    uses: /backend/.github/workflows/deploy.yml
+    uses: /backend.yml
     with:
       app-name: chat
     secrets: inherit
