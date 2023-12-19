@@ -53,6 +53,15 @@ subprojects {
         testImplementation 'org.slf4j:slf4j-api:2.0.4'
     }
 
+    jar {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        archiveFileName = "${project.parent.name}-${project.name}.jar"
+    }
+
+    bootJar {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+
     tasks.named('test') {
         useJUnitPlatform()
     }

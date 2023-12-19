@@ -1,0 +1,13 @@
+name: Deploy Chat
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    uses: ./deploy.yml
+    with:
+      app-name: chat
+    secrets: inherit
