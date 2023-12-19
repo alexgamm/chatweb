@@ -44,14 +44,14 @@ jobs:
       - name: Push Docker image
         run: docker push ghcr.io/${{ github.repository }}/${{ inputs.app-name }}:latest
 
-     - name: Deploy to remote
-       uses: appleboy/ssh-action@master
-       with:
-         host: ${{ secrets.SSH_HOST }}
-         username: ${{ secrets.SSH_USER }}
-         key: ${{ secrets.SSH_KEY }}
-         script: |
-           cd /opt/chatweb
-           docker-compose down
-           docker-compose pull
-           docker-compose up -d --build
+      - name: Deploy to remote
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /opt/chatweb
+            docker-compose down
+            docker-compose pull
+            docker-compose up -d --build
