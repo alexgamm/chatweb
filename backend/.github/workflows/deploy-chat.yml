@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    uses: ./deploy.yml
+    uses: /backend/.github/workflows/deploy.yml
     with:
       app-name: chat
     secrets: inherit
