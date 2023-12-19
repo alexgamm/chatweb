@@ -1,0 +1,4 @@
+dependencies {
+    implementation project(":events:model")
+    implementation project(":auth:infrastructure")
+}
