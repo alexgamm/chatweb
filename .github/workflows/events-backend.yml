@@ -1,4 +1,4 @@
-name: Deploy chat
+name: Deploy events
 
 on:
   push:
@@ -11,8 +11,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy-chat-backend:
+  deploy-events-backend:
     uses: ./.github/workflows/backend.yml
     with:
-      app-name: chat
+      app-name: events
     secrets: inherit
