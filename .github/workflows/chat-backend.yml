@@ -1,0 +1,15 @@
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'backend/**'
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+jobs:
+  deploy-chat-backend:
+    uses: ./.github/workflows/backend.yml
+    with:
+      app-name: chat
+    secrets: inherit
