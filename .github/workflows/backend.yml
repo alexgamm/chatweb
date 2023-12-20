@@ -52,6 +52,6 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd /opt/chatweb
-            docker-compose down
-            docker-compose pull
-            docker-compose up -d --build
+            docker-compose pull ${{ inputs.app-name }}
+            docker-compose restart ${{ inputs.app-name }}
+            docker-compose up -d
