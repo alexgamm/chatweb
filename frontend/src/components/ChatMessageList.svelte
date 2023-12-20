@@ -92,7 +92,7 @@
     addEventHandler("EDITED_MESSAGE", (event) => {
       messages = messages.map((message) =>
         message.id === event.message.id
-          ? { ...message, ...event.message }
+          ? { ...message, ...event.message, reactions: message.reactions }
           : message
       );
     });

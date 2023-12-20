@@ -4,7 +4,7 @@ export const reactionsOrder = (a, b) =>
   REACTIONS.indexOf(a.reaction) - REACTIONS.indexOf(b.reaction);
 
 export const toggleReaction = (reactions, reaction) => {
-  if (reactions.find((r) => r.reaction === reaction)) {
+  if (reactions?.find((r) => r.reaction === reaction)) {
     return reactions
       .map((r) =>
         r.reaction === reaction

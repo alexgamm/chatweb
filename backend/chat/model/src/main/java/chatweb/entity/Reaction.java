@@ -1,5 +1,6 @@
 package chatweb.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,6 +26,7 @@ public class Reaction {
     private String id;
     @Setter
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "message_id")
     private Message message;
     @Setter
