@@ -133,7 +133,7 @@
   </div>
 {/if}
 
-<form on:submit|preventDefault={submit}>
+<form class="p-2" on:submit|preventDefault={submit}>
   <input
     class="input input-bordered input-primary w-full"
     type="text"
