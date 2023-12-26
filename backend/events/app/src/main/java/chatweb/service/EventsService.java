@@ -33,7 +33,7 @@ public class EventsService {
                 SseEmitter.SseEventBuilder builder = SseEmitter.event()
                         .data(event)
                         .id(UUID.randomUUID().toString())
-                        .name(event.getType());
+                        .name(event.getClass().getSimpleName());
                 try {
                     emitter.send(builder);
                 } catch (Throwable ignored) {

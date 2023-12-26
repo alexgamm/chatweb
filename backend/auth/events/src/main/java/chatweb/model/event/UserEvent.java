@@ -7,6 +7,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public abstract class UserEvent extends Event {
+public abstract class UserEvent implements Event {
     private int userId;
 }

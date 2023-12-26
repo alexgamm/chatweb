@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class NewMessageEvent extends Event {
+public class NewMessageEvent implements Event {
     private MessageDto message;
 }
