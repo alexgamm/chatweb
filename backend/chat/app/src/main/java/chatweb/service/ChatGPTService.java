@@ -108,6 +108,7 @@ public class ChatGPTService {
                 chatweb.entity.Message completionMessage = messageRepository.save(new chatweb.entity.Message(
                         UUID.randomUUID().toString(),
                         completionContent,
+                        null,
                         user,
                         null,
                         message,

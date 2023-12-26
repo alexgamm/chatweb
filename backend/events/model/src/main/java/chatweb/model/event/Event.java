@@ -21,10 +21,12 @@ public abstract class Event {
     private final EventType type;
     // TODO check if the field is required
     private final Date date;
+    private final Integer roomId;
 
-    public Event(EventType type, Date date) {
+    public Event(EventType type, Date date, Integer roomId) {
         this.type = type;
         this.date = date;
+        this.roomId = roomId;
     }
 
     public EventType getType() {
@@ -33,5 +35,9 @@ public abstract class Event {
 
     public Date getDate() {
         return date;
+    }
+
+    public Integer getRoomId() {
+        return roomId;
     }
 }

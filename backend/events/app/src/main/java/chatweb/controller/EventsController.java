@@ -8,12 +8,7 @@ import chatweb.model.event.ReactionEvent;
 import chatweb.model.event.ServiceReactionEvent;
 import chatweb.service.EventsService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
@@ -37,8 +32,8 @@ public class EventsController implements ApiControllerHelper {
         if (event instanceof ServiceReactionEvent serviceReactionEvent) {
             eventsService.addEvent((userId) -> new ReactionEvent(
                     serviceReactionEvent.getMessageId(),
-                    MessageMapper.groupReactions(serviceReactionEvent.getReactions(), userId)
-            ));
+                    MessageMapper.groupReactions(serviceReactionEvent.getReactions(), userId), event.getRoomId())
+            );
         } else {
             eventsService.addEvent(event);
         }

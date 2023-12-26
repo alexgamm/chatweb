@@ -11,11 +11,11 @@ public class ChangeUserColorEvent extends Event {
     private UserColor color;
 
     public ChangeUserColorEvent() {
-        super(EventType.CHANGE_COLOR, null);
+        super(EventType.CHANGE_COLOR, null, null);
     }
 
     public ChangeUserColorEvent(int userId, UserColor color) {
-        super(EventType.CHANGE_COLOR, new Date());
+        super(EventType.CHANGE_COLOR, new Date(), null);
         this.userId = userId;
         this.color = color;
     }

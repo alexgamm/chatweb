@@ -18,12 +18,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Set;
@@ -57,8 +52,9 @@ public class UsersController implements ApiControllerHelper {
     }
 
     @PutMapping("me/typing")
-    public ResponseEntity<EmptyResponse> typing(@RequestAttribute User user) {
-        eventsApi.addEvent(new UserTypingEvent(user.getId()));
+    public ResponseEntity<EmptyResponse> typing(@RequestAttribute User user, @RequestParam(required = false) String roomKey) {
+
+        eventsApi.addEvent(new UserTypingEvent(user.getId(), ));
         return ResponseEntity.ok(new EmptyResponse());
     }
 

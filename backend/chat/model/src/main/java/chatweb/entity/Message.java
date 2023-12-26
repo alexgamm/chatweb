@@ -1,13 +1,6 @@
 package chatweb.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,6 +23,10 @@ public class Message {
     @Column(name = "message")
     private String message;
 
+    @ManyToOne
+    @JoinColumn(name = "room_id", referencedColumnName = "id")
+    private Room room;
+
     @Setter
     @OneToOne()
     @JoinColumn(name = "user_id", referencedColumnName = "id")
@@ -47,4 +44,7 @@ public class Message {
     @Column(name = "send_date")
     private Date sendDate;
 
+    public Integer getRoomId() {
+        return room == null ? null : room.getId();
+    }
 }

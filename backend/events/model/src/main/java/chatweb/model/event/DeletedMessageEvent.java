@@ -9,11 +9,11 @@ public class DeletedMessageEvent extends Event {
     private String messageId;
 
     public DeletedMessageEvent() {
-        super(EventType.DELETED_MESSAGE, null);
+        super(EventType.DELETED_MESSAGE, null, null);
     }
 
-    public DeletedMessageEvent(String messageId) {
-        super(EventType.DELETED_MESSAGE, new Date());
+    public DeletedMessageEvent(String messageId, Integer roomId) {
+        super(EventType.DELETED_MESSAGE, new Date(), roomId);
         this.messageId = messageId;
     }
 }

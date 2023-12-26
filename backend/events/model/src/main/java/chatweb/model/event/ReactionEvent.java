@@ -12,11 +12,11 @@ public class ReactionEvent extends Event {
     private Set<MessageDto.Reaction> reactions;
 
     public ReactionEvent() {
-        super(EventType.REACTION, null);
+        super(EventType.REACTION, null, null);
     }
 
-    public ReactionEvent(String messageId, Set<MessageDto.Reaction> reactions) {
-        super(EventType.REACTION, new Date());
+    public ReactionEvent(String messageId, Set<MessageDto.Reaction> reactions, Integer roomId) {
+        super(EventType.REACTION, new Date(), roomId);
         this.messageId = messageId;
         this.reactions = reactions;
     }

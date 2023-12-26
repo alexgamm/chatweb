@@ -10,11 +10,11 @@ public class EditedMessageEvent extends Event {
     private MessageDto message;
 
     public EditedMessageEvent() {
-        super(EventType.EDITED_MESSAGE, null);
+        super(EventType.EDITED_MESSAGE, null, null);
     }
 
-    public EditedMessageEvent(MessageDto message) {
-        super(EventType.EDITED_MESSAGE, new Date());
+    public EditedMessageEvent(MessageDto message, Integer roomId) {
+        super(EventType.EDITED_MESSAGE, new Date(), roomId);
         this.message = message;
     }
 }

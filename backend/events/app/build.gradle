@@ -3,5 +3,6 @@ dependencies {
     implementation project(":auth:infrastructure")
     implementation project(":auth:model")
     implementation project(":events:model")
+    implementation project(":chat:infrastructure")
     implementation project(":chat:model")
 }

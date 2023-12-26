@@ -9,11 +9,11 @@ public class UserTypingEvent extends Event {
     private int userId;
 
     public UserTypingEvent() {
-        super(EventType.USER_TYPING, null);
+        super(EventType.USER_TYPING, null, null);
     }
 
-    public UserTypingEvent(int userId) {
-        super(EventType.USER_TYPING, new Date());
+    public UserTypingEvent(int userId, Integer roomId) {
+        super(EventType.USER_TYPING, new Date(), roomId);
         this.userId = userId;
     }
 }

@@ -2,15 +2,12 @@ package chatweb.service;
 
 import chatweb.model.event.Event;
 import chatweb.model.event.UserOnlineEvent;
+import chatweb.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
@@ -18,6 +15,7 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class EventsService {
     private final Map<Integer, Set<SseEmitter>> emitters = new ConcurrentHashMap<>();
+    private final RoomRepository roomRepository;
 
     public void addEvent(Event event) {
         addEvent((userId) -> event);
@@ -29,6 +27,9 @@ public class EventsService {
                 return;
             }
             Event event = eventSupplier.apply(userId);
+            if (event.getRoomId() != null && !roomRepository.isUserInRoom(event.getRoomId(), userId)) {
+                return;
+            }
             userEmitters.forEach(emitter -> {
                 SseEmitter.SseEventBuilder builder = SseEmitter.event()
                         .data(event)

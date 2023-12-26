@@ -8,4 +8,5 @@ import lombok.NoArgsConstructor;
 public class SendMessageRequest {
     private String message;
     private String repliedMessageId;
+    private String roomKey;
 }

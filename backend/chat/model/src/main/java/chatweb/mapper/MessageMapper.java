@@ -19,6 +19,7 @@ public class MessageMapper {
                 message.getUser().getId(),
                 message.getUser().getUsername(),
                 message.getMessage(),
+                message.getRoom().getId(),
                 includeRepliedMessage
                         ? messageToMessageDto(message.getRepliedMessage(), userId, false, false)
                         : null,

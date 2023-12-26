@@ -1,3 +1,4 @@
 dependencies {
     implementation project(":chat:model")
+    implementation project(":auth:model")
 }
