@@ -11,8 +11,8 @@ public class NewMessageEvent extends Event {
         super(EventType.NEW_MESSAGE, null, null);
     }
 
-    public NewMessageEvent(MessageDto message) {
-        super(EventType.NEW_MESSAGE, message.getSendDate(), message.getRoomId());
+    public NewMessageEvent(MessageDto message, Integer roomId) {
+        super(EventType.NEW_MESSAGE, message.getSendDate(), roomId);
         this.message = message;
     }
 }

@@ -11,6 +11,9 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
 
     Room findByRoomKey(String roomKey);
 
+    @Query("SELECT r.id FROM Room r WHERE r.roomKey = :roomKey")
+    Integer findRoomIdByRoomKey(String roomKey);
+
     @Query("SELECT COUNT(ur) > 0 FROM user_rooms ur WHERE ur.room_id = :roomId AND ur.user_id = :userId")
     boolean isUserInRoom(Integer roomId, Integer userId);
 

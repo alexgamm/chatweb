@@ -20,23 +20,23 @@ public class RoomsController {
     @PostMapping
     public CreateRoomResponse createRoom(@RequestAttribute User user, @RequestBody CreateRoomRequest body) {
         Room room = roomsService.createRoom(user.getId(), body.getPassword());
-        return new CreateRoomResponse(room.getRoomKey());
+        return new CreateRoomResponse(room);
     }
 
     @PatchMapping("{roomKey}/join")
     public ApiResponse joinRoom(
-            @PathVariable String roomKey,
+            @PathVariable String room,
             @RequestAttribute User user,
             @RequestBody JoinRoomRequest body
     ) throws ApiErrorException {
-        Room room = roomRepository.findByRoomKey(roomKey);
-        if (room == null) {
+        Room relatedRoom = roomRepository.findByRoomKey(room);
+        if (relatedRoom == null) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "Room does not exist"));
         }
-        if (room.getPassword() != null && !body.getPassword().equals(room.getPassword())) {
+        if (relatedRoom.getPassword() != null && !body.getPassword().equals(relatedRoom.getPassword())) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "incorrect password"));
         }
-        roomRepository.addUserToRoom(room, user);
+        roomRepository.addUserToRoom(relatedRoom, user);
         return new ApiResponse(true);
     }
 }

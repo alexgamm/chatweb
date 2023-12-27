@@ -47,4 +47,5 @@ public class Message {
     public Integer getRoomId() {
         return room == null ? null : room.getId();
     }
+
 }

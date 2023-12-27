@@ -15,6 +15,7 @@ import chatweb.model.event.ServiceReactionEvent;
 import chatweb.repository.MessageRepository;
 import chatweb.repository.RoomRepository;
 import chatweb.service.ChatGPTService;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -42,11 +43,29 @@ public class MessagesController implements ApiControllerHelper {
     public MessagesResponse getMessages(
             @RequestParam(required = false, defaultValue = "20") int count,
             @RequestParam(required = false) Long from,
+            @RequestParam(required = false) String roomKey,
             @RequestAttribute User user
-    ) {
-        List<Message> messages = from == null
-                ? messageRepository.findByOrderBySendDateDesc(Pageable.ofSize(count))
-                : messageRepository.findBySendDateBeforeOrderBySendDateDesc(new Date(from), Pageable.ofSize(count));
+    ) throws ApiErrorException {
+        final Integer roomId;
+        if (roomKey != null) {
+            roomId = roomRepository.findRoomIdByRoomKey(roomKey);
+            if (roomId == null) {
+                throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "room not found"));
+            }
+        } else {
+            roomId = null;
+        }
+        List<Message> messages = messageRepository.findAll(((root, query, criteriaBuilder) -> {
+            Predicate predicate = criteriaBuilder.conjunction();
+            if (roomId != null) {
+                predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("roomId"), roomId));
+            }
+            if (from != null) {
+                predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("sendDate"), new Date(from)));
+            }
+            return predicate;
+        }), Pageable.ofSize(count)).getContent();
+
         return new MessagesResponse(
                 messages.stream()
                         .map(message -> MessageMapper.messageToMessageDto(message, user.getId(), true))
@@ -64,20 +83,23 @@ public class MessagesController implements ApiControllerHelper {
         if (body.getMessage() == null || body.getMessage().isBlank()) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "missing message"));
         }
+        if (roomRepository.isUserInRoom(roomRepository.findByRoomKey(body.getRoom()).getId(), user.getId())) {
+            throw new ApiErrorException(new ApiError(HttpStatus.FORBIDDEN, "not allowed to send messages"));
+        }
         Message repliedMessage = Optional.ofNullable(body.getRepliedMessageId())
                 .flatMap(messageRepository::findById)
                 .orElse(null);
         Message message = messageRepository.save(new Message(
                 randomUUID().toString(),
                 body.getMessage().trim(),
-                roomRepository.findByRoomKey(body.getRoomKey()),
+                roomRepository.findByRoomKey(body.getRoom()),
                 user,
                 Collections.emptySet(),
                 repliedMessage,
                 new Date()
         ));
         MessageDto messageDto = MessageMapper.messageToMessageDto(message, user.getId(), false);
-        eventsApi.addEvent(new NewMessageEvent(messageDto));
+        eventsApi.addEvent(new NewMessageEvent(messageDto, roomRepository.findRoomIdByRoomKey(messageDto.getRoom())));
         chatGPTService.handleMessage(message);
         return new MessageIdResponse(message.getId());
     }
@@ -114,7 +136,10 @@ public class MessagesController implements ApiControllerHelper {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "no message for edit"));
         }
         if (!user.getId().equals(message.getUser().getId())) {
-            throw new ApiErrorException(new ApiError(HttpStatus.FORBIDDEN, "you can edit only your messages"));
+            throw new ApiErrorException(new ApiError(
+                    HttpStatus.FORBIDDEN,
+                    "you can edit only your messages in this room"
+            ));
         }
         message.setMessage(body.getMessage().trim());
         messageRepository.save(message);
@@ -141,6 +166,12 @@ public class MessagesController implements ApiControllerHelper {
             throw new ApiErrorException(new ApiError(
                     HttpStatus.BAD_REQUEST,
                     "cannot put reaction without message"
+            ));
+        }
+        if (roomRepository.isUserInRoom(message.getRoom().getId(), user.getId())) {
+            throw new ApiErrorException(new ApiError(
+                    HttpStatus.FORBIDDEN,
+                    "not allowed to send reactions in this room"
             ));
         }
         Reaction existingReaction = message.getReactions().stream()

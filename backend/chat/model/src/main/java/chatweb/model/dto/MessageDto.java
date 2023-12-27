@@ -18,7 +18,7 @@ public class MessageDto {
     private int userId;
     private String username;
     private String message;
-    private Integer roomId;
+    private String room;
     private MessageDto repliedMessage;
     private Date sendDate;
     private Set<Reaction> reactions;
