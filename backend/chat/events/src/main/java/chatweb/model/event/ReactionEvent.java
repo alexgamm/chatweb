@@ -2,22 +2,17 @@ package chatweb.model.event;
 
 import chatweb.model.dto.MessageDto;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import java.util.Date;
 import java.util.Set;
 
 @Getter
-public class ReactionEvent extends Event {
-    private String messageId;
+@NoArgsConstructor
+public class ReactionEvent extends MessageIdEvent {
     private Set<MessageDto.Reaction> reactions;
 
-    public ReactionEvent() {
-        super(EventType.REACTION, null);
-    }
-
     public ReactionEvent(String messageId, Set<MessageDto.Reaction> reactions) {
-        super(EventType.REACTION, new Date());
-        this.messageId = messageId;
+        super(messageId);
         this.reactions = reactions;
     }
 }
