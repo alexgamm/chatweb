@@ -32,8 +32,9 @@ public class EventsController implements ApiControllerHelper {
         if (event instanceof ServiceReactionEvent serviceReactionEvent) {
             eventsService.addEvent((userId) -> new ReactionEvent(
                     serviceReactionEvent.getMessageId(),
-                    MessageMapper.groupReactions(serviceReactionEvent.getReactions(), userId), event.getRoomId())
-            );
+                    MessageMapper.
+                            groupReactions(serviceReactionEvent.getReactions(), userId), event.getRoomId()
+            ));
         } else {
             eventsService.addEvent(event);
         }

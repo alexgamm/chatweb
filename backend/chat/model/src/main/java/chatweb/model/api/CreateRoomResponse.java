@@ -1,11 +1,13 @@
 package chatweb.model.api;
 
 import chatweb.entity.Room;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 public class CreateRoomResponse {
-    private final Room room;
+    private Room room;
 }

@@ -3,6 +3,7 @@ package chatweb.controller;
 import chatweb.client.EventsApiClient;
 import chatweb.entity.Message;
 import chatweb.entity.Reaction;
+import chatweb.entity.Room;
 import chatweb.entity.User;
 import chatweb.exception.ApiErrorException;
 import chatweb.mapper.MessageMapper;
@@ -43,12 +44,12 @@ public class MessagesController implements ApiControllerHelper {
     public MessagesResponse getMessages(
             @RequestParam(required = false, defaultValue = "20") int count,
             @RequestParam(required = false) Long from,
-            @RequestParam(required = false) String roomKey,
+            @RequestParam(required = false) String room,
             @RequestAttribute User user
     ) throws ApiErrorException {
         final Integer roomId;
-        if (roomKey != null) {
-            roomId = roomRepository.findRoomIdByRoomKey(roomKey);
+        if (room != null) {
+            roomId = roomRepository.findRoomIdByRoomKey(room);
             if (roomId == null) {
                 throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "room not found"));
             }
@@ -83,7 +84,8 @@ public class MessagesController implements ApiControllerHelper {
         if (body.getMessage() == null || body.getMessage().isBlank()) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "missing message"));
         }
-        if (roomRepository.isUserInRoom(roomRepository.findByRoomKey(body.getRoom()).getId(), user.getId())) {
+        Room room = roomRepository.findByRoomKey(body.getRoom());
+        if (!roomRepository.isUserInRoom(room == null ? null : room.getId(), user.getId())) {
             throw new ApiErrorException(new ApiError(HttpStatus.FORBIDDEN, "not allowed to send messages"));
         }
         Message repliedMessage = Optional.ofNullable(body.getRepliedMessageId())
@@ -92,14 +94,14 @@ public class MessagesController implements ApiControllerHelper {
         Message message = messageRepository.save(new Message(
                 randomUUID().toString(),
                 body.getMessage().trim(),
-                roomRepository.findByRoomKey(body.getRoom()),
+                room,
                 user,
                 Collections.emptySet(),
                 repliedMessage,
                 new Date()
         ));
         MessageDto messageDto = MessageMapper.messageToMessageDto(message, user.getId(), false);
-        eventsApi.addEvent(new NewMessageEvent(messageDto, roomRepository.findRoomIdByRoomKey(messageDto.getRoom())));
+        eventsApi.addEvent(new NewMessageEvent(messageDto, room == null ? null : room.getId()));
         chatGPTService.handleMessage(message);
         return new MessageIdResponse(message.getId());
     }
@@ -136,16 +138,14 @@ public class MessagesController implements ApiControllerHelper {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "no message for edit"));
         }
         if (!user.getId().equals(message.getUser().getId())) {
-            throw new ApiErrorException(new ApiError(
-                    HttpStatus.FORBIDDEN,
-                    "you can edit only your messages in this room"
-            ));
+            throw new ApiErrorException(new ApiError(HttpStatus.FORBIDDEN, "you can edit only your messages"));
         }
         message.setMessage(body.getMessage().trim());
         messageRepository.save(message);
         MessageDto messageDto = MessageMapper.messageToMessageDto(message, user.getId(), true);
         eventsApi.addEvent(new EditedMessageEvent(
-                MessageMapper.messageToMessageDto(message, null, false), message.getRoomId()));
+                MessageMapper.messageToMessageDto(message, null, false), message.getRoomId()
+        ));
         return messageDto;
     }
 
@@ -168,7 +168,7 @@ public class MessagesController implements ApiControllerHelper {
                     "cannot put reaction without message"
             ));
         }
-        if (roomRepository.isUserInRoom(message.getRoom().getId(), user.getId())) {
+        if (!roomRepository.isUserInRoom(message.getRoomId(), user.getId())) {
             throw new ApiErrorException(new ApiError(
                     HttpStatus.FORBIDDEN,
                     "not allowed to send reactions in this room"

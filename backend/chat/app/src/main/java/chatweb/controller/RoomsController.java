@@ -14,16 +14,17 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("api/rooms")
 @RequiredArgsConstructor
 public class RoomsController {
+
     private final RoomRepository roomRepository;
     private final RoomsService roomsService;
 
     @PostMapping
     public CreateRoomResponse createRoom(@RequestAttribute User user, @RequestBody CreateRoomRequest body) {
-        Room room = roomsService.createRoom(user.getId(), body.getPassword());
+        Room room = roomsService.createRoom(user.getId(), body.getPassword(), body.getPrefix());
         return new CreateRoomResponse(room);
     }
 
-    @PatchMapping("{roomKey}/join")
+    @PostMapping("{room}/join")
     public ApiResponse joinRoom(
             @PathVariable String room,
             @RequestAttribute User user,
@@ -36,7 +37,8 @@ public class RoomsController {
         if (relatedRoom.getPassword() != null && !body.getPassword().equals(relatedRoom.getPassword())) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "incorrect password"));
         }
-        roomRepository.addUserToRoom(relatedRoom, user);
+        relatedRoom.addUser(user);
+        roomRepository.save(relatedRoom);
         return new ApiResponse(true);
     }
 }

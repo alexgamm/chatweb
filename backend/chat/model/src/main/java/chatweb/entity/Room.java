@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @NoArgsConstructor
@@ -16,15 +17,15 @@ import java.util.Set;
 public class Room {
 
     @Id
-    @SequenceGenerator(name = "users_id_seq", sequenceName = "users_id_seq", allocationSize = 1)
-    @GeneratedValue(generator = "users_id_seq", strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(name = "rooms_id_seq", sequenceName = "rooms_id_seq", allocationSize = 1)
+    @GeneratedValue(generator = "rooms_id_seq", strategy = GenerationType.SEQUENCE)
     @Column(name = "id")
     private Integer id;
 
     @Column(name = "room_key")
     private String roomKey;
 
-    @Column (name = "password")
+    @Column(name = "password")
     private String password;
 
     @Setter
@@ -37,5 +38,9 @@ public class Room {
             name = "user_rooms",
             joinColumns = @JoinColumn(name = "room_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private Set<User> users;
+    private Set<User> users = new HashSet<>();
+
+    public void addUser(User user) {
+        users.add(user);
+    }
 }

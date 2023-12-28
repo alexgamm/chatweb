@@ -46,7 +46,7 @@ public class ChatGPTService {
             MessageRepository messageRepository,
             EventsApiClient eventsApi,
             @Qualifier("chatGPTWebClient") WebClient webClient
-            ) {
+    ) {
         this.taskScheduler = taskScheduler;
         this.chatGPTProperties = chatGPTProperties;
         this.userRepository = userRepository;
@@ -116,8 +116,8 @@ public class ChatGPTService {
                 ));
                 eventsApi.addEvent(new NewMessageEvent(
                         MessageMapper.messageToMessageDto(completionMessage, null, false),
-                        completionMessage.getRoomId())
-                );
+                        completionMessage.getRoomId()
+                ));
             } catch (ChatCompletionException e) {
                 // TODO handle properly
                 throw new RuntimeException(e);

@@ -14,6 +14,7 @@ import chatweb.model.event.ChangeUsernameEvent;
 import chatweb.model.event.UserTypingEvent;
 import chatweb.repository.RoomRepository;
 import chatweb.repository.UserRepository;
+import chatweb.repository.chatweb.utils.RoomUtils;
 import chatweb.utils.PasswordUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -54,8 +55,10 @@ public class UsersController implements ApiControllerHelper {
     }
 
     @PutMapping("me/typing")
-    public ResponseEntity<EmptyResponse> typing(@RequestAttribute User user, @RequestParam(required = false) String room) {
-
+    public ResponseEntity<EmptyResponse> typing(@RequestAttribute User user, @RequestParam(required = false) String room) throws ApiErrorException {
+        if (!roomRepository.isUserInRoom(RoomUtils.decodeRoomKey(room), user.getId())) {
+            throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "User is not in the room"));
+        }
         eventsApi.addEvent(new UserTypingEvent(user.getId(), roomRepository.findRoomIdByRoomKey(room)));
         return ResponseEntity.ok(new EmptyResponse());
     }

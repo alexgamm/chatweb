@@ -1,10 +1,13 @@
 package chatweb.model.api;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 public class CreateRoomRequest {
-    private final String password;
+    private String password;
+    private String prefix;
 }
