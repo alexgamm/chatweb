@@ -55,8 +55,11 @@ public class UsersController implements ApiControllerHelper {
     }
 
     @PutMapping("me/typing")
-    public ResponseEntity<EmptyResponse> typing(@RequestAttribute User user, @RequestParam(required = false) String room) throws ApiErrorException {
-        if (!roomRepository.isUserInRoom(RoomUtils.decodeRoomKey(room), user.getId())) {
+    public ResponseEntity<EmptyResponse> typing(
+            @RequestAttribute User user,
+            @RequestParam(required = false) String room
+    ) throws ApiErrorException {
+        if (room != null && !roomRepository.isUserInRoom(RoomUtils.decodeRoomKey(room), user.getId())) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "User is not in the room"));
         }
         eventsApi.addEvent(new UserTypingEvent(user.getId(), roomRepository.findRoomIdByRoomKey(room)));
