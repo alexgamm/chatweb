@@ -25,7 +25,7 @@ public class RoomsService {
                 Collections.emptySet()
         );
         room = roomRepository.save(room);
-        room.setKey(String.format("%s-%s", roomKeyPrefix, RoomUtils.generateKey(room.getId())));
+        room.setKey(RoomUtils.generateKey(room.getId(), roomKeyPrefix));
         return roomRepository.save(room);
     }
 }

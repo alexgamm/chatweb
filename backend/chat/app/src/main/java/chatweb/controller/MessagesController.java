@@ -176,7 +176,7 @@ public class MessagesController implements ApiControllerHelper {
                     "cannot put reaction without message"
             ));
         }
-        if (!roomRepository.isUserInRoom(message.getRoomId(), user.getId())) {
+        if (message.getRoomId() != null && !roomRepository.isUserInRoom(message.getRoomId(), user.getId())) {
             throw new ApiErrorException(new ApiError(
                     HttpStatus.FORBIDDEN,
                     "you are not in the room"

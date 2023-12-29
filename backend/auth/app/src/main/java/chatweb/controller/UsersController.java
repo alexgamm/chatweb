@@ -3,6 +3,7 @@ package chatweb.controller;
 import chatweb.client.EventsApiClient;
 import chatweb.entity.User;
 import chatweb.exception.ApiErrorException;
+import chatweb.exception.InvalidRoomKeyException;
 import chatweb.mapper.UserMapper;
 import chatweb.model.api.ApiError;
 import chatweb.model.api.ChangePasswordRequest;
@@ -59,10 +60,20 @@ public class UsersController implements ApiControllerHelper {
             @RequestAttribute User user,
             @RequestParam(required = false) String room
     ) throws ApiErrorException {
-        if (room != null && !roomRepository.isUserInRoom(RoomUtils.decodeKey(room), user.getId())) {
+        Integer roomId;
+        if (room != null) {
+            try {
+                roomId = RoomUtils.decodeKey(room);
+            } catch (InvalidRoomKeyException e) {
+                throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "Invalid key format"));
+            }
+        } else {
+            roomId = null;
+        }
+        if (roomId != null && !roomRepository.isUserInRoom(roomId, user.getId())) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "you are not in the room"));
         }
-        eventsApi.addEvent(new UserTypingEvent(user.getId(), roomRepository.findRoomIdByKey(room)));
+        eventsApi.addEvent(new UserTypingEvent(user.getId(), roomId));
         return ResponseEntity.ok(new EmptyResponse());
     }
 
