@@ -59,10 +59,10 @@ public class UsersController implements ApiControllerHelper {
             @RequestAttribute User user,
             @RequestParam(required = false) String room
     ) throws ApiErrorException {
-        if (room != null && !roomRepository.isUserInRoom(RoomUtils.decodeRoomKey(room), user.getId())) {
-            throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "User is not in the room"));
+        if (room != null && !roomRepository.isUserInRoom(RoomUtils.decodeKey(room), user.getId())) {
+            throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "you are not in the room"));
         }
-        eventsApi.addEvent(new UserTypingEvent(user.getId(), roomRepository.findRoomIdByRoomKey(room)));
+        eventsApi.addEvent(new UserTypingEvent(user.getId(), roomRepository.findRoomIdByKey(room)));
         return ResponseEntity.ok(new EmptyResponse());
     }
 

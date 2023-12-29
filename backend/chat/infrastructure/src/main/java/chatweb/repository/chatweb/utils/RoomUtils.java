@@ -5,11 +5,11 @@ import chatweb.utils.StringBaseUtils;
 public class RoomUtils {
     private static final String ALPHABET = "abcdefghijklmnopqrstuvwxyz";
 
-    public static String generateRoomKey(int userId) {
-        return StringBaseUtils.toBase(userId, ALPHABET);
+    public static String generateKey(int roomId) {
+        return StringBaseUtils.toBase(roomId, ALPHABET);
     }
 
-    public static int decodeRoomKey(String roomKey) {
-        return StringBaseUtils.fromBase(roomKey, ALPHABET);
+    public static int decodeKey(String key) {
+        return StringBaseUtils.fromBase(key, ALPHABET);
     }
 }

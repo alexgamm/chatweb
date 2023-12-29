@@ -22,8 +22,9 @@ public class Room {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "room_key")
-    private String roomKey;
+    @Setter
+    @Column(name = "key")
+    private String key;
 
     @Column(name = "password")
     private String password;

@@ -6,6 +6,7 @@ import chatweb.exception.ApiErrorException;
 import chatweb.model.api.*;
 import chatweb.repository.RoomRepository;
 import chatweb.service.RoomsService;
+import chatweb.utils.PasswordUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class RoomsController {
 
     @PostMapping
     public CreateRoomResponse createRoom(@RequestAttribute User user, @RequestBody CreateRoomRequest body) {
-        Room room = roomsService.createRoom(user.getId(), body.getPassword(), body.getPrefix());
+        Room room = roomsService.createRoom(user, body.getPassword(), body.getPrefix());
         return new CreateRoomResponse(room);
     }
 
@@ -30,11 +31,11 @@ public class RoomsController {
             @RequestAttribute User user,
             @RequestBody JoinRoomRequest body
     ) throws ApiErrorException {
-        Room relatedRoom = roomRepository.findByRoomKey(room);
+        Room relatedRoom = roomRepository.findByKey(room);
         if (relatedRoom == null) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "Room does not exist"));
         }
-        if (relatedRoom.getPassword() != null && !body.getPassword().equals(relatedRoom.getPassword())) {
+        if (relatedRoom.getPassword() != null && !PasswordUtils.check(body.getPassword(), relatedRoom.getPassword())) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "incorrect password"));
         }
         relatedRoom.addUser(user);

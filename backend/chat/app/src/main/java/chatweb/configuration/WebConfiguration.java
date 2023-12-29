@@ -14,11 +14,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfiguration implements WebMvcConfigurer {
     private final UserAuthInterceptor userAuthInterceptor;
     private final ServiceAuthInterceptor serviceAuthInterceptor;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(userAuthInterceptor)
                 .addPathPatterns("/**")
-                        .excludePathPatterns("/api/rooms");
+                .excludePathPatterns("/api/rooms");
         registry.addInterceptor(serviceAuthInterceptor)
                 .addPathPatterns("/api/rooms");
     }

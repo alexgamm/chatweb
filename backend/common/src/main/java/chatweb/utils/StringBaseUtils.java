@@ -2,26 +2,25 @@ package chatweb.utils;
 
 public class StringBaseUtils {
 
-    public static String toBase(int userId, String alphabet) {
-        String roomKey = "";
-        while (userId > alphabet.length() - 1) {
-            int remainder = userId % alphabet.length();
-            userId = userId / alphabet.length();
-            roomKey = alphabet.charAt(remainder) + roomKey;
+    public static String toBase(int source, String alphabet) {
+        StringBuilder result = new StringBuilder();
+        while (source > alphabet.length() - 1) {
+            int remainder = source % alphabet.length();
+            source = source / alphabet.length();
+            result.insert(0, alphabet.charAt(remainder));
         }
-        roomKey = alphabet.charAt(userId) + roomKey;
-        return roomKey;
+        result.insert(0, alphabet.charAt(source));
+        return result.toString();
     }
 
-    public static int fromBase(String roomKey, String alphabet) {
-        int userId = 0;
-        for (int i = roomKey.length() - 1; i >= 0; i--) {
-            userId += (int) (alphabet.indexOf(
-                    roomKey.charAt(i)) * Math.pow(alphabet.length(),
-                    roomKey.length() - 1 - i)
-            );
+    public static int fromBase(String source, String alphabet) {
+        int result = 0;
+        for (int i = source.length() - 1; i >= 0; i--) {
+            int letterIdx = alphabet.indexOf(source.charAt(i));
+            double multiplier = Math.pow(alphabet.length(), source.length() - 1 - i);
+            result += (int) (letterIdx * multiplier);
         }
-        return userId;
+        return result;
     }
 
 }

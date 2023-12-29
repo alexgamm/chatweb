@@ -48,8 +48,8 @@ public class Message {
         return room == null ? null : room.getId();
     }
 
-    public String getRoomKey() {
-        return room == null ? null : room.getRoomKey();
+    public String getKey() {
+        return room == null ? null : room.getKey();
     }
 
 }

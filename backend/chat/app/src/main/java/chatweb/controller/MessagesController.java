@@ -49,7 +49,7 @@ public class MessagesController implements ApiControllerHelper {
     ) throws ApiErrorException {
         final Integer roomId;
         if (room != null) {
-            roomId = roomRepository.findRoomIdByRoomKey(room);
+            roomId = roomRepository.findRoomIdByKey(room);
             if (roomId == null) {
                 throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "room not found"));
             }
@@ -84,9 +84,17 @@ public class MessagesController implements ApiControllerHelper {
         if (body.getMessage() == null || body.getMessage().isBlank()) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "missing message"));
         }
-        Room room = roomRepository.findByRoomKey(body.getRoom());
-        if (!roomRepository.isUserInRoom(room == null ? null : room.getId(), user.getId())) {
-            throw new ApiErrorException(new ApiError(HttpStatus.FORBIDDEN, "not allowed to send messages"));
+        Room room;
+        if (body.getRoom() != null) {
+            room = roomRepository.findByKey(body.getRoom());
+            if (room == null) {
+                throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "room doesn't exist"));
+            }
+        } else {
+            room = null;
+        }
+        if (room != null && !roomRepository.isUserInRoom(room.getId(), user.getId())) {
+            throw new ApiErrorException(new ApiError(HttpStatus.FORBIDDEN, "you are not in the room"));
         }
         Message repliedMessage = Optional.ofNullable(body.getRepliedMessageId())
                 .flatMap(messageRepository::findById)
@@ -171,7 +179,7 @@ public class MessagesController implements ApiControllerHelper {
         if (!roomRepository.isUserInRoom(message.getRoomId(), user.getId())) {
             throw new ApiErrorException(new ApiError(
                     HttpStatus.FORBIDDEN,
-                    "not allowed to send reactions in this room"
+                    "you are not in the room"
             ));
         }
         Reaction existingReaction = message.getReactions().stream()

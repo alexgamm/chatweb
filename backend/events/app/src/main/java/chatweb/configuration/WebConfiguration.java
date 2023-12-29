@@ -22,6 +22,5 @@ public class WebConfiguration implements WebMvcConfigurer {
         registry.addInterceptor(serviceAuthInterceptor)
                 .addPathPatterns("/api/events")
                 .addPathPatterns("/api/events/online");
-
     }
 }
