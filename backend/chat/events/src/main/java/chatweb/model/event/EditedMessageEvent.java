@@ -1,13 +1,16 @@
 package chatweb.model.event;
 
 import chatweb.model.dto.MessageDto;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
-public class EditedMessageEvent implements Event {
+public class EditedMessageEvent extends RoomIdEvent {
     private MessageDto message;
+
+    public EditedMessageEvent(Integer roomId, MessageDto message) {
+        super(roomId);
+        this.message = message;
+    }
 }

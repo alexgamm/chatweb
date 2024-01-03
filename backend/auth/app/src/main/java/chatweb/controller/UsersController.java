@@ -3,7 +3,6 @@ package chatweb.controller;
 import chatweb.client.EventsApiClient;
 import chatweb.entity.User;
 import chatweb.exception.ApiErrorException;
-import chatweb.exception.InvalidRoomKeyException;
 import chatweb.mapper.UserMapper;
 import chatweb.model.api.ApiError;
 import chatweb.model.api.ChangePasswordRequest;
@@ -12,16 +11,19 @@ import chatweb.model.api.UserListResponse;
 import chatweb.model.dto.UserDto;
 import chatweb.model.event.ChangeUserColorEvent;
 import chatweb.model.event.ChangeUsernameEvent;
-import chatweb.model.event.UserTypingEvent;
 import chatweb.repository.RoomRepository;
 import chatweb.repository.UserRepository;
-import chatweb.repository.chatweb.utils.RoomUtils;
 import chatweb.utils.PasswordUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Set;
@@ -53,28 +55,6 @@ public class UsersController implements ApiControllerHelper {
     @GetMapping("me")
     public UserDto getMe(@RequestAttribute User user) {
         return UserMapper.userToUserDto(user);
-    }
-
-    @PutMapping("me/typing")
-    public ResponseEntity<EmptyResponse> typing(
-            @RequestAttribute User user,
-            @RequestParam(required = false) String room
-    ) throws ApiErrorException {
-        Integer roomId;
-        if (room != null) {
-            try {
-                roomId = RoomUtils.decodeKey(room);
-            } catch (InvalidRoomKeyException e) {
-                throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "Invalid key format"));
-            }
-        } else {
-            roomId = null;
-        }
-        if (roomId != null && !roomRepository.isUserInRoom(roomId, user.getId())) {
-            throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "you are not in the room"));
-        }
-        eventsApi.addEvent(new UserTypingEvent(user.getId(), roomId));
-        return ResponseEntity.ok(new EmptyResponse());
     }
 
     @PutMapping("me/username")

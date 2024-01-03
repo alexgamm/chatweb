@@ -1,7 +1,6 @@
-package chatweb.repository.chatweb.utils;
+package chatweb.utils;
 
 import chatweb.exception.InvalidRoomKeyException;
-import chatweb.utils.StringBaseUtils;
 
 public class RoomUtils {
     private static final String ALPHABET = "abcdefghijklmnopqrstuvwxyz";

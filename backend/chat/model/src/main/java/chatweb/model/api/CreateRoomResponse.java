@@ -1,6 +1,5 @@
 package chatweb.model.api;
 
-import chatweb.entity.Room;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,5 +8,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateRoomResponse {
-    private Room room;
+    private Integer roomId;
 }

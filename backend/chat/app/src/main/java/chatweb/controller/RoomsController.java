@@ -3,26 +3,36 @@ package chatweb.controller;
 import chatweb.entity.Room;
 import chatweb.entity.User;
 import chatweb.exception.ApiErrorException;
-import chatweb.model.api.*;
+import chatweb.model.api.ApiError;
+import chatweb.model.api.ApiResponse;
+import chatweb.model.api.CreateRoomRequest;
+import chatweb.model.api.CreateRoomResponse;
+import chatweb.model.api.JoinRoomRequest;
 import chatweb.repository.RoomRepository;
 import chatweb.service.RoomsService;
 import chatweb.utils.PasswordUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("api/rooms")
 @RequiredArgsConstructor
-public class RoomsController {
+public class RoomsController implements ApiControllerHelper {
 
     private final RoomRepository roomRepository;
     private final RoomsService roomsService;
 
     @PostMapping
-    public CreateRoomResponse createRoom(@RequestAttribute User user, @RequestBody CreateRoomRequest body) {
-        Room room = roomsService.createRoom(user, body.getPassword(), body.getPrefix());
-        return new CreateRoomResponse(room);
+    public CreateRoomResponse createRoom(@RequestBody CreateRoomRequest body) {
+        //TODO validate creatorId and prefix
+        Room room = roomsService.createRoom(body.getCreatorId(), body.getPassword(), body.getPrefix());
+        return new CreateRoomResponse(room.getId());
     }
 
     @PostMapping("{room}/join")

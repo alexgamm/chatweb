@@ -1,13 +1,18 @@
 package chatweb.service;
 
-import chatweb.model.event.Event;
+import chatweb.model.event.IEvent;
+import chatweb.model.event.IRoomEvent;
 import chatweb.model.event.UserOnlineEvent;
 import chatweb.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
@@ -17,18 +22,22 @@ public class EventsService {
     private final Map<Integer, Set<SseEmitter>> emitters = new ConcurrentHashMap<>();
     private final RoomRepository roomRepository;
 
-    public void addEvent(Event event) {
+    public void addEvent(IEvent event) {
         addEvent((userId) -> event);
     }
 
-    public void addEvent(Function<Integer, Event> eventSupplier) {
+    public void addEvent(Function<Integer, IEvent> eventSupplier) {
         emitters.forEach((userId, userEmitters) -> {
             if (userEmitters.isEmpty()) {
                 return;
             }
-            Event event = eventSupplier.apply(userId);
-            if (event.getRoomId() != null && !roomRepository.isUserInRoom(event.getRoomId(), userId)) {
-                return;
+            IEvent event = eventSupplier.apply(userId);
+            if (event instanceof IRoomEvent roomEvent && roomEvent.getRoomId() != null) {
+                if (!roomRepository.isUserInRoom(roomEvent.getRoomId(), userId)) {
+                    return;
+                }
+                // hide roomId for frontend
+                roomEvent.setRoomId(null);
             }
             userEmitters.forEach(emitter -> {
                 SseEmitter.SseEventBuilder builder = SseEmitter.event()

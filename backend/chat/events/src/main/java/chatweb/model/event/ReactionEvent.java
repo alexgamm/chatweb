@@ -11,8 +11,8 @@ import java.util.Set;
 public class ReactionEvent extends MessageIdEvent {
     private Set<MessageDto.Reaction> reactions;
 
-    public ReactionEvent(String messageId, Set<MessageDto.Reaction> reactions) {
-        super(messageId);
+    public ReactionEvent(Integer roomId, String messageId, Set<MessageDto.Reaction> reactions) {
+        super(roomId, messageId);
         this.reactions = reactions;
     }
 }

@@ -6,22 +6,42 @@ import chatweb.entity.Reaction;
 import chatweb.entity.Room;
 import chatweb.entity.User;
 import chatweb.exception.ApiErrorException;
+import chatweb.exception.InvalidRoomKeyException;
 import chatweb.mapper.MessageMapper;
-import chatweb.model.api.*;
+import chatweb.model.api.ApiError;
+import chatweb.model.api.EmptyResponse;
+import chatweb.model.api.MessageIdResponse;
+import chatweb.model.api.MessagesResponse;
+import chatweb.model.api.ReactionRequest;
+import chatweb.model.api.SendMessageRequest;
 import chatweb.model.dto.MessageDto;
 import chatweb.model.event.DeletedMessageEvent;
 import chatweb.model.event.EditedMessageEvent;
 import chatweb.model.event.NewMessageEvent;
 import chatweb.model.event.ServiceReactionEvent;
+import chatweb.model.event.TypingEvent;
 import chatweb.repository.MessageRepository;
 import chatweb.repository.RoomRepository;
 import chatweb.service.ChatGPTService;
+import chatweb.utils.RoomUtils;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
 import java.util.Date;
@@ -59,13 +79,19 @@ public class MessagesController implements ApiControllerHelper {
         List<Message> messages = messageRepository.findAll(((root, query, criteriaBuilder) -> {
             Predicate predicate = criteriaBuilder.conjunction();
             if (roomId != null) {
-                predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("roomId"), roomId));
+                predicate = criteriaBuilder.and(
+                        predicate,
+                        criteriaBuilder.equal(root.get("roomId"), roomId)
+                );
             }
             if (from != null) {
-                predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("sendDate"), new Date(from)));
+                predicate = criteriaBuilder.and(
+                        predicate,
+                        criteriaBuilder.lessThan(root.get("sendDate"), new Date(from))
+                );
             }
             return predicate;
-        }), Pageable.ofSize(count)).getContent();
+        }), PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "sendDate"))).getContent();
 
         return new MessagesResponse(
                 messages.stream()
@@ -109,7 +135,7 @@ public class MessagesController implements ApiControllerHelper {
                 new Date()
         ));
         MessageDto messageDto = MessageMapper.messageToMessageDto(message, user.getId(), false);
-        eventsApi.addEvent(new NewMessageEvent(messageDto, room == null ? null : room.getId()));
+        eventsApi.addEvent(new NewMessageEvent(room == null ? null : room.getId(), messageDto));
         chatGPTService.handleMessage(message);
         return new MessageIdResponse(message.getId());
     }
@@ -128,7 +154,7 @@ public class MessagesController implements ApiControllerHelper {
             throw new ApiErrorException(new ApiError(HttpStatus.FORBIDDEN, "you can delete only your messages"));
         }
         messageRepository.deleteMessageById(message.getId());
-        eventsApi.addEvent(new DeletedMessageEvent(message.getId(), message.getRoomId()));
+        eventsApi.addEvent(new DeletedMessageEvent(message.getRoomId(), message.getId()));
         return new MessageIdResponse(messageId);
     }
 
@@ -152,7 +178,8 @@ public class MessagesController implements ApiControllerHelper {
         messageRepository.save(message);
         MessageDto messageDto = MessageMapper.messageToMessageDto(message, user.getId(), true);
         eventsApi.addEvent(new EditedMessageEvent(
-                MessageMapper.messageToMessageDto(message, null, false), message.getRoomId()
+                message.getRoomId(),
+                MessageMapper.messageToMessageDto(message, null, false)
         ));
         return messageDto;
     }
@@ -198,11 +225,33 @@ public class MessagesController implements ApiControllerHelper {
         }
         Message saved = messageRepository.save(message);
         eventsApi.addEvent(new ServiceReactionEvent(
+                saved.getRoomId(),
                 saved.getId(),
-                saved.getReactions(),
-                saved.getRoomId()
+                saved.getReactions()
         ));
         return MessageMapper.messageToMessageDto(saved, user.getId(), true);
+    }
+
+    @PutMapping("typing")
+    public ResponseEntity<EmptyResponse> typing(
+            @RequestAttribute User user,
+            @RequestParam(required = false) String room
+    ) throws ApiErrorException {
+        Integer roomId;
+        if (room != null) {
+            try {
+                roomId = RoomUtils.decodeKey(room);
+            } catch (InvalidRoomKeyException e) {
+                throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "Invalid key format"));
+            }
+        } else {
+            roomId = null;
+        }
+        if (roomId != null && !roomRepository.isUserInRoom(roomId, user.getId())) {
+            throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "you are not in the room"));
+        }
+        eventsApi.addEvent(new TypingEvent(user.getId(), room));
+        return ResponseEntity.ok(new EmptyResponse());
     }
 }
 

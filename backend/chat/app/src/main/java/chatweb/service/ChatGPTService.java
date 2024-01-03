@@ -115,8 +115,8 @@ public class ChatGPTService {
                         new Date()
                 ));
                 eventsApi.addEvent(new NewMessageEvent(
-                        MessageMapper.messageToMessageDto(completionMessage, null, false),
-                        completionMessage.getRoomId()
+                        completionMessage.getRoomId(),
+                        MessageMapper.messageToMessageDto(completionMessage, null, false)
                 ));
             } catch (ChatCompletionException e) {
                 // TODO handle properly

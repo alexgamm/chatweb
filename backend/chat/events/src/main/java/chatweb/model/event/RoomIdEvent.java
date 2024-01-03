@@ -3,10 +3,12 @@ package chatweb.model.event;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
-public abstract class UserEvent implements IEvent {
-    private int userId;
+@AllArgsConstructor
+public abstract class RoomIdEvent implements IRoomEvent {
+    @Setter
+    private Integer roomId;
 }

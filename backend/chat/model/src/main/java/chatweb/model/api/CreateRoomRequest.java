@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateRoomRequest {
-    private String password;
+    private int creatorId;
     private String prefix;
+    private String password;
 }
