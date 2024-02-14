@@ -1,8 +1,24 @@
 package chatweb.model.event;
 
-public interface IRoomEvent extends IEvent {
-    Integer getRoomId();
+import chatweb.exception.InvalidRoomKeyException;
+import chatweb.utils.RoomUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.jetbrains.annotations.Nullable;
 
-    //TODO rework this logic
-    void setRoomId(Integer roomId);
+public interface IRoomEvent extends IEvent {
+    @Nullable
+    String getRoom();
+
+    @Nullable
+    @JsonIgnore
+    default Integer getRoomId() {
+        if (getRoom() == null) {
+            return null;
+        }
+        try {
+            return RoomUtils.idFromKey(getRoom());
+        } catch (InvalidRoomKeyException e) {
+            return null;
+        }
+    }
 }

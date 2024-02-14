@@ -4,15 +4,16 @@ import chatweb.exception.InvalidRoomKeyException;
 
 public class RoomUtils {
     private static final String ALPHABET = "abcdefghijklmnopqrstuvwxyz";
+    private static final int KEY_LENGTH = 4;
 
-    public static String generateKey(int roomId, String prefix) {
-        return String.format("%s-%s", prefix, StringBaseUtils.toBase(roomId, ALPHABET));
+    public static String keyFromId(int roomId, String prefix) {
+        return String.format("%s-%s", prefix, StringBaseUtils.toBase(roomId - 1, ALPHABET, KEY_LENGTH));
     }
 
-    public static int decodeKey(String key) throws InvalidRoomKeyException {
+    public static int idFromKey(String key) throws InvalidRoomKeyException {
         if (key.contains("-")) {
             String keyWithoutPrefix = key.substring(key.indexOf("-") + 1);
-            return StringBaseUtils.fromBase(keyWithoutPrefix, ALPHABET);
+            return StringBaseUtils.fromBase(keyWithoutPrefix, ALPHABET) + 1;
         } else {
             throw new InvalidRoomKeyException();
         }

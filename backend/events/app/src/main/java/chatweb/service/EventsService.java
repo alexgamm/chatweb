@@ -36,8 +36,6 @@ public class EventsService {
                 if (!roomRepository.isUserInRoom(roomEvent.getRoomId(), userId)) {
                     return;
                 }
-                // hide roomId for frontend
-                roomEvent.setRoomId(null);
             }
             userEmitters.forEach(emitter -> {
                 SseEmitter.SseEventBuilder builder = SseEmitter.event()

@@ -27,7 +27,7 @@ public class RoomsService {
         );
         room.addUser(creator);
         room = roomRepository.save(room);
-        room.setKey(RoomUtils.generateKey(room.getId(), roomKeyPrefix));
+        room.setKey(RoomUtils.keyFromId(room.getId(), roomKeyPrefix));
         return roomRepository.save(room);
     }
 }

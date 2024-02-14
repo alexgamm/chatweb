@@ -1,16 +1,19 @@
 package chatweb.model.event;
 
 import chatweb.model.dto.MessageDto;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 
 @Getter
 @NoArgsConstructor
-public class NewMessageEvent extends RoomIdEvent {
+@AllArgsConstructor
+public class NewMessageEvent implements IRoomEvent {
     private MessageDto message;
 
-    public NewMessageEvent(Integer roomId, MessageDto message) {
-        super(roomId);
-        this.message = message;
+    @Override
+    public @Nullable String getRoom() {
+        return message.getRoom();
     }
 }

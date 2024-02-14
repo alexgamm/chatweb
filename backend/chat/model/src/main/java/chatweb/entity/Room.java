@@ -29,7 +29,6 @@ public class Room {
     @Column(name = "password")
     private String password;
 
-    @Setter
     @OneToOne()
     @JoinColumn(name = "creator_id", referencedColumnName = "id")
     private User creator;

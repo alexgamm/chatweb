@@ -11,8 +11,8 @@ import java.util.Set;
 public class ServiceReactionEvent extends MessageIdEvent {
     private Set<Reaction> reactions;
 
-    public ServiceReactionEvent(Integer roomId, String messageId, Set<Reaction> reactions) {
-        super(roomId, messageId);
+    public ServiceReactionEvent(String room, String messageId, Set<Reaction> reactions) {
+        super(room, messageId);
         this.reactions = reactions;
     }
 }

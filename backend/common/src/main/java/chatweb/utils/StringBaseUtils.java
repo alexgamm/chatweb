@@ -13,6 +13,14 @@ public class StringBaseUtils {
         return result.toString();
     }
 
+    public static String toBase(int source, String alphabet, int length) {
+        String result = toBase(source, alphabet);
+        while (result.length() < length) {
+            result = alphabet.charAt(0) + result;
+        }
+        return result;
+    }
+
     public static int fromBase(String source, String alphabet) {
         int result = 0;
         for (int i = source.length() - 1; i >= 0; i--) {

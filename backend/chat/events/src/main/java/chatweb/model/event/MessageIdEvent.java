@@ -5,11 +5,11 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public abstract class MessageIdEvent extends RoomIdEvent {
+public abstract class MessageIdEvent extends RoomEvent {
     private String messageId;
 
-    public MessageIdEvent(Integer roomId, String messageId) {
-        super(roomId);
+    public MessageIdEvent(String room, String messageId) {
+        super(room);
         this.messageId = messageId;
     }
 }

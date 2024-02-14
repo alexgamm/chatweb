@@ -115,7 +115,6 @@ public class ChatGPTService {
                         new Date()
                 ));
                 eventsApi.addEvent(new NewMessageEvent(
-                        completionMessage.getRoomId(),
                         MessageMapper.messageToMessageDto(completionMessage, null, false)
                 ));
             } catch (ChatCompletionException e) {
