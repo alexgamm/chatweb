@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DeletedMessageEvent extends MessageIdEvent {
 
-    public DeletedMessageEvent(String messageId) {
-        super(messageId);
+    public DeletedMessageEvent(String room, String messageId) {
+        super(room, messageId);
     }
 }

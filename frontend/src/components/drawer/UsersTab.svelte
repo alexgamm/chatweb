@@ -52,7 +52,7 @@
         user.id === event.userId ? { ...user, color: event.color } : user
       );
     });
-    addEventHandler("UserTypingEvent", (event) => {
+    addEventHandler("TypingEvent", (event) => {
       const user = $users.find(({ id }) => id === event.userId);
       if (!user) {
         return;

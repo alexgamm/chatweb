@@ -69,7 +69,7 @@
   const onInput = () =>
     typingDebounce(async () => {
       try {
-        await put("/api/users/me/typing");
+        await put("/api/messages/typing");
       } catch (error) {
         console.error("could not send typing", error);
       }

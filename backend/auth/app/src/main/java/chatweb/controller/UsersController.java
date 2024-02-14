@@ -11,7 +11,7 @@ import chatweb.model.api.UserListResponse;
 import chatweb.model.dto.UserDto;
 import chatweb.model.event.ChangeUserColorEvent;
 import chatweb.model.event.ChangeUsernameEvent;
-import chatweb.model.event.UserTypingEvent;
+import chatweb.repository.RoomRepository;
 import chatweb.repository.UserRepository;
 import chatweb.utils.PasswordUtils;
 import jakarta.transaction.Transactional;
@@ -34,6 +34,7 @@ import java.util.Set;
 public class UsersController implements ApiControllerHelper {
     private final UserRepository userRepository;
     private final EventsApiClient eventsApi;
+    private final RoomRepository roomRepository;
 
     @GetMapping
     public UserListResponse users() {
@@ -54,12 +55,6 @@ public class UsersController implements ApiControllerHelper {
     @GetMapping("me")
     public UserDto getMe(@RequestAttribute User user) {
         return UserMapper.userToUserDto(user);
-    }
-
-    @PutMapping("me/typing")
-    public ResponseEntity<EmptyResponse> typing(@RequestAttribute User user) {
-        eventsApi.addEvent(new UserTypingEvent(user.getId()));
-        return ResponseEntity.ok(new EmptyResponse());
     }
 
     @PutMapping("me/username")

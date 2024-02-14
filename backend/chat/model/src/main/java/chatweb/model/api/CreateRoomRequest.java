@@ -5,10 +5,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
-public class SendMessageRequest {
-    private String message;
-    private String repliedMessageId;
-    private String room;
+@NoArgsConstructor
+public class CreateRoomRequest {
+    private int creatorId;
+    private String prefix;
+    private String password;
 }
