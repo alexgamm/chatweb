@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Date;
-
 @RestController
 @RequestMapping("api/registration")
 @RequiredArgsConstructor
@@ -55,7 +53,6 @@ public class ApiRegistrationController implements ApiControllerHelper {
                 username.toLowerCase(),
                 email.toLowerCase(),
                 PasswordUtils.hash(password),
-                new Date(),
                 UserColorUtils.getRandomColor()
         );
         user = userRepository.save(user);

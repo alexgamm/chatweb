@@ -15,14 +15,9 @@ import chatweb.utils.UserColorUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.Date;
 
 @RestController
 @RequestMapping("api/google/oauth")
@@ -55,7 +50,6 @@ public class ApiGoogleOAuthController implements ApiControllerHelper {
                     username,
                     userInfo.getEmail().toLowerCase(),
                     null,
-                    new Date(),
                     UserColorUtils.getRandomColor()
             );
             user = userRepository.save(user);
