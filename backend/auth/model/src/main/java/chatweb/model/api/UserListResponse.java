@@ -4,7 +4,6 @@ import chatweb.model.user.UserColor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Date;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -18,7 +17,6 @@ public class UserListResponse {
     public static class User {
         private final int id;
         private final String username;
-        private final Date lastActivityAt;
         private final boolean online;
         private final UserColor color;
     }

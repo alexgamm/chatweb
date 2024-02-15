@@ -17,7 +17,7 @@ public class RoomsService {
     private final RoomRepository roomRepository;
 
     public Room createRoom(int creatorId, String roomPassword, String roomKeyPrefix) {
-        User creator = new User(creatorId, null, null, null, null, null);
+        User creator = new User(creatorId, null, null, null, null);
         Room room = new Room(
                 null,
                 null,
