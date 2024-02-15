@@ -3,36 +3,23 @@ package chatweb.controller;
 import chatweb.client.EventsApiClient;
 import chatweb.entity.Message;
 import chatweb.entity.Reaction;
+import chatweb.entity.Room;
 import chatweb.entity.User;
 import chatweb.exception.ApiErrorException;
+import chatweb.exception.InvalidRoomKeyException;
 import chatweb.mapper.MessageMapper;
-import chatweb.model.api.ApiError;
-import chatweb.model.api.MessageIdResponse;
-import chatweb.model.api.MessagesResponse;
-import chatweb.model.api.ReactionRequest;
-import chatweb.model.api.SendMessageRequest;
+import chatweb.model.api.*;
 import chatweb.model.dto.MessageDto;
-import chatweb.model.event.DeletedMessageEvent;
-import chatweb.model.event.EditedMessageEvent;
-import chatweb.model.event.NewMessageEvent;
-import chatweb.model.event.ServiceReactionEvent;
+import chatweb.model.event.*;
 import chatweb.repository.MessageRepository;
+import chatweb.repository.RoomRepository;
 import chatweb.service.ChatGPTService;
+import chatweb.utils.RoomUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.Date;
@@ -49,16 +36,25 @@ public class MessagesController implements ApiControllerHelper {
     private final MessageRepository messageRepository;
     private final EventsApiClient eventsApi;
     private final ChatGPTService chatGPTService;
+    private final RoomRepository roomRepository;
 
     @GetMapping
     public MessagesResponse getMessages(
             @RequestParam(required = false, defaultValue = "20") int count,
             @RequestParam(required = false) Long from,
+            @RequestParam(required = false) String room,
             @RequestAttribute User user
-    ) {
-        List<Message> messages = from == null
-                ? messageRepository.findByOrderBySendDateDesc(Pageable.ofSize(count))
-                : messageRepository.findBySendDateBeforeOrderBySendDateDesc(new Date(from), Pageable.ofSize(count));
+    ) throws ApiErrorException {
+        final Integer roomId;
+        if (room != null) {
+            roomId = roomRepository.findRoomIdByKey(room);
+            if (roomId == null) {
+                throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "room not found"));
+            }
+        } else {
+            roomId = null;
+        }
+        List<Message> messages = messageRepository.findMessages(count, roomId, from);
         return new MessagesResponse(
                 messages.stream()
                         .map(message -> MessageMapper.messageToMessageDto(message, user.getId(), true))
@@ -76,12 +72,25 @@ public class MessagesController implements ApiControllerHelper {
         if (body.getMessage() == null || body.getMessage().isBlank()) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "missing message"));
         }
+        Room room;
+        if (body.getRoom() != null) {
+            room = roomRepository.findByKey(body.getRoom());
+            if (room == null) {
+                throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "room doesn't exist"));
+            }
+        } else {
+            room = null;
+        }
+        if (room != null && !roomRepository.isUserInRoom(room.getId(), user.getId())) {
+            throw new ApiErrorException(new ApiError(HttpStatus.FORBIDDEN, "you are not in the room"));
+        }
         Message repliedMessage = Optional.ofNullable(body.getRepliedMessageId())
                 .flatMap(messageRepository::findById)
                 .orElse(null);
         Message message = messageRepository.save(new Message(
                 randomUUID().toString(),
                 body.getMessage().trim(),
+                room,
                 user,
                 Collections.emptySet(),
                 repliedMessage,
@@ -107,7 +116,7 @@ public class MessagesController implements ApiControllerHelper {
             throw new ApiErrorException(new ApiError(HttpStatus.FORBIDDEN, "you can delete only your messages"));
         }
         messageRepository.deleteMessageById(message.getId());
-        eventsApi.addEvent(new DeletedMessageEvent(message.getId()));
+        eventsApi.addEvent(new DeletedMessageEvent(message.getRoomKey(), message.getId()));
         return new MessageIdResponse(messageId);
     }
 
@@ -155,6 +164,12 @@ public class MessagesController implements ApiControllerHelper {
                     "cannot put reaction without message"
             ));
         }
+        if (message.getRoomId() != null && !roomRepository.isUserInRoom(message.getRoomId(), user.getId())) {
+            throw new ApiErrorException(new ApiError(
+                    HttpStatus.FORBIDDEN,
+                    "you are not in the room"
+            ));
+        }
         Reaction existingReaction = message.getReactions().stream()
                 .filter(r -> r.getReaction().equals(body.getReaction())
                         && r.getUserId() == user.getId())
@@ -171,10 +186,33 @@ public class MessagesController implements ApiControllerHelper {
         }
         Message saved = messageRepository.save(message);
         eventsApi.addEvent(new ServiceReactionEvent(
+                saved.getRoomKey(),
                 saved.getId(),
                 saved.getReactions()
         ));
         return MessageMapper.messageToMessageDto(saved, user.getId(), true);
+    }
+
+    @PutMapping("typing")
+    public ResponseEntity<EmptyResponse> typing(
+            @RequestAttribute User user,
+            @RequestParam(required = false) String room
+    ) throws ApiErrorException {
+        Integer roomId;
+        if (room != null) {
+            try {
+                roomId = RoomUtils.idFromKey(room);
+            } catch (InvalidRoomKeyException e) {
+                throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "Invalid key format"));
+            }
+        } else {
+            roomId = null;
+        }
+        if (roomId != null && !roomRepository.isUserInRoom(roomId, user.getId())) {
+            throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "you are not in the room"));
+        }
+        eventsApi.addEvent(new TypingEvent(room, user.getId()));
+        return ResponseEntity.ok(new EmptyResponse());
     }
 }
 

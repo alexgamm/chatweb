@@ -74,7 +74,7 @@
   };
   onMount(() => {
     loadMessages(20).then(scrollBottom);
-    addEventHandler("NEW_MESSAGE", (event) => {
+    addEventHandler("NewMessageEvent", (event) => {
       if (messages.find((message) => message.id === event.message.id)) {
         return;
       }
@@ -82,24 +82,24 @@
       sortMessages();
       scrollBottom();
     });
-    addEventHandler("CHANGE_USERNAME", (event) => {
+    addEventHandler("ChangeUsernameEvent", (event) => {
       messages = messages.map((message) =>
         message.userId === event.userId
           ? { ...message, username: event.newUsername }
           : message
       );
     });
-    addEventHandler("EDITED_MESSAGE", (event) => {
+    addEventHandler("EditedMessageEvent", (event) => {
       messages = messages.map((message) =>
         message.id === event.message.id
           ? { ...message, ...event.message, reactions: message.reactions }
           : message
       );
     });
-    addEventHandler("DELETED_MESSAGE", (event) => {
+    addEventHandler("DeletedMessageEvent", (event) => {
       messages = messages.filter(({ id }) => id !== event.messageId);
     });
-    addEventHandler("REACTION", (event) => {
+    addEventHandler("ReactionEvent", (event) => {
       messages = messages.map((message) =>
         message.id === event.messageId
           ? {

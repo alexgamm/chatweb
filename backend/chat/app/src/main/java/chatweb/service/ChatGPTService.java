@@ -108,12 +108,15 @@ public class ChatGPTService {
                 chatweb.entity.Message completionMessage = messageRepository.save(new chatweb.entity.Message(
                         UUID.randomUUID().toString(),
                         completionContent,
+                        message.getRoom(),
                         user,
                         null,
                         message,
                         new Date()
                 ));
-                eventsApi.addEvent(new NewMessageEvent(MessageMapper.messageToMessageDto(completionMessage, null, false)));
+                eventsApi.addEvent(new NewMessageEvent(
+                        MessageMapper.messageToMessageDto(completionMessage, null, false)
+                ));
             } catch (ChatCompletionException e) {
                 // TODO handle properly
                 throw new RuntimeException(e);
@@ -126,7 +129,6 @@ public class ChatGPTService {
                 .orElseGet(() -> userRepository.save(new User(
                         null,
                         chatGPTProperties.getUsername(),
-                        null,
                         null,
                         null,
                         UserColorUtils.getRandomColor()

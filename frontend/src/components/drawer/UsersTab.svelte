@@ -30,7 +30,7 @@
   onMount(() => {
     loadUsers();
 
-    addEventHandler("USER_ONLINE", (event) => {
+    addEventHandler("UserOnlineEvent", (event) => {
       if ($users.find((user) => user.id === event.userId)) {
         $users = $users.map((user) =>
           user.id === event.userId ? { ...user, online: event.online } : user
@@ -40,19 +40,19 @@
         loadUsers();
       }
     });
-    addEventHandler("CHANGE_USERNAME", (event) => {
+    addEventHandler("ChangeUsernameEvent", (event) => {
       $users = $users.map((user) =>
         user.id === event.userId
           ? { ...user, username: event.newUsername }
           : user
       );
     });
-    addEventHandler("CHANGE_COLOR", (event) => {
+    addEventHandler("ChangeUserColorEvent", (event) => {
       $users = $users.map((user) =>
         user.id === event.userId ? { ...user, color: event.color } : user
       );
     });
-    addEventHandler("USER_TYPING", (event) => {
+    addEventHandler("TypingEvent", (event) => {
       const user = $users.find(({ id }) => id === event.userId);
       if (!user) {
         return;

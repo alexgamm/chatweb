@@ -13,7 +13,7 @@ export const toggleReaction = (reactions, reaction) => {
       )
       .filter(({ count }) => count > 0);
   } else {
-    return [{ reaction, count: 1, hasOwn: true }, ...reactions];
+    return [{ reaction, count: 1, hasOwn: true }, ...(reactions ?? [])];
   }
 };
 
