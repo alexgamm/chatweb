@@ -11,19 +11,13 @@ import chatweb.model.api.UserListResponse;
 import chatweb.model.dto.UserDto;
 import chatweb.model.event.ChangeUserColorEvent;
 import chatweb.model.event.ChangeUsernameEvent;
-import chatweb.repository.RoomRepository;
 import chatweb.repository.UserRepository;
 import chatweb.utils.PasswordUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Set;
@@ -34,7 +28,6 @@ import java.util.Set;
 public class UsersController implements ApiControllerHelper {
     private final UserRepository userRepository;
     private final EventsApiClient eventsApi;
-    private final RoomRepository roomRepository;
 
     @GetMapping
     public UserListResponse users() {
@@ -44,7 +37,6 @@ public class UsersController implements ApiControllerHelper {
                 .map(user -> new UserListResponse.User(
                         user.getId(),
                         user.getUsername(),
-                        user.getLastActivityAt(),
                         onlineUserIds.contains(user.getId()),
                         user.getColor()
                 ))

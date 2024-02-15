@@ -131,7 +131,6 @@ public class ChatGPTService {
                         chatGPTProperties.getUsername(),
                         null,
                         null,
-                        null,
                         UserColorUtils.getRandomColor()
                 )));
     }

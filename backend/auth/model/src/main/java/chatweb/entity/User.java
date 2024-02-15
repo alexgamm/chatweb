@@ -6,8 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -25,8 +23,6 @@ public class User {
     private String email;
     @Column(name = "password")
     private String password;
-    @Column(name = "last_activity_at")
-    private Date lastActivityAt;
     @Column(name = "color")
     @Enumerated(EnumType.STRING)
     private UserColor color;
