@@ -19,7 +19,7 @@ import static chatweb.model.api.ApiError.notFound;
 @RestController
 @RequestMapping("api/codenames/game")
 @RequiredArgsConstructor
-public class GameController {
+public class GameController implements ApiControllerHelper {
     private final ChatApiClient chatApiClient;
     private final DictionaryRepository dictionaryRepository;
     private final GameService gameService;
@@ -44,6 +44,7 @@ public class GameController {
             @RequestAttribute User user,
             @RequestBody CreateGameRequest request
     ) throws ApiErrorException {
+        // TODO Validate all first, then create the room
         CreateRoomResponse roomResponse = chatApiClient.createRoom(new CreateRoomRequest(
                 user.getId(),
                 "codenames",
