@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <changeSet id="schema" author="AlexGamm">
+        <sql>
+            CREATE SCHEMA IF NOT EXISTS codenames;
+        </sql>
+    </changeSet>
+
+    <changeSet id="1-dictionaries" author="AlexGamm">
+        <createTable tableName="dictionaries" schemaName="codenames">
+            <column name="id" type="text">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="words" type="json">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2-games" author="AlexGamm">
+        <createTable tableName="games" schemaName="codenames">
+            <column name="id" type="text">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="room_id" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="host_id" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="settings" type="json">
+                <constraints nullable="false"/>
+            </column>
+            <column name="state" type="json"/>
+        </createTable>
+        <addForeignKeyConstraint constraintName="games_room_fk"
+                                 baseTableSchemaName="codenames" baseTableName="games" baseColumnNames="room_id"
+                                 referencedTableName="rooms" referencedColumnNames="id"
+                                 onDelete="CASCADE" onUpdate="CASCADE"/>
+        <addForeignKeyConstraint constraintName="games_host_fk"
+                                 baseTableSchemaName="codenames" baseTableName="games" baseColumnNames="host_id"
+                                 referencedTableName="users" referencedColumnNames="id"
+                                 onDelete="CASCADE" onUpdate="CASCADE"/>
+
+        <createTable tableName="game_viewers" schemaName="codenames">
+            <column name="game_id" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="integer">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey schemaName="codenames" tableName="game_viewers" columnNames="game_id,user_id"/>
+        <addForeignKeyConstraint constraintName="game_viewers_game_fk"
+                                 baseTableSchemaName="codenames" baseTableName="game_viewers" baseColumnNames="game_id"
+                                 referencedTableSchemaName="codenames" referencedTableName="games"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE" onUpdate="CASCADE"/>
+        <addForeignKeyConstraint constraintName="game_viewers_user_fk"
+                                 baseTableSchemaName="codenames" baseTableName="game_viewers" baseColumnNames="user_id"
+                                 referencedTableName="users" referencedColumnNames="id"
+                                 onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet id="3-teams" author="AlexGamm">
+        <createTable tableName="teams" schemaName="codenames">
+            <column name="id" type="integer" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="game_id" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="leader_id" type="integer"/>
+            <column name="color" type="text">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint constraintName="teams_game_fk"
+                                 baseTableSchemaName="codenames" baseTableName="teams" baseColumnNames="game_id"
+                                 referencedTableSchemaName="codenames" referencedTableName="games"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
+        <addForeignKeyConstraint constraintName="teams_leader_fk"
+                                 baseTableSchemaName="codenames" baseTableName="teams" baseColumnNames="leader_id"
+                                 referencedTableName="users" referencedColumnNames="id"
+                                 onDelete="SET NULL" onUpdate="CASCADE"/>
+
+        <createTable tableName="team_players" schemaName="codenames">
+            <column name="team_id" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="integer">
+                <constraints primaryKey="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint constraintName="team_players_team_fk"
+                                 baseTableSchemaName="codenames" baseTableName="team_players" baseColumnNames="team_id"
+                                 referencedTableSchemaName="codenames" referencedTableName="teams"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE" onUpdate="CASCADE"/>
+        <addForeignKeyConstraint constraintName="team_players_user_fk"
+                                 baseTableSchemaName="codenames" baseTableName="team_players" baseColumnNames="user_id"
+                                 referencedTableName="users" referencedColumnNames="id"
+                                 onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+</databaseChangeLog>

@@ -28,7 +28,7 @@ public class Message {
     private Room room;
 
     @Setter
-    @OneToOne()
+    @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 

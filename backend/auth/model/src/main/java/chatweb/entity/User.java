@@ -1,8 +1,9 @@
 package chatweb.entity;
 
-import chatweb.model.user.UserColor;
+import chatweb.model.Color;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,11 +12,13 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "users")
 @Getter
+@EqualsAndHashCode
 public class User {
     @Id
     @SequenceGenerator(name = "users_id_seq", sequenceName = "users_id_seq", allocationSize = 1)
     @GeneratedValue(generator = "users_id_seq", strategy = GenerationType.SEQUENCE)
     @Column(name = "id")
+    @EqualsAndHashCode.Include
     private Integer id;
     @Column(name = "username")
     private String username;
@@ -25,7 +28,7 @@ public class User {
     private String password;
     @Column(name = "color")
     @Enumerated(EnumType.STRING)
-    private UserColor color;
+    private Color color;
 }
 
 

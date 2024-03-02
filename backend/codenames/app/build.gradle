@@ -1,0 +1,10 @@
+dependencies {
+    implementation project(":common")
+    implementation project(":auth:model")
+    implementation project(":auth:infrastructure")
+    implementation project(":chat:client")
+    implementation project(":chat:infrastructure")
+    implementation project(":chat:model")
+    implementation project(":codenames:model")
+    implementation project(":codenames:infrastructure")
+}
