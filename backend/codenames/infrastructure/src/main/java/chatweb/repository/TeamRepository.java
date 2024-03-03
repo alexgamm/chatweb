@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 public interface TeamRepository extends JpaRepository<Team, Integer> {
     @Modifying
     @Transactional
-    @Query(value = "DELETE FROM team_players WHERE user_id = :userId", nativeQuery = true)
+    @Query(value = "DELETE FROM codenames.team_players WHERE user_id = :userId", nativeQuery = true)
     void removePlayerFromAllTeams(Integer userId);
     @Modifying
     @Transactional

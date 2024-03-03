@@ -39,7 +39,7 @@ public class GameService {
                 null
         );
         game.setTeams(List.of(
-                new Team(null, game, null, Color.VIOLET, null),
+                new Team(null, game, null, Color.FUCHSIA, null),
                 new Team(null, game, null, Color.BLUE, null)
         ));
         // TODO check if it really works without flush()
