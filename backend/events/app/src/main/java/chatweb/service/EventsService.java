@@ -2,6 +2,7 @@ package chatweb.service;
 
 import chatweb.model.event.IEvent;
 import chatweb.model.event.IRoomEvent;
+import chatweb.model.event.PersonalEventProducer;
 import chatweb.model.event.UserOnlineEvent;
 import chatweb.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
@@ -26,12 +26,12 @@ public class EventsService {
         addEvent((userId) -> event);
     }
 
-    public void addEvent(Function<Integer, IEvent> eventSupplier) {
+    public void addEvent(PersonalEventProducer producer) {
         emitters.forEach((userId, userEmitters) -> {
             if (userEmitters.isEmpty()) {
                 return;
             }
-            IEvent event = eventSupplier.apply(userId);
+            IEvent event = producer.getPersonalEvent(userId);
             if (event instanceof IRoomEvent roomEvent && roomEvent.getRoomId() != null) {
                 if (!roomRepository.isUserInRoom(roomEvent.getRoomId(), userId)) {
                     return;
