@@ -3,21 +3,16 @@ package chatweb.controller;
 import chatweb.entity.User;
 import chatweb.exception.UnauthorizedException;
 import chatweb.helper.UserAuthHelper;
+import chatweb.mapper.GameMapper;
 import chatweb.mapper.MessageMapper;
 import chatweb.model.api.ApiError;
 import chatweb.model.api.OnlineResponse;
-import chatweb.model.event.IEvent;
-import chatweb.model.event.ReactionEvent;
-import chatweb.model.event.ServiceReactionEvent;
+import chatweb.model.event.*;
 import chatweb.service.EventsService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
@@ -59,6 +54,11 @@ public class EventsController implements ApiControllerHelper {
                     serviceReactionEvent.getRoom(),
                     serviceReactionEvent.getMessageId(),
                     MessageMapper.groupReactions(serviceReactionEvent.getReactions(), userId)
+            ));
+        } else if (event instanceof ServiceGameStateChangedEvent serviceGameStateChangedEvent) {
+            eventsService.addEvent((userId) -> new GameStateChangedEvent(
+                    serviceGameStateChangedEvent.getGame().getId(),
+                    GameMapper.mapState(userId, serviceGameStateChangedEvent.getGame())
             ));
         } else {
             eventsService.addEvent(event);

@@ -9,7 +9,6 @@ import lombok.Setter;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "teams", schema = "codenames")
@@ -50,6 +49,11 @@ public class Team {
 
     public boolean isLeader(User user) {
         return user.equals(getLeader());
+    }
+
+    public boolean isLeader(Integer userId) {
+        if (leader == null) return false;
+        return leader.getId().equals(userId);
     }
 
 }

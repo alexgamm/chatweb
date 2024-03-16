@@ -4,6 +4,7 @@ import chatweb.model.game.state.Card;
 import chatweb.model.game.state.CardType;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -29,6 +30,7 @@ public class GameUtils {
         for (String word : shuffledWords) {
             cards.add(new Card(CardType.NEUTRAL, word, null, null));
         }
+        Collections.shuffle(cards);
         return cards;
     }
 }

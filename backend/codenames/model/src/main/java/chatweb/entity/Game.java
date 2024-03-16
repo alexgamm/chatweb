@@ -65,4 +65,5 @@ public class Game {
         Collections.shuffle(shuffledTeams);
         return shuffledTeams;
     }
+
 }

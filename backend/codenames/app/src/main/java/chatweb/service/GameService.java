@@ -1,30 +1,44 @@
 package chatweb.service;
 
+import chatweb.client.EventsApiClient;
 import chatweb.entity.*;
 import chatweb.model.Color;
-import chatweb.model.game.BoardSize;
-import chatweb.model.game.GameState;
+import chatweb.model.event.ServiceGameStateChangedEvent;
 import chatweb.model.game.Settings;
-import chatweb.model.game.state.CardType;
-import chatweb.model.game.state.Status;
-import chatweb.model.game.state.Card;
-import chatweb.model.game.state.Turn;
 import chatweb.repository.GameRepository;
-import chatweb.utils.GameUtils;
-import lombok.RequiredArgsConstructor;
+import chatweb.utils.updaters.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
 public class GameService {
     private final GameRepository gameRepository;
+
+    private final Map<Class<? extends GameAction>, GameActionExecutor<? extends GameAction>> actionExecutors;
+    private final GameSchedulingService gameSchedulingService;
+    private final EventsApiClient eventsApi;
+
+
+    public GameService(
+            GameRepository gameRepository,
+            GameActionExecutor<PickCard> pickCardExecutor,
+            GameActionExecutor<ChangeTurn> changeTurnExecutor,
+            GameActionExecutor<StartGame> startGameExecutor, GameSchedulingService gameSchedulingService, EventsApiClient eventsApi
+    ) {
+        this.gameRepository = gameRepository;
+        this.gameSchedulingService = gameSchedulingService;
+        this.eventsApi = eventsApi;
+        this.actionExecutors = Map.of(
+                PickCard.class, pickCardExecutor,
+                ChangeTurn.class, changeTurnExecutor,
+                StartGame.class, startGameExecutor
+        );
+    }
 
     @NotNull
     public Game createGame(String id, Integer roomId, User host, Dictionary dictionary) {
@@ -44,8 +58,8 @@ public class GameService {
         ));
         // TODO check if it really works without flush()
         game = gameRepository.save(game);
-        game.setState(createState(game, dictionary));
-        return gameRepository.save(game);
+        executeAction(game, new RestartGame(game, dictionary));
+        return game;
     }
 
     @Nullable
@@ -63,14 +77,35 @@ public class GameService {
         gameRepository.save(game);
     }
 
-    public GameState createState(Game game, Dictionary dictionary) {
-        List<Integer> shuffledTeamIds = game.getShuffledTeams().stream().map(Team::getId).toList();
-        Settings settings = game.getSettings();
-        List<Card> cards = GameUtils.createCards(
-                dictionary.getRandomWords(settings.getBoardSize().getWordAmount()),
-                shuffledTeamIds
-        );
-        Turn turn = new Turn(shuffledTeamIds.get(0), settings.getTurnSeconds() * 2, null);
-        return new GameState(Status.IDLE, cards, shuffledTeamIds, turn);
+
+    public <T extends GameAction> void executeAction(Game game, T action) {
+        //noinspection unchecked
+        GameActionExecutor<T> executor = (GameActionExecutor<T>) actionExecutors.get(action.getClass());
+        if (executor == null) {
+            throw new IllegalArgumentException(String.format("No executor found for action type: %s", action.getClass()));
+        }
+        GameActionExecutionResult result = executor.execute(game.getState(), action);
+        gameRepository.updateState(game.getId(), result.getNewState());
+        eventsApi.addEvent(new ServiceGameStateChangedEvent(game));
+        result.getPostTasks().forEach(task -> {
+            if (action instanceof StartGame || action instanceof EndGame || action instanceof RestartGame) {
+                gameSchedulingService.cancelTaskIfExists(game.getId());
+            }
+            if (task.getStartAt() != null) {
+                gameSchedulingService.schedule(
+                        game.getId(),
+                        () -> gameRepository.findById(game.getId()).ifPresent(g -> executeAction(g, task.getAction())),
+                        task.getStartAt()
+                );
+            } else {
+                executeAction(game, task.getAction());
+            }
+        });
     }
+
+    public void changeSettings(String gameId, Settings settings) {
+        gameRepository.updateSettings(gameId, settings);
+    }
+
+
 }

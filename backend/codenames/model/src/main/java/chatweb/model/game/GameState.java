@@ -1,20 +1,36 @@
 package chatweb.model.game;
 
+import chatweb.model.game.state.Card;
 import chatweb.model.game.state.Status;
 import chatweb.model.game.state.Turn;
-import chatweb.model.game.state.Card;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @AllArgsConstructor
 @Getter
+@Builder(toBuilder = true)
 public class GameState {
     private Status status;
     private List<Card> cards;
     private List<Integer> turnOrderTeamIds;
-    @Nullable
     private Turn turn;
+
+    public GameStateBuilder copy() {
+        return toBuilder()
+                .cards(Collections.unmodifiableList(cards))
+                .turnOrderTeamIds(Collections.unmodifiableList(turnOrderTeamIds))
+                .turn(turn.toBuilder().build());
+    }
+
+    public boolean allCardsPicked(Integer teamId) {
+        return this.getCards().stream()
+                .filter(card -> teamId.equals(card.getTeamId()))
+                .map(Card::getPickedByTeamId)
+                .allMatch(Objects::nonNull);
+    }
 }

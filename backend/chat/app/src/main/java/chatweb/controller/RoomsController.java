@@ -3,7 +3,10 @@ package chatweb.controller;
 import chatweb.entity.Room;
 import chatweb.entity.User;
 import chatweb.exception.ApiErrorException;
-import chatweb.model.api.*;
+import chatweb.model.api.ApiResponse;
+import chatweb.model.api.CreateRoomRequest;
+import chatweb.model.api.CreateRoomResponse;
+import chatweb.model.api.JoinRoomRequest;
 import chatweb.repository.RoomRepository;
 import chatweb.repository.UserRepository;
 import chatweb.service.RoomsService;
@@ -54,4 +57,5 @@ public class RoomsController implements ApiControllerHelper {
         roomRepository.save(relatedRoom);
         return new ApiResponse(true);
     }
+
 }

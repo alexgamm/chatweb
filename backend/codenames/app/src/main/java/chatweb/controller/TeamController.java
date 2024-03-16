@@ -10,6 +10,7 @@ import chatweb.model.api.JoinTeamRequest;
 import chatweb.model.game.state.Status;
 import chatweb.service.GameService;
 import chatweb.service.TeamService;
+import chatweb.utils.updaters.PauseGame;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,5 +58,24 @@ public class TeamController {
         return new ApiResponse(true);
     }
 
-  //  @PostMapping("{teamId}/leave")
+    @PostMapping("{teamId}/leave")
+    public ApiResponse leaveTeam(@PathVariable Integer teamId, @RequestAttribute User user) throws ApiErrorException {
+        Team team = teamService.findTeam(teamId);
+        if (team == null) {
+            throw ApiError.badRequest("Required team doesn't exist").toException();
+        }
+        Game game = team.getGame();
+        if (!game.getRoom().getUsers().contains(user)) {
+            throw badRequest("You are not a member of this room").toException();
+        }
+        if (!team.isPlayer(user)) {
+            throw ApiError.badRequest("You are not a member of this team").toException();
+        }
+        if ((team.isLeader(user) || team.getPlayers().size() == 1) && game.getState().getStatus() == Status.ACTIVE) {
+            gameService.executeAction(game, new PauseGame());
+        }
+        teamService.removePlayer(team, user, team.isLeader(user));
+        gameService.addViewer(game, user);
+        return new ApiResponse(true);
+    }
 }
