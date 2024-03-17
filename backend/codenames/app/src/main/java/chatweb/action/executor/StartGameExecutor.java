@@ -23,7 +23,7 @@ public class StartGameExecutor implements GameActionExecutor<StartGame> {
                                 .turn(turn.toBuilder().startedAt(Instant.now()).build())
                                 .build()
                 )
-                .cancelActiveTasks(true)
+                .cancelScheduledTasks(true)
                 .build();
     }
 }

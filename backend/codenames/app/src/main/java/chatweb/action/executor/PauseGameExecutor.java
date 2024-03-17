@@ -2,6 +2,7 @@ package chatweb.action.executor;
 
 import chatweb.action.PauseGame;
 import chatweb.model.game.GameState;
+import chatweb.model.game.state.Status;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -17,10 +18,13 @@ public class PauseGameExecutor implements GameActionExecutor<PauseGame> {
         }
         Integer durationSeconds = state.getTurn().getDurationSeconds();
         int remainingTime = (int) Instant.now().until(startedAt.plusSeconds(durationSeconds), ChronoUnit.SECONDS);
-        GameState newState = state.copy().turn(state.getTurn().toBuilder().durationSeconds(remainingTime).build()).build();
+        GameState newState = state.copy()
+                .status(Status.PAUSED)
+                .turn(state.getTurn().toBuilder().durationSeconds(remainingTime).build())
+                .build();
         return GameActionExecutionResult.builder()
                 .newState(newState)
-                .cancelActiveTasks(true)
+                .cancelScheduledTasks(true)
                 .build();
     }
 }

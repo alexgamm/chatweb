@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChangeSettingsRequest {
+public class UpdateSettingsRequest {
     @Nullable
     private BoardSize boardSize;
     @Nullable

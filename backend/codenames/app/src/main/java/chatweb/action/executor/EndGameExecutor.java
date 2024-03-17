@@ -11,7 +11,7 @@ public class EndGameExecutor implements GameActionExecutor<EndGame> {
     public GameActionExecutionResult execute(GameState state, EndGame action) throws IllegalStateException {
         return GameActionExecutionResult.builder()
                 .newState(state.copy().status(Status.FINISHED).build())
-                .cancelActiveTasks(true)
+                .cancelScheduledTasks(true)
                 .build();
     }
 }

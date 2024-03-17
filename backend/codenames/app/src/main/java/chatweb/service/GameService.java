@@ -1,10 +1,18 @@
 package chatweb.service;
 
-import chatweb.action.*;
+import chatweb.action.ChangeTurn;
+import chatweb.action.GameAction;
+import chatweb.action.PickCard;
+import chatweb.action.RestartGame;
+import chatweb.action.StartGame;
 import chatweb.action.executor.GameActionExecutionResult;
 import chatweb.action.executor.GameActionExecutor;
 import chatweb.client.EventsApiClient;
-import chatweb.entity.*;
+import chatweb.entity.Dictionary;
+import chatweb.entity.Game;
+import chatweb.entity.Room;
+import chatweb.entity.Team;
+import chatweb.entity.User;
 import chatweb.model.Color;
 import chatweb.model.event.ServiceGameStateChangedEvent;
 import chatweb.model.game.Settings;
@@ -58,9 +66,8 @@ public class GameService {
                 new Team(null, game, null, Color.FUCHSIA, null),
                 new Team(null, game, null, Color.BLUE, null)
         ));
-        // TODO check if it actually works without flush()
         game = gameRepository.save(game);
-        executeAction(game, new RestartGame(game, dictionary));
+        executeAction(game, new RestartGame(game));
         return game;
     }
 
@@ -79,7 +86,6 @@ public class GameService {
         gameRepository.save(game);
     }
 
-
     public <T extends GameAction> void executeAction(Game game, T action) {
         //noinspection unchecked
         GameActionExecutor<T> executor = (GameActionExecutor<T>) actionExecutors.get(action.getClass());
@@ -89,10 +95,10 @@ public class GameService {
         GameActionExecutionResult result = executor.execute(game.getState(), action);
         gameRepository.updateState(game.getId(), result.getNewState());
         eventsApi.addEvent(new ServiceGameStateChangedEvent(game));
+        if (result.isCancelScheduledTasks()) {
+            gameSchedulingService.cancelTaskIfExists(game.getId());
+        }
         result.getPostTasks().forEach(task -> {
-            if (result.isCancelActiveTasks()) {
-                gameSchedulingService.cancelTaskIfExists(game.getId());
-            }
             if (task.getStartAt() != null) {
                 gameSchedulingService.schedule(
                         game.getId(),
@@ -105,9 +111,8 @@ public class GameService {
         });
     }
 
-    public void changeSettings(String gameId, Settings settings) {
+    public void updateSettings(String gameId, Settings settings) {
         gameRepository.updateSettings(gameId, settings);
     }
-
 
 }

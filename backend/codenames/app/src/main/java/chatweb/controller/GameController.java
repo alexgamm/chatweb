@@ -4,17 +4,35 @@ import chatweb.action.PickCard;
 import chatweb.action.RestartGame;
 import chatweb.action.StartGame;
 import chatweb.client.ChatApiClient;
-import chatweb.entity.*;
+import chatweb.entity.Dictionary;
+import chatweb.entity.Game;
+import chatweb.entity.Room;
+import chatweb.entity.Team;
+import chatweb.entity.User;
 import chatweb.exception.ApiErrorException;
 import chatweb.mapper.GameMapper;
-import chatweb.model.api.*;
+import chatweb.model.api.ApiResponse;
+import chatweb.model.api.UpdateSettingsRequest;
+import chatweb.model.api.CreateGameRequest;
+import chatweb.model.api.CreateGameResponse;
+import chatweb.model.api.CreateRoomRequest;
+import chatweb.model.api.CreateRoomResponse;
+import chatweb.model.api.GameDto;
+import chatweb.model.api.PickCardRequest;
 import chatweb.model.game.Settings;
 import chatweb.model.game.state.Status;
 import chatweb.repository.DictionaryRepository;
 import chatweb.service.GameService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import static chatweb.model.api.ApiError.badRequest;
 import static chatweb.model.api.ApiError.notFound;
@@ -95,7 +113,7 @@ public class GameController implements ApiControllerHelper {
         return new ApiResponse(true);
     }
 
-    @PostMapping("{gameId}/pick")
+    @PostMapping("{gameId}/cards/pick")
     public ApiResponse pickCard(
             @PathVariable String gameId,
             @RequestAttribute User user,
@@ -134,28 +152,24 @@ public class GameController implements ApiControllerHelper {
         if (game == null) {
             throw notFound("Game is not found").toException();
         }
-        if (!game.getHost().equals(user)) {
+        if (!user.equals(game.getHost())) {
             throw badRequest("Only host may restart the game").toException();
         }
-        Dictionary dictionary = dictionaryRepository.findById(game.getSettings().getDictionaryId()).orElse(null);
-        if (dictionary == null) {
-            throw notFound("Dictionary is not found").toException();
-        }
-        gameService.executeAction(game, new RestartGame(game, dictionary));
+        gameService.executeAction(game, new RestartGame(game));
         return new ApiResponse(true);
     }
 
-    @PatchMapping("{gameId}/editSettings")
-    public ApiResponse editSettings(
+    @PatchMapping("{gameId}/settings")
+    public ApiResponse updateSettings(
             @PathVariable String gameId,
             @RequestAttribute User user,
-            @RequestBody @Validated ChangeSettingsRequest request
+            @RequestBody @Validated UpdateSettingsRequest request
     ) throws ApiErrorException {
         Game game = gameService.findGame(gameId);
         if (game == null) {
             throw notFound("Game is not found").toException();
         }
-        if (!game.getHost().equals(user)) {
+        if (!user.equals(game.getHost())) {
             throw badRequest("Only host may change the settings").toException();
         }
         Settings.SettingsBuilder copy = game.getSettings().copy();
@@ -163,18 +177,17 @@ public class GameController implements ApiControllerHelper {
             copy.turnSeconds(request.getTurnSeconds());
         }
         if (request.getDictionaryId() != null) {
+            if (!dictionaryRepository.existsById(request.getDictionaryId())) {
+                throw badRequest("Dictionary is not found").toException();
+            }
             copy.dictionaryId(request.getDictionaryId());
         }
         if (request.getBoardSize() != null) {
             copy.boardSize(request.getBoardSize());
         }
         Settings newSettings = copy.build();
-        gameService.changeSettings(gameId, newSettings);
-        Dictionary dictionary = dictionaryRepository.findById(newSettings.getDictionaryId()).orElse(null);
-        if (dictionary == null) {
-            throw notFound("Dictionary is not found").toException();
-        }
-        gameService.executeAction(game, new RestartGame(game, dictionary));
+        gameService.updateSettings(gameId, newSettings);
+        gameService.executeAction(game, new RestartGame(game));
         return new ApiResponse(true);
     }
 

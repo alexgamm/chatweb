@@ -41,17 +41,14 @@ public class PickCardExecutor implements GameActionExecutor<PickCard> {
         if (pickedCard.getPickedByTeamId() != null) {
             throw new IllegalStateException("The card is already picked");
         }
-        state = state.copy()
-                .cards(
-                        state.getCards().stream().map(card -> {
-                            Card.CardBuilder copy = card.toBuilder();
-                            if (card == pickedCard) {
-                                copy = copy.pickedByTeamId(action.getPickedTeamId());
-                            }
-                            return copy.build();
-                        }).collect(Collectors.toList())
-                )
-                .build();
+        List<Card> newCards = state.getCards().stream().map(card -> {
+            Card.CardBuilder copy = card.toBuilder();
+            if (card == pickedCard) {
+                copy = copy.pickedByTeamId(action.getPickedTeamId());
+            }
+            return copy.build();
+        }).collect(Collectors.toList());
+        state = state.copy().cards(newCards).build();
         List<GameActionExecutionResult.PostTask> postTasks =
                 switch (pickedCard.getType()) {
                     case BLACK -> List.of(immediate(
@@ -76,7 +73,7 @@ public class PickCardExecutor implements GameActionExecutor<PickCard> {
                 };
         return GameActionExecutionResult.builder()
                 .newState(state)
-                .cancelActiveTasks(!postTasks.isEmpty())
+                .cancelScheduledTasks(!postTasks.isEmpty())
                 .postTasks(postTasks)
                 .build();
     }

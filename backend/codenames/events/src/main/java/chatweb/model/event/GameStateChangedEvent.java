@@ -8,5 +8,5 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public class GameStateChangedEvent extends RoomEvent {
     private final String gameId;
-    private final GameState gameState;
+    private final GameState state;
 }
