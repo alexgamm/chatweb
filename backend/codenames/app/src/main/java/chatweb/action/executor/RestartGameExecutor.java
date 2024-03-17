@@ -32,7 +32,7 @@ public class RestartGameExecutor implements GameActionExecutor<RestartGame> {
         }
         return GameActionExecutionResult.builder()
                 .newState(createState(action.getGame(), dictionary))
-                .cancelScheduledTasks(true)
+                .cancelScheduledTask(true)
                 .build();
     }
 

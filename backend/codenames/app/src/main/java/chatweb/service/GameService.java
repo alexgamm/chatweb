@@ -95,7 +95,7 @@ public class GameService {
         GameActionExecutionResult result = executor.execute(game.getState(), action);
         gameRepository.updateState(game.getId(), result.getNewState());
         eventsApi.addEvent(new ServiceGameStateChangedEvent(game));
-        if (result.isCancelScheduledTasks()) {
+        if (result.isCancelScheduledTask()) {
             gameSchedulingService.cancelTaskIfExists(game.getId());
         }
         result.getPostTasks().forEach(task -> {

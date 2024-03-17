@@ -24,7 +24,7 @@ public class PauseGameExecutor implements GameActionExecutor<PauseGame> {
                 .build();
         return GameActionExecutionResult.builder()
                 .newState(newState)
-                .cancelScheduledTasks(true)
+                .cancelScheduledTask(true)
                 .build();
     }
 }

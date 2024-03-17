@@ -73,7 +73,7 @@ public class PickCardExecutor implements GameActionExecutor<PickCard> {
                 };
         return GameActionExecutionResult.builder()
                 .newState(state)
-                .cancelScheduledTasks(!postTasks.isEmpty())
+                .cancelScheduledTask(!postTasks.isEmpty())
                 .postTasks(postTasks)
                 .build();
     }

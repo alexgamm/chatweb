@@ -36,7 +36,7 @@ public class ChangeTurnExecutor implements GameActionExecutor<ChangeTurn> {
         state = state.copy().turn(newTurn.build()).build();
         return GameActionExecutionResult.builder()
                 .newState(state)
-                .cancelScheduledTasks(true)
+                .cancelScheduledTask(true)
                 .postTasks(List.of(scheduled(
                         new ChangeTurn(action.getTurnSeconds()),
                         Objects.requireNonNull(state.getTurn().getStartedAt())

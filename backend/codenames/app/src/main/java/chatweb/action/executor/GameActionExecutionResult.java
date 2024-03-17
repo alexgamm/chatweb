@@ -17,7 +17,7 @@ import java.util.List;
 @Builder
 public class GameActionExecutionResult {
     private final GameState newState;
-    private final boolean cancelScheduledTasks;
+    private final boolean cancelScheduledTask;
     @Builder.Default
     private final List<PostTask> postTasks = Collections.emptyList();
 
