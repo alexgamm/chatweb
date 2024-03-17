@@ -15,10 +15,11 @@ public class Settings {
     private Integer turnSeconds;
     private BoardSize boardSize;
 
-    public static Settings getDefault(@NotNull String dictionaryId){
+    public static Settings getDefault(@NotNull String dictionaryId) {
         return new Settings(dictionaryId, 60, BoardSize.FIVE_X_FIVE);
     }
-    public SettingsBuilder copy(){
+
+    public SettingsBuilder copy() {
         return toBuilder();
     }
 }

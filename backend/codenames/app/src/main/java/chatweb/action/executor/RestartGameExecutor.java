@@ -1,5 +1,6 @@
-package chatweb.utils.updaters;
+package chatweb.action.executor;
 
+import chatweb.action.RestartGame;
 import chatweb.entity.Dictionary;
 import chatweb.entity.Game;
 import chatweb.entity.Team;

@@ -1,5 +1,6 @@
-package chatweb.utils.updaters;
+package chatweb.action.executor;
 
+import chatweb.action.PauseGame;
 import chatweb.model.game.GameState;
 import org.springframework.stereotype.Component;
 
@@ -12,12 +13,13 @@ public class PauseGameExecutor implements GameActionExecutor<PauseGame> {
     public GameActionExecutionResult execute(GameState state, PauseGame action) throws IllegalStateException {
         Instant startedAt = state.getTurn().getStartedAt();
         if (startedAt == null) {
-            throw new IllegalArgumentException("Cannot pause the game that is not started yet");
+            throw new IllegalStateException("Cannot pause the game that is not started yet");
         }
         Integer durationSeconds = state.getTurn().getDurationSeconds();
         int remainingTime = (int) Instant.now().until(startedAt.plusSeconds(durationSeconds), ChronoUnit.SECONDS);
+        GameState newState = state.copy().turn(state.getTurn().toBuilder().durationSeconds(remainingTime).build()).build();
         return GameActionExecutionResult.builder()
-                .newState(state.copy().turn(state.getTurn().toBuilder().durationSeconds(remainingTime).build()).build())
+                .newState(newState)
                 .cancelActiveTasks(true)
                 .build();
     }

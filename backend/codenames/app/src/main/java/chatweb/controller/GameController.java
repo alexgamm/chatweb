@@ -1,5 +1,8 @@
 package chatweb.controller;
 
+import chatweb.action.PickCard;
+import chatweb.action.RestartGame;
+import chatweb.action.StartGame;
 import chatweb.client.ChatApiClient;
 import chatweb.entity.*;
 import chatweb.exception.ApiErrorException;
@@ -9,9 +12,6 @@ import chatweb.model.game.Settings;
 import chatweb.model.game.state.Status;
 import chatweb.repository.DictionaryRepository;
 import chatweb.service.GameService;
-import chatweb.utils.updaters.PickCard;
-import chatweb.utils.updaters.RestartGame;
-import chatweb.utils.updaters.StartGame;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -47,9 +47,6 @@ public class GameController implements ApiControllerHelper {
             @RequestAttribute User user,
             @RequestBody CreateGameRequest request
     ) throws ApiErrorException {
-        if (request.getDictionaryId() == null) {
-            throw badRequest("Dictionary id is missing").toException();
-        }
         Dictionary dictionary = dictionaryRepository.findById(request.getDictionaryId()).orElse(null);
         if (dictionary == null) {
             throw badRequest("Dictionary is not found").toException();
@@ -91,12 +88,10 @@ public class GameController implements ApiControllerHelper {
         if (game.getState().getStatus() == Status.ACTIVE) {
             throw badRequest("Game is already started").toException();
         }
-        for (Team team : game.getTeams()) {
-            if (team.getLeader() == null || team.getPlayers().isEmpty()) {
-                throw badRequest("Each team must have a leader and at least one player").toException();
-            }
+        if (game.getTeams().stream().anyMatch(team -> team.getLeader() == null || team.getPlayers().isEmpty())) {
+            throw badRequest("Each team must have a leader and at least one player").toException();
         }
-        gameService.executeAction(game, new StartGame(Status.ACTIVE));
+        gameService.executeAction(game, new StartGame());
         return new ApiResponse(true);
     }
 

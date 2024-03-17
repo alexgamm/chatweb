@@ -1,5 +1,6 @@
-package chatweb.utils.updaters;
+package chatweb.action.executor;
 
+import chatweb.action.GameAction;
 import chatweb.model.game.GameState;
 
 public interface GameActionExecutor<T extends GameAction> {

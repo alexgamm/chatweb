@@ -1,5 +1,6 @@
-package chatweb.utils.updaters;
+package chatweb.action.executor;
 
+import chatweb.action.ChangeTurn;
 import chatweb.model.game.GameState;
 import chatweb.model.game.state.Turn;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +10,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
-import static chatweb.utils.updaters.GameActionExecutionResult.PostTask.scheduled;
+import static chatweb.action.executor.GameActionExecutionResult.PostTask.scheduled;
 
 @Component
 @RequiredArgsConstructor
@@ -39,8 +40,8 @@ public class ChangeTurnExecutor implements GameActionExecutor<ChangeTurn> {
                 .postTasks(List.of(scheduled(
                         new ChangeTurn(action.getTurnSeconds()),
                         Objects.requireNonNull(state.getTurn().getStartedAt())
-                                .plusSeconds(state.getTurn().getDurationSeconds()
-                                ))))
+                                .plusSeconds(state.getTurn().getDurationSeconds())
+                )))
                 .build();
     }
 }

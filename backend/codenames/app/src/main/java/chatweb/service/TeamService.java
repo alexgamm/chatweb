@@ -27,9 +27,9 @@ public class TeamService {
         return teamRepository.save(team);
     }
 
-    public void removePlayer(Team team, User user, boolean leader) {
+    public void removePlayer(Team team, User user) {
         team.getPlayers().remove(user);
-        if (leader && team.getLeader() != null) {
+        if (team.isLeader(user) && team.getLeader() != null) {
             team.setLeader(null);
         }
         teamRepository.save(team);

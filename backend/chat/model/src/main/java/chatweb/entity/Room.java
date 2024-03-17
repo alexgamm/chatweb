@@ -43,5 +43,4 @@ public class Room {
     public void addUser(User user) {
         users.add(user);
     }
-
 }

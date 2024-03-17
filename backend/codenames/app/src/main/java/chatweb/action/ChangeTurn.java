@@ -1,4 +1,4 @@
-package chatweb.utils.updaters;
+package chatweb.action;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

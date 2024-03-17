@@ -1,4 +1,4 @@
-package chatweb.utils.updaters;
+package chatweb.action;
 
 import chatweb.entity.Dictionary;
 import chatweb.entity.Game;

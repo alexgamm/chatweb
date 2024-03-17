@@ -28,15 +28,15 @@ public class GameMapper {
 
     public static GameState mapState(Integer userId, Game game) {
         GameState state = game.getState();
-        boolean isCardToBeOpened = game.getTeams().stream().anyMatch(team -> team.isLeader(userId)) ||
-                state.getStatus() == Status.FINISHED;
+        boolean areCardsRevealed = state.getStatus() == Status.FINISHED
+                || game.getTeams().stream().anyMatch(team -> team.isLeader(userId));
         return new GameState(
                 state.getStatus(),
                 state.getCards().stream()
                         .map(card -> new Card(
-                                isCardToBeOpened || card.getPickedByTeamId() != null ? card.getType() : null,
+                                areCardsRevealed || card.getPickedByTeamId() != null ? card.getType() : null,
                                 card.getWord(),
-                                isCardToBeOpened ? card.getTeamId() : null,
+                                areCardsRevealed ? card.getTeamId() : null,
                                 card.getPickedByTeamId()
                         ))
                         .toList(),

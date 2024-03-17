@@ -1,11 +1,9 @@
-package chatweb.utils.updaters;
+package chatweb.action;
 
-import chatweb.model.game.state.Status;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
 public class StartGame implements GameAction {
-    private final Status gameStateStatus;
 }

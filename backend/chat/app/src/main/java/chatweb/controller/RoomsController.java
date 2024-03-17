@@ -27,9 +27,6 @@ public class RoomsController implements ApiControllerHelper {
 
     @PostMapping
     public CreateRoomResponse createRoom(@RequestBody CreateRoomRequest body) throws ApiErrorException {
-        if (body.getPrefix() == null || !body.getPrefix().matches("[a-z]+")) {
-            throw badRequest("Missing or invalid prefix").toException();
-        }
         if (!userRepository.existsById(body.getCreatorId())) {
             throw badRequest("Creator not found").toException();
         }

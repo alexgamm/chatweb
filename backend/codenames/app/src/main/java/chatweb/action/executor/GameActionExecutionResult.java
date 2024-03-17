@@ -1,5 +1,6 @@
-package chatweb.utils.updaters;
+package chatweb.action.executor;
 
+import chatweb.action.GameAction;
 import chatweb.model.game.GameState;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -17,7 +18,7 @@ import java.util.List;
 public class GameActionExecutionResult {
     private final GameState newState;
     private final boolean cancelActiveTasks;
-    @Builder.Default()
+    @Builder.Default
     private final List<PostTask> postTasks = Collections.emptyList();
 
     @AllArgsConstructor(access = AccessLevel.PRIVATE)

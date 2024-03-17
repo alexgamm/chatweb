@@ -1,4 +1,4 @@
-package chatweb.utils.updaters;
+package chatweb.action;
 
 public class PauseGame implements GameAction {
 }

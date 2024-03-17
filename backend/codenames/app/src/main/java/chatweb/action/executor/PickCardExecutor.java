@@ -1,5 +1,8 @@
-package chatweb.utils.updaters;
+package chatweb.action.executor;
 
+import chatweb.action.ChangeTurn;
+import chatweb.action.EndGame;
+import chatweb.action.PickCard;
 import chatweb.model.game.GameState;
 import chatweb.model.game.state.Card;
 import chatweb.model.game.state.Status;
@@ -11,7 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static chatweb.utils.updaters.GameActionExecutionResult.PostTask.immediate;
+import static chatweb.action.executor.GameActionExecutionResult.PostTask.immediate;
 
 @Component
 @RequiredArgsConstructor

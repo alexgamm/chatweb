@@ -1,12 +1,14 @@
 package chatweb.service;
 
+import chatweb.action.*;
+import chatweb.action.executor.GameActionExecutionResult;
+import chatweb.action.executor.GameActionExecutor;
 import chatweb.client.EventsApiClient;
 import chatweb.entity.*;
 import chatweb.model.Color;
 import chatweb.model.event.ServiceGameStateChangedEvent;
 import chatweb.model.game.Settings;
 import chatweb.repository.GameRepository;
-import chatweb.utils.updaters.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
@@ -56,7 +58,7 @@ public class GameService {
                 new Team(null, game, null, Color.FUCHSIA, null),
                 new Team(null, game, null, Color.BLUE, null)
         ));
-        // TODO check if it really works without flush()
+        // TODO check if it actually works without flush()
         game = gameRepository.save(game);
         executeAction(game, new RestartGame(game, dictionary));
         return game;
@@ -88,7 +90,7 @@ public class GameService {
         gameRepository.updateState(game.getId(), result.getNewState());
         eventsApi.addEvent(new ServiceGameStateChangedEvent(game));
         result.getPostTasks().forEach(task -> {
-            if (action instanceof StartGame || action instanceof EndGame || action instanceof RestartGame) {
+            if (result.isCancelActiveTasks()) {
                 gameSchedulingService.cancelTaskIfExists(game.getId());
             }
             if (task.getStartAt() != null) {

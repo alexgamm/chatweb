@@ -1,6 +1,8 @@
-package chatweb.utils.updaters;
+package chatweb.action.executor;
 
+import chatweb.action.StartGame;
 import chatweb.model.game.GameState;
+import chatweb.model.game.state.Status;
 import chatweb.model.game.state.Turn;
 import org.springframework.stereotype.Component;
 
@@ -16,13 +18,10 @@ public class StartGameExecutor implements GameActionExecutor<StartGame> {
         }
         return GameActionExecutionResult.builder()
                 .newState(
-                        state.copy().turn(
-                                turn.toBuilder()
-                                        .teamId(turn.getTeamId())
-                                        .leader(turn.isLeader())
-                                        .durationSeconds(turn.getDurationSeconds())
-                                        .startedAt(Instant.now()).build()
-                        ).build()
+                        state.copy()
+                                .status(Status.ACTIVE)
+                                .turn(turn.toBuilder().startedAt(Instant.now()).build())
+                                .build()
                 )
                 .cancelActiveTasks(true)
                 .build();
