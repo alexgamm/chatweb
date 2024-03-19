@@ -1,4 +1,4 @@
-package chatweb.action.executor;
+package chatweb.action;
 
 import chatweb.action.GameAction;
 import chatweb.model.game.GameState;

@@ -23,6 +23,7 @@ import chatweb.model.game.Settings;
 import chatweb.model.game.state.Status;
 import chatweb.repository.DictionaryRepository;
 import chatweb.service.GameService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -60,6 +61,7 @@ public class GameController implements ApiControllerHelper {
     }
 
 
+    @Transactional
     @PostMapping
     public CreateGameResponse createGame(
             @RequestAttribute User user,

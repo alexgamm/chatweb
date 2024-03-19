@@ -1,5 +1,6 @@
 package chatweb.action.executor;
 
+import chatweb.action.GameActionExecutionResult;
 import chatweb.action.RestartGame;
 import chatweb.entity.Dictionary;
 import chatweb.entity.Game;

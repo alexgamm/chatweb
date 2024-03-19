@@ -1,11 +1,13 @@
 package chatweb.service;
 
 import chatweb.action.ChangeTurn;
+import chatweb.action.EndGame;
 import chatweb.action.GameAction;
+import chatweb.action.GameActionExecutionResult;
+import chatweb.action.PauseGame;
 import chatweb.action.PickCard;
 import chatweb.action.RestartGame;
 import chatweb.action.StartGame;
-import chatweb.action.executor.GameActionExecutionResult;
 import chatweb.action.executor.GameActionExecutor;
 import chatweb.client.EventsApiClient;
 import chatweb.entity.Dictionary;
@@ -36,16 +38,24 @@ public class GameService {
 
     public GameService(
             GameRepository gameRepository,
-            GameActionExecutor<PickCard> pickCardExecutor,
+            GameSchedulingService gameSchedulingService,
+            EventsApiClient eventsApi,
             GameActionExecutor<ChangeTurn> changeTurnExecutor,
-            GameActionExecutor<StartGame> startGameExecutor, GameSchedulingService gameSchedulingService, EventsApiClient eventsApi
+            GameActionExecutor<EndGame> endGameExecutor,
+            GameActionExecutor<PauseGame> pauseGameExecutor,
+            GameActionExecutor<PickCard> pickCardExecutor,
+            GameActionExecutor<RestartGame> restartGameExecutor,
+            GameActionExecutor<StartGame> startGameExecutor
     ) {
         this.gameRepository = gameRepository;
         this.gameSchedulingService = gameSchedulingService;
         this.eventsApi = eventsApi;
         this.actionExecutors = Map.of(
-                PickCard.class, pickCardExecutor,
                 ChangeTurn.class, changeTurnExecutor,
+                EndGame.class, endGameExecutor,
+                PauseGame.class, pauseGameExecutor,
+                PickCard.class, pickCardExecutor,
+                RestartGame.class, restartGameExecutor,
                 StartGame.class, startGameExecutor
         );
     }

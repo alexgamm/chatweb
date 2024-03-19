@@ -2,6 +2,7 @@ package chatweb.action.executor;
 
 import chatweb.action.ChangeTurn;
 import chatweb.action.EndGame;
+import chatweb.action.GameActionExecutionResult;
 import chatweb.action.PickCard;
 import chatweb.model.game.GameState;
 import chatweb.model.game.state.Card;
@@ -14,7 +15,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static chatweb.action.executor.GameActionExecutionResult.PostTask.immediate;
+import static chatweb.action.GameActionExecutionResult.PostTask.immediate;
 
 @Component
 @RequiredArgsConstructor

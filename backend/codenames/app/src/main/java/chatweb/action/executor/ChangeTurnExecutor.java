@@ -1,6 +1,7 @@
 package chatweb.action.executor;
 
 import chatweb.action.ChangeTurn;
+import chatweb.action.GameActionExecutionResult;
 import chatweb.model.game.GameState;
 import chatweb.model.game.state.Turn;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +11,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
-import static chatweb.action.executor.GameActionExecutionResult.PostTask.scheduled;
+import static chatweb.action.GameActionExecutionResult.PostTask.scheduled;
 
 @Component
 @RequiredArgsConstructor

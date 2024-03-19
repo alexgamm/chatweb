@@ -1,6 +1,7 @@
 package chatweb.action.executor;
 
 import chatweb.action.EndGame;
+import chatweb.action.GameActionExecutionResult;
 import chatweb.model.game.GameState;
 import chatweb.model.game.state.Status;
 import org.springframework.stereotype.Component;
