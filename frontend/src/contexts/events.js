@@ -1,5 +1,5 @@
 let eventSource;
-export const addEventHandler = (eventType, handler) => {
+export const listen = () => {
   if (!eventSource) {
     const accessToken = localStorage.getItem("token");
     if (!accessToken) {
@@ -9,8 +9,21 @@ export const addEventHandler = (eventType, handler) => {
       `/api/events/stream?access_token=${accessToken}`
     );
   }
+};
+export const addEventHandler = (eventType, handler) => {
+  listen();
+  if (!eventSource) return;
   eventSource.addEventListener(eventType, (event) => {
+    if (!event.data) return;
     const eventData = JSON.parse(event.data);
     handler(eventData);
   });
 };
+
+addEventHandler("error", ({ statusCode }) => {
+  if (statusCode === 401) {
+    localStorage.removeItem("token");
+    eventSource.close();
+    eventSource = null;
+  }
+});

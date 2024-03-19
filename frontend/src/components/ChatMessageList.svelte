@@ -67,6 +67,7 @@
   };
   const scrollBottom = async () => {
     await tick();
+    if (!messagesContainerWrapper) return;
     messagesContainerWrapper.scrollTo({
       top: messagesContainerWrapper.scrollHeight,
       behavior: "smooth",

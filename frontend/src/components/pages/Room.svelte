@@ -1,5 +1,6 @@
 <script>
   import { onMount } from "svelte";
+  import { fetchGame, joinGame } from "../../stores/codenames";
   import { getUser } from "../../stores/user";
   import Chat from "../Chat.svelte";
   import CodenamesBoard from "../codenames/CodenamesBoard.svelte";
@@ -13,6 +14,7 @@
   import UsersIcon from "../icons/UsersIcon.svelte";
   import ChangePasswordModal from "../modals/ChangePasswordModal.svelte";
   import ChangeUsernameModal from "../modals/ChangeUsernameModal.svelte";
+  import user from "../../stores/user";
 
   export let room = "global";
 
@@ -45,8 +47,19 @@
     ],
   };
 
-  onMount(() => {
-    getUser();
+  onMount(async () => {
+    await getUser();
+    if (roomPrefix === "codenames") {
+      const game = await fetchGame(room);
+      if (
+        !game.teams.find(({ players }) =>
+          players.find(({ id }) => id === $user.id)
+        ) &&
+        !game.viewers.find(({ id }) => id === $user.id)
+      ) {
+        joinGame(room);
+      }
+    }
   });
 </script>
 
@@ -54,17 +67,7 @@
   <input id="drawer-toggle" type="checkbox" class="drawer-toggle" />
   <div class="drawer-content flex flex-col overflow-auto">
     {#if roomPrefix === "codenames"}
-      <CodenamesBoard
-        game={{
-          words: [
-            ["яблоко", "банан", "вишня", "дата", "ежевика"],
-            ["инжир", "виноград", "дыня", "айсберг", "джекфрут"],
-            ["киви", "лимон", "манго", "нектарин", "апельсин"],
-            ["папайя", "айва", "малина", "клубника", "мандарин"],
-            ["угли", "ваниль", "арбуз", "хурма", "желтый"],
-          ],
-        }}
-      />
+      <CodenamesBoard />
     {/if}
     <Chat />
   </div>

@@ -4,8 +4,10 @@
   import UserIcon from "../icons/UserIcon.svelte";
 
   export let teams;
-  export let selectedTeam;
+  export let selectedTeamId;
   export let onSelect;
+
+  $: selectItems = [...teams, { id: "viewers", color: "GRAY" }];
 
   let selectingTeam;
 
@@ -23,12 +25,12 @@
 
 <h2 class="mb-2">Select your team</h2>
 <div class="flex justify-start items-center flex-wrap gap-3">
-  {#each teams as team}
+  {#each selectItems as team}
     <button
       class={`flex justify-center items-center w-12 h-12 rounded-full ${
         COLORS[team.color].text
       } ${COLORS[team.color].bg} ${
-        !selectingTeam && team === selectedTeam
+        !selectingTeam && team.id === selectedTeamId
           ? "border-white border-opacity-50 bg-opacity-80"
           : "bg-opacity-50 opacity-60"
       }`}
@@ -36,7 +38,7 @@
     >
       {#if team === selectingTeam}
         <span class="loading loading-spinner text-white opacity-40" />
-      {:else if team === selectedTeam}
+      {:else if team.id === selectedTeamId}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -51,7 +53,7 @@
             d="M4.5 12.75l6 6 9-13.5"
           />
         </svg>
-      {:else if team.name === "spectators"}
+      {:else if team.id === "viewers"}
         <SpectatorIcon size="lg" />
       {:else}
         <UserIcon />

@@ -11,6 +11,7 @@ const PROXY_CONFIGS = {
     "/api/google/oauth": "http://localhost:23456",
     "/api/messages": "http://localhost:23457",
     "/api/events": "http://localhost:23458",
+    "/api/codenames": "http://localhost:23459",
   },
   production: {
     "/api": "https://loocretia.ru",

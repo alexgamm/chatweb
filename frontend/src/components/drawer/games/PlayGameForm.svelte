@@ -1,26 +1,47 @@
 <script>
   import { navigate } from "svelte-routing";
+  import useApi from "../../../hooks/api";
+  import fi from "date-fns/locale/fi";
 
   export let title;
+
+  const {
+    authorized: { post },
+  } = useApi();
+
   let password = "";
   let state = "idle";
   $: canSubmit = state === "idle";
 
-  function handleSubmit() {
-    navigate(`/room/codenames-test`);
-  }
+  const submit = async () => {
+    state = "pending";
+    // TODO select dictionary
+    let game;
+    try {
+      game = await post(`/api/codenames/game`, {
+        dictionaryId: "test",
+        password,
+      });
+    } catch (error) {
+      console.error("could not create game", error);
+      return;
+    } finally {
+      state = "idle";
+    }
+    navigate(`/room/${game.id}`);
+  };
 </script>
 
 <div class="rounded-xl bg-neutral-focus p-3">
   <h2 class="text-lg font-bold mb-2">{title}</h2>
-  <form on:submit|preventDefault={handleSubmit}>
+  <form on:submit|preventDefault={submit}>
     <div class="form-control">
       <label class="label" for="password">
         <span class="label-text text-xs">password (optional)</span>
       </label>
       <input
         class="input input-bordered input-sm"
-        type="text"
+        type="password"
         id="password"
         placeholder="leave blank to make a public game"
         bind:value={password}
