@@ -6,12 +6,14 @@ import chatweb.model.game.state.Turn;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Builder(toBuilder = true)
 public class GameState {

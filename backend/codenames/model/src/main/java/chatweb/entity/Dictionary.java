@@ -1,6 +1,5 @@
 package chatweb.entity;
 
-import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -8,7 +7,8 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,7 +25,7 @@ public class Dictionary {
     @Column(name = "id")
     private String id;
 
-    @Type(JsonType.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     private List<String> words;
 
     public LinkedList<String> getRandomWords(int amount) {

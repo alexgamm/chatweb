@@ -17,19 +17,19 @@ public class TeamService {
         return teamRepository.findById(id).orElse(null);
     }
 
-    public Team addPlayer(Team team, User user, boolean leader) {
+    public void addPlayer(Team team, User user, boolean leader) {
         teamRepository.removeLeaderFromAllTeams(team.getId(), user.getId());
         teamRepository.removePlayerFromAllTeams(team.getId(), user.getId());
         if (!team.getPlayers().contains(user)) {
             team.getPlayers().add(user);
         }
         team.setLeader(leader ? user : null);
-        return teamRepository.save(team);
+        teamRepository.save(team);
     }
 
     public void removePlayer(Team team, User user) {
         team.getPlayers().remove(user);
-        if (team.isLeader(user) && team.getLeader() != null) {
+        if (team.isLeader(user)) {
             team.setLeader(null);
         }
         teamRepository.save(team);
