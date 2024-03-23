@@ -11,11 +11,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface GameRepository extends JpaRepository<Game, String> {
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE Game g SET g.state = :state WHERE g.id = :gameId")
     void updateState(String gameId, GameState state);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE Game g SET g.settings = :settings WHERE g.id = :gameId")
     void updateSettings(String gameId, Settings settings);
 }

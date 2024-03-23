@@ -11,6 +11,7 @@ import chatweb.model.api.JoinTeamRequest;
 import chatweb.model.game.state.Status;
 import chatweb.service.GameService;
 import chatweb.service.TeamService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,10 +25,12 @@ import static chatweb.model.api.ApiError.badRequest;
 @RestController
 @RequestMapping("api/codenames/team")
 @RequiredArgsConstructor
-public class TeamController {
+public class TeamController implements ApiControllerHelper {
+
     private final TeamService teamService;
     private final GameService gameService;
 
+    @Transactional
     @PostMapping("{teamId}/join")
     public ApiResponse joinTeam(
             @PathVariable Integer teamId,
@@ -63,6 +66,7 @@ public class TeamController {
         return new ApiResponse(true);
     }
 
+    @Transactional
     @PostMapping("{teamId}/leave")
     public ApiResponse leaveTeam(@PathVariable Integer teamId, @RequestAttribute User user) throws ApiErrorException {
         Team team = teamService.findTeam(teamId);

@@ -47,6 +47,7 @@ subprojects {
         implementation "io.jsonwebtoken:jjwt-api:${jjwtVersion}"
         runtimeOnly "io.jsonwebtoken:jjwt-impl:${jjwtVersion}"
         runtimeOnly "io.jsonwebtoken:jjwt-jackson:${jjwtVersion}"
+        implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
         compileOnly 'org.projectlombok:lombok'
         annotationProcessor 'org.projectlombok:lombok'

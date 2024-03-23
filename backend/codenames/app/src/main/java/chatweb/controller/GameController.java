@@ -35,6 +35,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
+
 import static chatweb.model.api.ApiError.badRequest;
 import static chatweb.model.api.ApiError.notFound;
 
@@ -60,7 +62,6 @@ public class GameController implements ApiControllerHelper {
         return gameMapper.map(user.getId(), game);
     }
 
-
     @Transactional
     @PostMapping
     public CreateGameResponse createGame(
@@ -74,12 +75,15 @@ public class GameController implements ApiControllerHelper {
         CreateRoomResponse roomResponse = chatApiClient.createRoom(new CreateRoomRequest(
                 user.getId(),
                 "codenames",
-                request.getPassword()
+                Optional.ofNullable(request.getPassword())
+                        .filter(password -> !password.isBlank())
+                        .orElse(null)
         ));
         Game game = gameService.createGame(roomResponse.getKey(), roomResponse.getId(), user, dictionary);
         return new CreateGameResponse(game.getId());
     }
 
+    @Transactional
     @PostMapping("{gameId}/join")
     public ApiResponse joinGame(@PathVariable String gameId, @RequestAttribute User user) throws ApiErrorException {
         Game game = gameService.findGame(gameId);
@@ -93,6 +97,9 @@ public class GameController implements ApiControllerHelper {
         return new ApiResponse(true);
     }
 
+    // TODO WHERE IS THE PAUSE ACTION ???
+
+    @Transactional
     @PostMapping("{gameId}/start")
     public ApiResponse startGame(@PathVariable String gameId, @RequestAttribute User user) throws ApiErrorException {
         Game game = gameService.findGame(gameId);
@@ -115,6 +122,7 @@ public class GameController implements ApiControllerHelper {
         return new ApiResponse(true);
     }
 
+    @Transactional
     @PostMapping("{gameId}/cards/pick")
     public ApiResponse pickCard(
             @PathVariable String gameId,
@@ -148,6 +156,7 @@ public class GameController implements ApiControllerHelper {
         return new ApiResponse(true);
     }
 
+    @Transactional
     @PostMapping("{gameId}/restart")
     public ApiResponse restartGame(@PathVariable String gameId, @RequestAttribute User user) throws ApiErrorException {
         Game game = gameService.findGame(gameId);
@@ -161,6 +170,7 @@ public class GameController implements ApiControllerHelper {
         return new ApiResponse(true);
     }
 
+    @Transactional
     @PatchMapping("{gameId}/settings")
     public ApiResponse updateSettings(
             @PathVariable String gameId,

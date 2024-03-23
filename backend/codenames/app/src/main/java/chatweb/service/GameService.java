@@ -104,21 +104,23 @@ public class GameService {
         }
         GameActionExecutionResult result = executor.execute(game.getState(), action);
         gameRepository.updateState(game.getId(), result.getNewState());
+        game = gameRepository.findById(game.getId()).orElseThrow();
         eventsApi.addEvent(new ServiceGameStateChangedEvent(game));
         if (result.isCancelScheduledTask()) {
             gameSchedulingService.cancelTaskIfExists(game.getId());
         }
-        result.getPostTasks().forEach(task -> {
+        String gameId = game.getId();
+        for (GameActionExecutionResult.PostTask task : result.getPostTasks()) {
             if (task.getStartAt() != null) {
                 gameSchedulingService.schedule(
                         game.getId(),
-                        () -> gameRepository.findById(game.getId()).ifPresent(g -> executeAction(g, task.getAction())),
+                        () -> gameRepository.findById(gameId).ifPresent(g -> executeAction(g, task.getAction())),
                         task.getStartAt()
                 );
             } else {
                 executeAction(game, task.getAction());
             }
-        });
+        }
     }
 
     public void updateSettings(String gameId, Settings settings) {
