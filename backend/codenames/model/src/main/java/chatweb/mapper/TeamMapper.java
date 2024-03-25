@@ -2,19 +2,12 @@ package chatweb.mapper;
 
 import chatweb.entity.Team;
 import chatweb.model.api.TeamDto;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
 
-import java.util.Optional;
-import java.util.stream.Collectors;
+@Mapper(uses = MemberMapper.class)
+public interface TeamMapper {
+    TeamMapper INSTANCE = Mappers.getMapper(TeamMapper.class);
 
-@Component
-public class TeamMapper {
-    public TeamDto map(Team team) {
-        return new TeamDto(
-                team.getId(),
-                team.getPlayers().stream().map(UserMapper::userToUserDto).collect(Collectors.toSet()),
-                team.getColor(),
-                Optional.ofNullable(team.getLeader()).map(UserMapper::userToUserDto).orElse(null)
-        );
-    }
+    TeamDto teamToDtoMapper(Team team);
 }

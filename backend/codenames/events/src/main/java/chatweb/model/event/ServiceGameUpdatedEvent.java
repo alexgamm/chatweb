@@ -9,14 +9,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class ServiceGameStateChangedEvent extends RoomEvent implements PersonalEventProducer {
+public class ServiceGameUpdatedEvent extends RoomEvent implements PersonalEventProducer {
     private Game game;
 
     @Override
     public IEvent getPersonalEvent(Integer userId) {
-        return new GameStateChangedEvent(
-                getGame().getId(),
-                GameMapper.mapState(userId, getGame())
+        return new GameUpdatedEvent(
+                GameMapper.map(userId, getGame())
         );
     }
 }

@@ -6,4 +6,5 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public class StartGame implements GameAction {
+    private final Integer turnSeconds;
 }

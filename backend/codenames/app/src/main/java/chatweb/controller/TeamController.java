@@ -1,6 +1,7 @@
 package chatweb.controller;
 
 import chatweb.action.PauseGame;
+import chatweb.client.EventsApiClient;
 import chatweb.entity.Game;
 import chatweb.entity.Team;
 import chatweb.entity.User;
@@ -8,6 +9,7 @@ import chatweb.exception.ApiErrorException;
 import chatweb.model.api.ApiError;
 import chatweb.model.api.ApiResponse;
 import chatweb.model.api.JoinTeamRequest;
+import chatweb.model.event.ServiceGameUpdatedEvent;
 import chatweb.model.game.state.Status;
 import chatweb.service.GameService;
 import chatweb.service.TeamService;
@@ -29,6 +31,7 @@ public class TeamController implements ApiControllerHelper {
 
     private final TeamService teamService;
     private final GameService gameService;
+    private final EventsApiClient eventsApi;
 
     @Transactional
     @PostMapping("{teamId}/join")
@@ -63,6 +66,7 @@ public class TeamController implements ApiControllerHelper {
         }
         gameService.removeViewer(game, user);
         teamService.addPlayer(team, user, request.isLeader());
+        eventsApi.addEvent(new ServiceGameUpdatedEvent(gameService.findGame(game.getId())));
         return new ApiResponse(true);
     }
 
@@ -82,6 +86,7 @@ public class TeamController implements ApiControllerHelper {
         }
         teamService.removePlayer(team, user);
         gameService.addViewer(game, user);
+        eventsApi.addEvent(new ServiceGameUpdatedEvent(gameService.findGame(game.getId())));
         return new ApiResponse(true);
     }
 }

@@ -13,14 +13,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Component
 public class GameMapper {
-    private final TeamMapper teamMapper;
 
-    public GameDto map(Integer userId, Game game) {
+    public static GameDto map(Integer userId, Game game) {
         return new GameDto(
                 game.getId(),
-                UserMapper.userToUserDto(game.getHost()),
-                game.getViewers().stream().map(UserMapper::userToUserDto).collect(Collectors.toSet()),
-                game.getTeams().stream().map(teamMapper::map).toList(),
+                MemberMapper.INSTANCE.userToMember(game.getHost()),
+                game.getViewers().stream().map(MemberMapper.INSTANCE::userToMember).collect(Collectors.toSet()),
+                game.getTeams().stream().map(TeamMapper.INSTANCE::teamToDtoMapper).toList(),
                 game.getSettings(),
                 mapState(userId, game)
         );

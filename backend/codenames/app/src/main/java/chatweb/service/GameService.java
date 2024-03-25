@@ -16,7 +16,7 @@ import chatweb.entity.Room;
 import chatweb.entity.Team;
 import chatweb.entity.User;
 import chatweb.model.Color;
-import chatweb.model.event.ServiceGameStateChangedEvent;
+import chatweb.model.event.ServiceGameUpdatedEvent;
 import chatweb.model.game.Settings;
 import chatweb.repository.GameRepository;
 import org.jetbrains.annotations.NotNull;
@@ -105,7 +105,7 @@ public class GameService {
         GameActionExecutionResult result = executor.execute(game.getState(), action);
         gameRepository.updateState(game.getId(), result.getNewState());
         game = gameRepository.findById(game.getId()).orElseThrow();
-        eventsApi.addEvent(new ServiceGameStateChangedEvent(game));
+        eventsApi.addEvent(new ServiceGameUpdatedEvent(game));
         if (result.isCancelScheduledTask()) {
             gameSchedulingService.cancelTaskIfExists(game.getId());
         }
