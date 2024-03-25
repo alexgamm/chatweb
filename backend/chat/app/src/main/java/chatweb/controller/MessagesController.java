@@ -54,6 +54,7 @@ public class MessagesController implements ApiControllerHelper {
         } else {
             roomId = null;
         }
+        // TODO Check if user is member
         List<Message> messages = messageRepository.findMessages(count, roomId, from);
         return new MessagesResponse(
                 messages.stream()

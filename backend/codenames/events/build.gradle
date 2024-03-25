@@ -1,0 +1,6 @@
+dependencies {
+    implementation project(":auth:model")
+    implementation project(":chat:events")
+    implementation project(":events:model")
+    implementation project(":codenames:model")
+}

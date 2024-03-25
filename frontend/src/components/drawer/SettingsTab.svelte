@@ -4,7 +4,7 @@
   import UserColorSelect from "./settings/UserColorSelect.svelte";
 </script>
 
-<div class="flex flex-col gap-3 p-4 w-full" data-tab="settings">
+<div class="flex flex-col gap-3 p-4 w-full">
   <ChangeUsernameButton />
   <ChangePasswordButton />
   <UserColorSelect />

@@ -17,7 +17,12 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Set;
@@ -46,7 +51,7 @@ public class UsersController implements ApiControllerHelper {
 
     @GetMapping("me")
     public UserDto getMe(@RequestAttribute User user) {
-        return UserMapper.userToUserDto(user);
+        return UserMapper.INSTANCE.userToUserDto(user);
     }
 
     @PutMapping("me/username")
@@ -61,7 +66,7 @@ public class UsersController implements ApiControllerHelper {
         userRepository.updateUsername(user.getId(), input.getUsername());
         user = userRepository.findUserById(user.getId());
         eventsApi.addEvent(new ChangeUsernameEvent(user.getId(), user.getUsername()));
-        return UserMapper.userToUserDto(user);
+        return UserMapper.INSTANCE.userToUserDto(user);
     }
 
     @PutMapping("me/password")
@@ -88,6 +93,6 @@ public class UsersController implements ApiControllerHelper {
         }
         userRepository.updateColor(user.getId(), body.getColor());
         eventsApi.addEvent(new ChangeUserColorEvent(user.getId(), body.getColor()));
-        return UserMapper.userToUserDto(userRepository.findUserById(user.getId()));
+        return UserMapper.INSTANCE.userToUserDto(userRepository.findUserById(user.getId()));
     }
 }

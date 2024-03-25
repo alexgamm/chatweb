@@ -2,15 +2,14 @@ package chatweb.mapper;
 
 import chatweb.entity.User;
 import chatweb.model.dto.UserDto;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
 
-public class UserMapper {
-    public static UserDto userToUserDto(User user) {
-        return new UserDto(
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                user.getPassword() != null,
-                user.getColor()
-        );
-    }
+@Mapper
+public interface UserMapper {
+    UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
+
+    @Mapping(target = "hasPassword", expression = "java(user.getPassword() != null)")
+    UserDto userToUserDto(User user);
 }

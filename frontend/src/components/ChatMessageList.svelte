@@ -67,6 +67,7 @@
   };
   const scrollBottom = async () => {
     await tick();
+    if (!messagesContainerWrapper) return;
     messagesContainerWrapper.scrollTo({
       top: messagesContainerWrapper.scrollHeight,
       behavior: "smooth",
@@ -117,7 +118,7 @@
 </script>
 
 <div
-  class="messages-container-wrapper flex-1 min-h-0 overflow-auto py-2"
+  class="messages-container-wrapper flex-1 min-h-0 overflow-auto p-2"
   bind:this={messagesContainerWrapper}
   on:scroll={(scrollEvent) => {
     if (scrollEvent.target.scrollTop === 0) {

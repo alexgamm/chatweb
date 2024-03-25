@@ -1,6 +1,6 @@
-package chatweb.model.user;
+package chatweb.model;
 
-public enum UserColor {
+public enum Color {
     BLUE,
     BLUE_DARK,
     INDIGO,
