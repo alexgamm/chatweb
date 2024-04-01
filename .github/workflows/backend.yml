@@ -52,7 +52,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd /opt/chatweb
-            sudo docker compose stop ${{ inputs.app-name }}
-            sudo docker compose pull ${{ inputs.app-name }}
-            sudo docker compose restart ${{ inputs.app-name }}
-            sudo docker compose up -d
+            docker compose stop ${{ inputs.app-name }}
+            docker compose pull ${{ inputs.app-name }}
+            docker compose restart ${{ inputs.app-name }}
+            docker compose up -d
