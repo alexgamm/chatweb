@@ -12,17 +12,16 @@
   import SpectatorIcon from "../icons/SpectatorIcon.svelte";
   import StarIcon from "../icons/StarIcon.svelte";
   import TeamSelect from "./TeamSelect.svelte";
-  import { onMount } from "svelte";
 
   const {
     authorized: { post },
   } = useApi();
 
   $: currentTeam = $game?.teams?.find(({ players }) =>
-    players.find(({ id }) => id === $user?.id)
+    players.find(({ userId }) => userId === $user?.id)
   );
 
-  $: isLeader = currentTeam?.leader?.id === $user?.id;
+  $: isLeader = currentTeam?.leader?.userId === $user?.id;
 
   let teams;
 
@@ -30,8 +29,19 @@
     teams = [...$game.teams, { color: "GRAY", players: $game.viewers }];
   }
 
-  const joinTeam = async (teamId, leader) =>
-    post(`/api/codenames/team/${teamId}/join`, { leader });
+  const toggleGame = async () => {
+    await post(
+      `/api/codenames/game/${$game.id}/${$game.state.status === "ACTIVE" ? "pause" : "start"}`
+    );
+  };
+
+  const restartGame = async () => {
+    await post(`/api/codenames/game/${$game.id}/restart`);
+  };
+
+  const joinTeam = async (teamId, leader) => {
+    await post(`/api/codenames/team/${teamId}/join`, { leader });
+  };
 
   const leaveTeam = async () => {
     await post(`/api/codenames/team/${currentTeam.id}/leave`);
@@ -56,10 +66,7 @@
         class={`btn flex flex-col h-20 rounded-xl gap-3 flex-1 ${
           $game.state.status === "ACTIVE" ? "btn-neutral" : "btn-primary"
         }`}
-        on:click={() => {
-          $game.state.status =
-            $game.state.status === "ACTIVE" ? "PAUSED" : "ACTIVE";
-        }}
+        on:click={() => toggleGame()}
       >
         {#if $game.state.status !== "ACTIVE"}
           <PlayIcon />
@@ -71,6 +78,7 @@
       </button>
       <button
         class="btn flex flex-col h-20 rounded-xl gap-3 flex-1 btn-neutral"
+        on:click={() => restartGame()}
       >
         <RefreshIcon /> Change cards
       </button>
@@ -100,7 +108,7 @@
               {:else}
                 <button on:click={() => toggleLeader()}>
                   <StarIcon
-                    variant={team.leader?.id === player.id ? "solid" : ""}
+                    variant={team.leader?.userId === player.userId ? "solid" : ""}
                   />
                 </button>
               {/if}

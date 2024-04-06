@@ -10,6 +10,8 @@
   import useDebounce from "../utils/debounce";
   import { reactionsOrder, toggleReaction } from "../utils/reactions";
 
+  export let room;
+
   const typingDebounce = useDebounce(300);
 
   let messages = [];
@@ -54,6 +56,7 @@
         await post("/api/messages", {
           message: messageText,
           repliedMessageId: repliedMessage?.id,
+          room: room === "global" ? null : room,
         });
       }
     } catch (error) {
@@ -69,7 +72,7 @@
   const onInput = () =>
     typingDebounce(async () => {
       try {
-        await put("/api/messages/typing");
+        await put(`/api/messages/typing?room=${room === "global" ? "" : room}`);
       } catch (error) {
         console.error("could not send typing", error);
       }
@@ -102,6 +105,7 @@
 </script>
 
 <ChatMessageList
+  {room}
   bind:messages
   onContextMenu={({ x, y, message }) => {
     showContextMenu = true;

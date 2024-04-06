@@ -1,7 +1,8 @@
 <script>
   import { onMount } from "svelte";
-  import { fetchGame, joinGame } from "../../stores/codenames";
-  import { getUser } from "../../stores/user";
+  import { addEventHandler } from "../../contexts/events";
+  import { fetchGame, game, joinGame } from "../../stores/codenames";
+  import user, { getUser } from "../../stores/user";
   import Chat from "../Chat.svelte";
   import CodenamesBoard from "../codenames/CodenamesBoard.svelte";
   import CodenamesTab from "../codenames/CodenamesTab.svelte";
@@ -14,7 +15,6 @@
   import UsersIcon from "../icons/UsersIcon.svelte";
   import ChangePasswordModal from "../modals/ChangePasswordModal.svelte";
   import ChangeUsernameModal from "../modals/ChangeUsernameModal.svelte";
-  import user from "../../stores/user";
 
   export let room = "global";
 
@@ -50,15 +50,20 @@
   onMount(async () => {
     await getUser();
     if (roomPrefix === "codenames") {
-      const game = await fetchGame(room);
+      const fetched = await fetchGame(room);
       if (
-        !game.teams.find(({ players }) =>
-          players.find(({ id }) => id === $user.id)
+        !fetched.teams.find(({ players }) =>
+          players.find(({ userId }) => userId === $user.id)
         ) &&
-        !game.viewers.find(({ id }) => id === $user.id)
+        !fetched.viewers.find(({ userId }) => userId === $user.id)
       ) {
-        joinGame(room);
+        joinGame(room).then(() => fetchGame(room));
       }
+      addEventHandler("GameUpdatedEvent", (event) => {
+        if (event.game.id === room) {
+          game.set(event.game);
+        }
+      });
     }
   });
 </script>
@@ -69,7 +74,7 @@
     {#if roomPrefix === "codenames"}
       <CodenamesBoard />
     {/if}
-    <Chat />
+    <Chat {room} />
   </div>
   <div class="drawer-side overflow-hidden h-[100dvh]">
     <label for="drawer-toggle" class="drawer-overlay" />

@@ -8,6 +8,7 @@
   import ChatMessage from "./ChatMessage.svelte";
   import setSendDate from "../utils/message-send-date";
 
+  export let room;
   export let onContextMenu;
   export let onReaction;
   export let messages;
@@ -34,6 +35,9 @@
     const params = { count };
     if (from) {
       params.from = from;
+    }
+    if (room && room !== "global") {
+      params.room = room;
     }
     loading = true;
     let responseBody;
