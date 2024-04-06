@@ -5,6 +5,7 @@ import chatweb.model.game.Settings;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
@@ -42,7 +43,7 @@ public class Game {
     @JoinColumn(name = "host_id", referencedColumnName = "id")
     private User host;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "game_viewers",
             schema = "codenames",
@@ -57,6 +58,7 @@ public class Game {
     @JdbcTypeCode(SqlTypes.JSON)
     private Settings settings;
 
+    @Setter
     @JdbcTypeCode(SqlTypes.JSON)
     private GameState state;
 

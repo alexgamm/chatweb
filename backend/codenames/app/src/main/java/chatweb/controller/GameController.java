@@ -126,7 +126,7 @@ public class GameController implements ApiControllerHelper {
     }
 
     @Transactional
-    @PostMapping("{gameId}pause")
+    @PostMapping("{gameId}/pause")
     public ApiResponse pauseGame(@PathVariable String gameId, @RequestAttribute User user) throws ApiErrorException {
         Game game = gameService.findGame(gameId);
         if (game == null) {

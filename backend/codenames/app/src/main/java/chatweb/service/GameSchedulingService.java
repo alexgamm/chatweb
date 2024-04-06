@@ -3,6 +3,7 @@ package chatweb.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -16,6 +17,7 @@ public class GameSchedulingService {
 
     private final TaskScheduler taskScheduler;
     private final Map<String, ScheduledFuture<?>> gameTasks = Collections.synchronizedMap(new HashMap<>());
+    private final TransactionTemplate transactionTemplate;
 
     public void cancelTaskIfExists(String gameId) {
         ScheduledFuture<?> task = gameTasks.get(gameId);
@@ -27,7 +29,10 @@ public class GameSchedulingService {
 
     public void schedule(String gameId, Runnable action, Instant startTime) {
         cancelTaskIfExists(gameId);
-        ScheduledFuture<?> task = taskScheduler.schedule(action, startTime);
+        ScheduledFuture<?> task = taskScheduler.schedule(
+                () -> transactionTemplate.executeWithoutResult(status -> action.run()),
+                startTime
+        );
         gameTasks.put(gameId, task);
     }
 

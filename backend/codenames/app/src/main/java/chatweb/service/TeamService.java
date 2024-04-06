@@ -23,7 +23,11 @@ public class TeamService {
         if (!team.getPlayers().contains(user)) {
             team.getPlayers().add(user);
         }
-        team.setLeader(leader ? user : null);
+        if (team.isLeader(user) && !leader) {
+            team.setLeader(null);
+        } else if (!team.isLeader(user) && leader) {
+            team.setLeader(user);
+        }
         teamRepository.save(team);
     }
 

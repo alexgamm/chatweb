@@ -103,8 +103,7 @@ public class GameService {
             throw new IllegalArgumentException(String.format("No executor found for action type: %s", action.getClass()));
         }
         GameActionExecutionResult result = executor.execute(game.getState(), action);
-        gameRepository.updateState(game.getId(), result.getNewState());
-        game = gameRepository.findById(game.getId()).orElseThrow();
+        game.setState(result.getNewState());
         eventsApi.addEvent(new ServiceGameUpdatedEvent(game));
         if (result.isCancelScheduledTask()) {
             gameSchedulingService.cancelTaskIfExists(game.getId());
