@@ -23,7 +23,7 @@ public class ChangeTurnExecutor implements GameActionExecutor<ChangeTurn> {
         Turn.TurnBuilder newTurn = state.getTurn()
                 .toBuilder()
                 .durationSeconds(action.getTurnSeconds())
-                .startedAt(Instant.now());
+                .timeoutAt(Instant.now().plusSeconds(action.getTurnSeconds()));
         if (state.getTurn().isLeader()) {
             newTurn = newTurn.leader(false);
         } else {
@@ -40,8 +40,7 @@ public class ChangeTurnExecutor implements GameActionExecutor<ChangeTurn> {
                 .cancelScheduledTask(true)
                 .postTasks(List.of(scheduled(
                         new ChangeTurn(action.getTurnSeconds()),
-                        Objects.requireNonNull(state.getTurn().getStartedAt())
-                                .plusSeconds(state.getTurn().getDurationSeconds())
+                        Objects.requireNonNull(state.getTurn().getTimeoutAt())
                 )))
                 .build();
     }

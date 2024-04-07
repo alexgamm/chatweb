@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @AllArgsConstructor
@@ -21,12 +22,14 @@ public class GameState {
     private List<Card> cards;
     private List<Integer> turnOrderTeamIds;
     private Turn turn;
+    private Map<Integer, Long> remainingCards; // Map<teamId, number of remaining cards>
 
     public GameStateBuilder copy() {
         return toBuilder()
                 .cards(Collections.unmodifiableList(cards))
                 .turnOrderTeamIds(Collections.unmodifiableList(turnOrderTeamIds))
-                .turn(turn.toBuilder().build());
+                .turn(turn.toBuilder().build())
+                .remainingCards(Collections.unmodifiableMap(remainingCards));
     }
 
     public boolean allCardsPicked(Integer teamId) {

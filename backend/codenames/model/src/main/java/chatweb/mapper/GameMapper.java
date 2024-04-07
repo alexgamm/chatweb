@@ -8,6 +8,8 @@ import chatweb.model.game.state.Status;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -27,20 +29,28 @@ public class GameMapper {
 
     public static GameState mapState(Integer userId, Game game) {
         GameState state = game.getState();
-        boolean areCardsRevealed = state.getStatus() == Status.FINISHED
+        return state.copy()
+                .cards(mapCards(userId, game))
+                .remainingCards(countRemainingCards(state.getCards()))
+                .build();
+    }
+
+    private static List<Card> mapCards(Integer userId, Game game) {
+        boolean areCardsRevealed = game.getState().getStatus() == Status.FINISHED
                 || game.getTeams().stream().anyMatch(team -> team.isLeader(userId));
-        return new GameState(
-                state.getStatus(),
-                state.getCards().stream()
-                        .map(card -> new Card(
-                                areCardsRevealed || card.getPickedByTeamId() != null ? card.getType() : null,
-                                card.getWord(),
-                                areCardsRevealed ? card.getTeamId() : null,
-                                card.getPickedByTeamId()
-                        ))
-                        .toList(),
-                state.getTurnOrderTeamIds(),
-                state.getTurn()
-        );
+        return game.getState().getCards().stream()
+                .map(card -> new Card(
+                        areCardsRevealed || card.getPickedByTeamId() != null ? card.getType() : null,
+                        card.getWord(),
+                        areCardsRevealed ? card.getTeamId() : null,
+                        card.getPickedByTeamId()
+                ))
+                .toList();
+    }
+
+    private static Map<Integer, Long> countRemainingCards(List<Card> cards) {
+        return cards.stream()
+                .filter(card -> card.getTeamId() != null && card.getPickedByTeamId() == null)
+                .collect(Collectors.groupingBy(Card::getTeamId, Collectors.counting()));
     }
 }

@@ -15,6 +15,7 @@ import chatweb.utils.GameUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.List;
 
 @Component
@@ -44,12 +45,18 @@ public class RestartGameExecutor implements GameActionExecutor<RestartGame> {
                 dictionary.getRandomWords(settings.getBoardSize().getWordAmount()),
                 shuffledTeamIds
         );
-        Turn turn = new Turn(
-                shuffledTeamIds.get(0),
-                true,
-                settings.getTurnSeconds() * 2,
-                null
-        );
-        return new GameState(Status.IDLE, cards, shuffledTeamIds, turn);
+        int firstTurnDurationSeconds = settings.getTurnSeconds() * 2;
+        Turn turn = Turn.builder()
+                .teamId(shuffledTeamIds.get(0))
+                .leader(true)
+                .durationSeconds(firstTurnDurationSeconds)
+                .timeoutAt(Instant.now().plusSeconds(firstTurnDurationSeconds))
+                .build();
+        return GameState.builder()
+                .status(Status.IDLE)
+                .cards(cards)
+                .turnOrderTeamIds(shuffledTeamIds)
+                .turn(turn)
+                .build();
     }
 }

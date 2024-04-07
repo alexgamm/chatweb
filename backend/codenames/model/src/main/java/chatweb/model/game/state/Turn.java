@@ -16,6 +16,7 @@ public class Turn {
     private Integer teamId;
     private boolean leader;
     private Integer durationSeconds;
+    private Instant timeoutAt;
     @Nullable
-    private Instant startedAt;
+    private Instant pausedAt;
 }
