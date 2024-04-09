@@ -1,9 +1,7 @@
 package chatweb.interceptor;
 
-import chatweb.entity.User;
 import chatweb.exception.UnauthorizedException;
-import chatweb.repository.UserRepository;
-import chatweb.service.JwtService;
+import chatweb.helper.UserAuthHelper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +15,8 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class UserAuthInterceptor implements HandlerInterceptor {
-    private final UserRepository userRepository;
-    private final JwtService jwtService;
+
+    private final UserAuthHelper authHelper;
 
     @Override
     public boolean preHandle(
@@ -26,7 +24,6 @@ public class UserAuthInterceptor implements HandlerInterceptor {
             @NotNull HttpServletResponse response,
             @NotNull Object handler
     ) throws Exception {
-        User user;
         String accessToken = Optional.ofNullable(request.getHeader(HttpHeaders.AUTHORIZATION))
                 .map(header -> {
                     String[] parts = header.split(" ");
@@ -36,22 +33,9 @@ public class UserAuthInterceptor implements HandlerInterceptor {
                     return parts[1];
                 })
                 .filter(token -> !token.isBlank())
-                .orElse(request.getParameter("access_token"));
-        if (accessToken == null || accessToken.isEmpty()) {
-            throw new UnauthorizedException();
-        }
-        int userId;
-        try {
-            userId = jwtService.decodeToken(accessToken);
-        } catch (Throwable e) {
-            throw new UnauthorizedException();
-        }
-        user = userRepository.findUserById(userId);
-        if (user == null) {
-            throw new UnauthorizedException();
-        }
+                .orElseThrow(UnauthorizedException::new);
         // сохраняем user в контекст запроса
-        request.setAttribute("user", user);
+        request.setAttribute("user", authHelper.auth(accessToken));
         return true;
     }
 }
