@@ -1,6 +1,6 @@
 let socket;
 const handlers = {};
-const baseUrl = `${location.protocol === 'https' ? 'wss' : 'ws'}://${location.host}`;
+const baseUrl = `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}`;
 
 export const addEventHandler = (eventType, handler) => {
   if (!socket) {
