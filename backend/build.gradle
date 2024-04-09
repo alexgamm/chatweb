@@ -7,6 +7,12 @@ plugins {
 group = 'chatweb'
 version = '0.0.1-SNAPSHOT'
 
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+}
+
 subprojects {
     apply plugin: 'java'
     apply plugin: 'org.springframework.boot'
@@ -20,10 +26,6 @@ subprojects {
         compileOnly {
             extendsFrom annotationProcessor
         }
-    }
-
-    repositories {
-        mavenCentral()
     }
 
     dependencies {
