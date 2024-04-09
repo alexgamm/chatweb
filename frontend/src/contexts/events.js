@@ -1,29 +1,20 @@
-let eventSource;
-export const listen = () => {
-  if (!eventSource) {
+let socket;
+const handlers = {};
+const baseUrl = `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}`;
+
+export const addEventHandler = (eventType, handler) => {
+  if (!socket) {
     const accessToken = localStorage.getItem("token");
     if (!accessToken) {
       return;
     }
-    eventSource = new EventSource(
-      `/api/events/stream?access_token=${accessToken}`
-    );
+    // TODO Handle expired token
+    socket = new WebSocket(`${baseUrl}/api/ws/events?access_token=${accessToken}`);
+    socket.addEventListener("message", (event) => {
+      const eventData = JSON.parse(event.data);
+      const eventHandlers = handlers[eventData.type?.slice(1)] ?? [];
+      eventHandlers.forEach(handler => handler(eventData));
+    });
   }
+  handlers[eventType] = [...(handlers[eventType] ?? []), handler];
 };
-export const addEventHandler = (eventType, handler) => {
-  listen();
-  if (!eventSource) return;
-  eventSource.addEventListener(eventType, (event) => {
-    if (!event.data) return;
-    const eventData = JSON.parse(event.data);
-    handler(eventData);
-  });
-};
-
-addEventHandler("error", ({ statusCode }) => {
-  if (statusCode === 401) {
-    localStorage.removeItem("token");
-    eventSource.close();
-    eventSource = null;
-  }
-});
