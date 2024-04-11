@@ -2,12 +2,16 @@ package chatweb.mapper;
 
 import chatweb.entity.Team;
 import chatweb.model.api.TeamDto;
+import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingConstants;
 
-@Mapper(uses = MemberMapper.class)
+@Mapper(
+        componentModel = MappingConstants.ComponentModel.SPRING,
+        uses = MemberMapper.class,
+        injectionStrategy = InjectionStrategy.CONSTRUCTOR
+)
 public interface TeamMapper {
-    TeamMapper INSTANCE = Mappers.getMapper(TeamMapper.class);
 
-    TeamDto teamToDtoMapper(Team team);
+    TeamDto teamToTeamDto(Team team);
 }

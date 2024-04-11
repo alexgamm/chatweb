@@ -5,29 +5,24 @@ import chatweb.model.api.GameDto;
 import chatweb.model.game.GameState;
 import chatweb.model.game.state.Card;
 import chatweb.model.game.state.Status;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
-@Component
-public class GameMapper {
 
-    public static GameDto map(Integer userId, Game game) {
-        return new GameDto(
-                game.getId(),
-                MemberMapper.INSTANCE.userToMember(game.getHost()),
-                game.getViewers().stream().map(MemberMapper.INSTANCE::userToMember).collect(Collectors.toSet()),
-                game.getTeams().stream().map(TeamMapper.INSTANCE::teamToDtoMapper).toList(),
-                game.getSettings(),
-                mapState(userId, game)
-        );
-    }
+@Mapper(uses = {TeamMapper.class, MemberMapper.class})
+public interface GameMapper {
+    GameMapper INSTANCE = Mappers.getMapper(GameMapper.class);
 
-    public static GameState mapState(Integer userId, Game game) {
+    @Mapping(target = "state", expression = "java(mapState(userId, game))")
+    GameDto map(Integer userId, Game game);
+
+    @SuppressWarnings("unused")
+    default GameState mapState(Integer userId, Game game) {
         GameState state = game.getState();
         return state.copy()
                 .cards(mapCards(userId, game))

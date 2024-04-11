@@ -24,19 +24,21 @@ public class PickCardExecutor implements GameActionExecutor<PickCard> {
     @Override
     public GameActionExecutionResult execute(GameState state, PickCard action) throws IllegalStateException {
         Turn turn = state.getTurn();
-        Card pickedCard = state.getCards().stream()
-                .filter(card -> card.getWord().equals(action.getWord()))
-                .findFirst().orElse(null);
         if (turn == null) {
             throw new IllegalStateException("The game is not created");
+        }
+        if (turn.isLeader()) {
+            throw new IllegalStateException("It is leader's turn now. You cannot pick cards");
         }
         if (!turn.getTeamId().equals(action.getPickedTeamId())) {
             throw new IllegalStateException("It's not your team's turn");
         }
-        // TODO check its not leader's turn now
         if (state.getStatus() != Status.ACTIVE) {
             throw new IllegalStateException("Game is stopped");
         }
+        Card pickedCard = state.getCards().stream()
+                .filter(card -> card.getWord().equals(action.getWord()))
+                .findFirst().orElse(null);
         if (pickedCard == null) {
             throw new IllegalStateException("No such word on the game board");
         }

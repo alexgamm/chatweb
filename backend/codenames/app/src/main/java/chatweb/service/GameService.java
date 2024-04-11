@@ -88,7 +88,7 @@ public class GameService {
 
     public void addViewer(Game game, User viewer) {
         game.getViewers().add(viewer);
-        gameRepository.save(game);
+        eventsApi.addEvent(new ServiceGameUpdatedEvent(game));
     }
 
     public void removeViewer(Game game, User viewer) {

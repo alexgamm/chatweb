@@ -15,7 +15,7 @@ public class ServiceGameUpdatedEvent extends RoomEvent implements PersonalEventP
     @Override
     public IEvent getPersonalEvent(Integer userId) {
         return new GameUpdatedEvent(
-                GameMapper.map(userId, getGame())
+                GameMapper.INSTANCE.map(userId, getGame())
         );
     }
 }

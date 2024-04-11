@@ -26,6 +26,7 @@ public class ApiRegistrationController implements ApiControllerHelper {
 
     private final UserRepository userRepository;
     private final VerificationService verificationService;
+    private final UserMapper userMapper;
 
     @PostMapping
     public UserDto registration(@RequestBody RegistrationRequest body) throws ApiErrorException {
@@ -58,6 +59,6 @@ public class ApiRegistrationController implements ApiControllerHelper {
         user = userRepository.save(user);
         verificationService.createAndSendVerification(user);
         //TODO handle email problems (if email was not sent)
-        return UserMapper.INSTANCE.userToUserDto(user);
+        return userMapper.userToUserDto(user);
     }
 }

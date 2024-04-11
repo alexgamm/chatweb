@@ -6,7 +6,6 @@ import chatweb.action.PickCard;
 import chatweb.action.RestartGame;
 import chatweb.action.StartGame;
 import chatweb.client.ChatApiClient;
-import chatweb.client.EventsApiClient;
 import chatweb.entity.Dictionary;
 import chatweb.entity.Game;
 import chatweb.entity.Room;
@@ -22,7 +21,6 @@ import chatweb.model.api.CreateRoomResponse;
 import chatweb.model.api.GameDto;
 import chatweb.model.api.PickCardRequest;
 import chatweb.model.api.UpdateSettingsRequest;
-import chatweb.model.event.ServiceGameUpdatedEvent;
 import chatweb.model.game.Settings;
 import chatweb.model.game.state.Status;
 import chatweb.repository.DictionaryRepository;
@@ -51,7 +49,6 @@ public class GameController implements ApiControllerHelper {
     private final ChatApiClient chatApiClient;
     private final DictionaryRepository dictionaryRepository;
     private final GameService gameService;
-    private final EventsApiClient eventsApi;
 
     @GetMapping("{gameId}")
     public GameDto getGame(@PathVariable String gameId, @RequestAttribute User user) throws ApiErrorException {
@@ -63,7 +60,7 @@ public class GameController implements ApiControllerHelper {
         if (!room.getUsers().contains(user)) {
             throw badRequest("You are not a member of this room").toException();
         }
-        return GameMapper.map(user.getId(), game);
+        return GameMapper.INSTANCE.map(user.getId(), game);
     }
 
     @Transactional
@@ -98,7 +95,6 @@ public class GameController implements ApiControllerHelper {
             throw badRequest("You are already in the room").toException();
         }
         gameService.addViewer(game, user);
-        eventsApi.addEvent(new ServiceGameUpdatedEvent(game));
         return new ApiResponse(true);
     }
 
@@ -109,7 +105,7 @@ public class GameController implements ApiControllerHelper {
         if (game == null) {
             throw notFound("Game is not found").toException();
         }
-        if (!game.getHost().equals(user)) {
+        if (!user.equals(game.getHost())) {
             throw badRequest("Only host may start the game").toException();
         }
         if (game.getState().getStatus() == Status.ACTIVE) {
@@ -129,7 +125,7 @@ public class GameController implements ApiControllerHelper {
         if (game == null) {
             throw notFound("Game is not found").toException();
         }
-        if (!game.getHost().equals(user)) {
+        if (!user.equals(game.getHost())) {
             throw badRequest("Only host may pause the game").toException();
         }
         if (game.getState().getStatus() != Status.ACTIVE) {
@@ -152,7 +148,7 @@ public class GameController implements ApiControllerHelper {
             throw notFound("Game is not found").toException();
         }
         Team userTeam = game.getTeams().stream()
-                .filter(team -> team.getPlayers().contains(user))
+                .filter(team -> team.isPlayer(user))
                 .findFirst()
                 .orElse(null);
         if (userTeam == null) {
@@ -174,7 +170,7 @@ public class GameController implements ApiControllerHelper {
     }
 
     @Transactional
-    @PostMapping("{gameId}/endTurn")
+    @PostMapping("{gameId}/turn/end")
     public ApiResponse endTurn(@PathVariable String gameId, @RequestAttribute User user) throws ApiErrorException {
         Game game = gameService.findGame(gameId);
         if (game == null) {
@@ -184,7 +180,7 @@ public class GameController implements ApiControllerHelper {
             throw badRequest("Game is not active").toException();
         }
         Team userTeam = game.getTeams().stream()
-                .filter(team -> team.getPlayers().contains(user))
+                .filter(team -> team.isPlayer(user))
                 .findFirst()
                 .orElse(null);
         if (userTeam == null) {
@@ -193,8 +189,10 @@ public class GameController implements ApiControllerHelper {
         if (game.getState().getTurn().isLeader() && !userTeam.isLeader(user)) {
             throw badRequest("Now it's the leader's turn").toException();
         }
-        if (!game.getState().getTurn().isLeader() && userTeam.isLeader(user))
-            gameService.executeAction(game, new ChangeTurn(game.getSettings().getTurnSeconds()));
+        if (!game.getState().getTurn().isLeader() && userTeam.isLeader(user)) {
+            throw badRequest("Now it's the team members' turn").toException();
+        }
+        gameService.executeAction(game, new ChangeTurn(game.getSettings().getTurnSeconds()));
         return new ApiResponse(true);
     }
 

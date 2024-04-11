@@ -86,7 +86,6 @@ public class TeamController implements ApiControllerHelper {
         }
         teamService.removePlayer(team, user);
         gameService.addViewer(game, user);
-        eventsApi.addEvent(new ServiceGameUpdatedEvent(gameService.findGame(game.getId())));
         return new ApiResponse(true);
     }
 }

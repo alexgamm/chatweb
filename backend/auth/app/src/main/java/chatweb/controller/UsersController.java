@@ -33,6 +33,7 @@ import java.util.Set;
 public class UsersController implements ApiControllerHelper {
     private final UserRepository userRepository;
     private final EventsApiClient eventsApi;
+    private final UserMapper userMapper;
 
     @GetMapping
     public UserListResponse users() {
@@ -51,7 +52,7 @@ public class UsersController implements ApiControllerHelper {
 
     @GetMapping("me")
     public UserDto getMe(@RequestAttribute User user) {
-        return UserMapper.INSTANCE.userToUserDto(user);
+        return userMapper.userToUserDto(user);
     }
 
     @PutMapping("me/username")
@@ -66,7 +67,7 @@ public class UsersController implements ApiControllerHelper {
         userRepository.updateUsername(user.getId(), input.getUsername());
         user = userRepository.findUserById(user.getId());
         eventsApi.addEvent(new ChangeUsernameEvent(user.getId(), user.getUsername()));
-        return UserMapper.INSTANCE.userToUserDto(user);
+        return userMapper.userToUserDto(user);
     }
 
     @PutMapping("me/password")
@@ -93,6 +94,6 @@ public class UsersController implements ApiControllerHelper {
         }
         userRepository.updateColor(user.getId(), body.getColor());
         eventsApi.addEvent(new ChangeUserColorEvent(user.getId(), body.getColor()));
-        return UserMapper.INSTANCE.userToUserDto(userRepository.findUserById(user.getId()));
+        return userMapper.userToUserDto(userRepository.findUserById(user.getId()));
     }
 }
