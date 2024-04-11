@@ -16,9 +16,6 @@
   $: turnTeam = $game?.teams?.find(
     ({ id }) => id === $game?.state?.turn?.teamId
   );
-  $: turnStartedAt = $game?.state?.turn?.startedAt
-    ? new Date($game.state.turn.startedAt)
-    : null;
 
   const cardColor = (card) => {
     switch (card.type) {
@@ -67,7 +64,7 @@
         <div
           class={`rounded-xl md:p-4 md:text-3xl py-2 break-words text-2xl text-center font-bold bg-opacity-30 ${COLORS[$game.teams[0].color].text} ${COLORS[$game.teams[0].color].bg}`}
         >
-          5
+          {$game?.state?.remainingCards?.[$game.teams[0].id] ?? ""}
         </div>
         <div
           class={`relative rounded-xl md:p-4 md:text-3xl py-2 break-words text-2xl text-center font-semibold bg-opacity-30 bg-gray-700 overflow-hidden ${COLORS[turnTeam.color].text}`}
@@ -75,7 +72,8 @@
           {#if $game.state.turn}
             <span style={`opacity: ${Math.max(0.3, turnProgress * 2)}`}>
               <Countdown
-                start={turnStartedAt}
+                endsAt={$game.state.turn.timeoutAt}
+                pausedAt={$game.state.turn.pausedAt}
                 durationSeconds={$game.state.turn.durationSeconds}
                 bind:progress={turnProgress}
               />
@@ -89,7 +87,7 @@
         <div
           class={`rounded-xl md:p-4 md:text-3xl py-2 break-words text-2xl text-center font-bold bg-opacity-30 ${COLORS[$game.teams[1].color].text} ${COLORS[$game.teams[1].color].bg}`}
         >
-          2
+          {$game?.state?.remainingCards?.[$game.teams[1].id] ?? ""}
         </div>
       </div>
     </div>

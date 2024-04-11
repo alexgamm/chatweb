@@ -1,40 +1,40 @@
 <script>
-  import { intervalToDuration } from "date-fns";
+  import { differenceInSeconds } from "date-fns";
   import { onMount } from "svelte";
 
-  export let start;
+  export let endsAt;
+  export let pausedAt;
   export let durationSeconds;
   export let progress;
 
   let view = null;
 
+  const formatDuration = (durationSeconds) => {
+    const minutes = Math.floor(durationSeconds / 60);
+    const seconds = durationSeconds % 60;
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+  };
+
   onMount(() => {
     const interval = setInterval(() => {
-      let duration;
-      if (start) {
+      let remainingSeconds;
+      if (endsAt) {
         const now = Date.now();
-        const end = start.getTime() + durationSeconds * 1000;
-        if (now > end) {
-          duration = {
-            minutes: 0,
-            seconds: 0,
-          };
-          progress = 0;
-        } else {
-          progress = Math.max(
-            0,
-            Math.min(1, (end - now) / durationSeconds / 1000)
+        if (pausedAt) {
+          remainingSeconds = differenceInSeconds(
+            new Date(endsAt),
+            new Date(pausedAt)
           );
-          duration = intervalToDuration({ start: now, end });
+        } else if (now > endsAt) {
+          remainingSeconds = 0;
+        } else {
+          remainingSeconds = differenceInSeconds(new Date(endsAt), now);
         }
       } else {
-        duration = {
-          minutes: Math.floor(durationSeconds / 60),
-          seconds: durationSeconds % 60,
-        };
-        progress = 1;
+        remainingSeconds = durationSeconds;
       }
-      view = `${duration.minutes}:${duration.seconds < 10 ? "0" : ""}${duration.seconds}`;
+      progress = remainingSeconds / durationSeconds;
+      view = formatDuration(remainingSeconds);
     }, 200);
 
     return () => {

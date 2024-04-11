@@ -20,7 +20,7 @@ public class GameUtils {
         // adding color cards for teams
         for (int teamIdx = 0; teamIdx < shuffledTeamIds.size(); teamIdx++) {
             Integer teamId = shuffledTeamIds.get(teamIdx);
-            for (int i = 0; i < MIN_TEAM_CARD_AMOUNT + teamIdx; i++) {
+            for (int i = 0; i < MIN_TEAM_CARD_AMOUNT + (shuffledTeamIds.size() - teamIdx - 1); i++) {
                 cards.add(new Card(CardType.COLOR, shuffledWords.pop(), teamId, null));
             }
         }

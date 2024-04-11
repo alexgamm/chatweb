@@ -48,7 +48,7 @@ public class RoomsController implements ApiControllerHelper {
             throw badRequest("Incorrect password").toException();
         }
         if (relatedRoom.getUsers().contains(user)) {
-            throw badRequest("You are already in the room").toException();
+            return new ApiResponse(true);
         }
         relatedRoom.addUser(user);
         roomRepository.save(relatedRoom);

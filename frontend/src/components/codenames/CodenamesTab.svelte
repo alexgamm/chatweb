@@ -12,6 +12,8 @@
   import SpectatorIcon from "../icons/SpectatorIcon.svelte";
   import StarIcon from "../icons/StarIcon.svelte";
   import TeamSelect from "./TeamSelect.svelte";
+  import ca from "date-fns/locale/ca";
+  import { pushToast } from "../../stores/toast";
 
   const {
     authorized: { post },
@@ -30,9 +32,13 @@
   }
 
   const toggleGame = async () => {
-    await post(
-      `/api/codenames/game/${$game.id}/${$game.state.status === "ACTIVE" ? "pause" : "start"}`
-    );
+    try {
+      await post(
+        `/api/codenames/game/${$game.id}/${$game.state.status === "ACTIVE" ? "pause" : "start"}`
+      );
+    } catch (error) {
+      pushToast({ type: "error", message: error.message });
+    }
   };
 
   const restartGame = async () => {
@@ -108,7 +114,9 @@
               {:else}
                 <button on:click={() => toggleLeader()}>
                   <StarIcon
-                    variant={team.leader?.userId === player.userId ? "solid" : ""}
+                    variant={team.leader?.userId === player.userId
+                      ? "solid"
+                      : ""}
                   />
                 </button>
               {/if}

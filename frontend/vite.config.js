@@ -10,6 +10,7 @@ const PROXY_CONFIGS = {
         "/api/tg/oauth": "http://localhost:23456",
         "/api/google/oauth": "http://localhost:23456",
         "/api/messages": "http://localhost:23457",
+        "/api/rooms": "http://localhost:23457",
         "/api/ws/events": {
             target: "http://localhost:23458",
             ws: true

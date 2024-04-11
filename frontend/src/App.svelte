@@ -6,6 +6,7 @@
   import Verification from "./components/pages/Verification.svelte";
   import GoogleOAuthRedirect from "./components/pages/google/OAuthRedirect.svelte";
   import TelegramOAuthRedirect from "./components/pages/telegram/OAuthRedirect.svelte";
+  import Toasts from "./components/Toasts.svelte";
 </script>
 
 <Router>
@@ -17,3 +18,4 @@
   <Route path="/room/:room" component={Room} />
   <Route path="/" component={Room} />
 </Router>
+<Toasts />

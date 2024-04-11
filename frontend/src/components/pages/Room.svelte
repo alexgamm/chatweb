@@ -15,8 +15,17 @@
   import UsersIcon from "../icons/UsersIcon.svelte";
   import ChangePasswordModal from "../modals/ChangePasswordModal.svelte";
   import ChangeUsernameModal from "../modals/ChangeUsernameModal.svelte";
+  import useApi from "../../hooks/api";
+  import ca from "date-fns/locale/ca";
+  import RoomPasswordModal from "../modals/RoomPasswordModal.svelte";
+  import af from "date-fns/locale/af";
+  import roomPasswordModal from "../../stores/room-password-modal";
 
   export let room = "global";
+
+  const {
+    authorized: { post },
+  } = useApi();
 
   $: roomPrefix = room.split("-")[0];
 
@@ -47,7 +56,15 @@
     ],
   };
 
-  onMount(async () => {
+  const joinRoom = async (password) =>
+    post(`/api/rooms/${room}/join`, password ? { password } : {});
+
+  const onPasswordSubmit = async (password) => {
+    await joinRoom(password);
+    afterJoin();
+  };
+
+  const afterJoin = async () => {
     await getUser();
     if (roomPrefix === "codenames") {
       const fetched = await fetchGame(room);
@@ -65,6 +82,20 @@
         }
       });
     }
+  };
+
+  onMount(async () => {
+    if (room !== "global") {
+      try {
+        await post(`/api/rooms/${room}/join`, {});
+      } catch (error) {
+        if (error.statusCode === 400) {
+          $roomPasswordModal.showModal();
+          return;
+        }
+      }
+    }
+    afterJoin();
   });
 </script>
 
@@ -101,3 +132,4 @@
 </label>
 <ChangeUsernameModal />
 <ChangePasswordModal />
+<RoomPasswordModal onSubmit={onPasswordSubmit} />

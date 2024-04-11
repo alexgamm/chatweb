@@ -28,8 +28,7 @@ public class GameState {
         return toBuilder()
                 .cards(Collections.unmodifiableList(cards))
                 .turnOrderTeamIds(Collections.unmodifiableList(turnOrderTeamIds))
-                .turn(turn.toBuilder().build())
-                .remainingCards(Collections.unmodifiableMap(remainingCards));
+                .turn(turn.toBuilder().build());
     }
 
     public boolean allCardsPicked(Integer teamId) {

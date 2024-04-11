@@ -24,8 +24,7 @@ public class StartGameExecutor implements GameActionExecutor<StartGame> {
         }
         int remainingTurnSeconds = turn.getDurationSeconds();
         if (turn.getPausedAt() != null) {
-            int spentTurnSeconds = (int) Duration.between(turn.getTimeoutAt(), turn.getPausedAt()).getSeconds();
-            remainingTurnSeconds -= spentTurnSeconds;
+            remainingTurnSeconds = (int) Duration.between(turn.getPausedAt(), turn.getTimeoutAt()).getSeconds();
         }
         Turn newTurn = turn.toBuilder()
                 .timeoutAt(Instant.now().plusSeconds(remainingTurnSeconds))

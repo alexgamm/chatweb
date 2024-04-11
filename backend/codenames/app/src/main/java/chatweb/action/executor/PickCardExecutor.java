@@ -33,6 +33,7 @@ public class PickCardExecutor implements GameActionExecutor<PickCard> {
         if (!turn.getTeamId().equals(action.getPickedTeamId())) {
             throw new IllegalStateException("It's not your team's turn");
         }
+        // TODO check its not leader's turn now
         if (state.getStatus() != Status.ACTIVE) {
             throw new IllegalStateException("Game is stopped");
         }

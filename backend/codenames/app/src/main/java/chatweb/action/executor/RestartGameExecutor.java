@@ -15,7 +15,6 @@ import chatweb.utils.GameUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.util.List;
 
 @Component
@@ -50,7 +49,6 @@ public class RestartGameExecutor implements GameActionExecutor<RestartGame> {
                 .teamId(shuffledTeamIds.get(0))
                 .leader(true)
                 .durationSeconds(firstTurnDurationSeconds)
-                .timeoutAt(Instant.now().plusSeconds(firstTurnDurationSeconds))
                 .build();
         return GameState.builder()
                 .status(Status.IDLE)

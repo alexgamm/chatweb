@@ -109,9 +109,6 @@ public class GameController implements ApiControllerHelper {
         if (game == null) {
             throw notFound("Game is not found").toException();
         }
-        if (!game.isPlayer(user)) {
-            throw badRequest("You are not a player in this game").toException();
-        }
         if (!game.getHost().equals(user)) {
             throw badRequest("Only host may start the game").toException();
         }
