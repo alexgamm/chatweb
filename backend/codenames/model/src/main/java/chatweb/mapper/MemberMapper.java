@@ -2,17 +2,14 @@ package chatweb.mapper;
 
 import chatweb.entity.User;
 import chatweb.model.game.Member;
-import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
+import org.mapstruct.factory.Mappers;
 
-@Mapper(
-        componentModel = MappingConstants.ComponentModel.SPRING,
-        injectionStrategy = InjectionStrategy.CONSTRUCTOR
-)
+@Mapper
 public interface MemberMapper {
+    MemberMapper INSTANCE = Mappers.getMapper(MemberMapper.class);
 
     @Mapping(source = "id", target = "userId")
-    Member userToMember(User user);
+    Member toMember(User user);
 }

@@ -33,7 +33,6 @@ import java.util.Set;
 public class UsersController implements ApiControllerHelper {
     private final UserRepository userRepository;
     private final EventsApiClient eventsApi;
-    private final UserMapper userMapper;
 
     @GetMapping
     public UserListResponse users() {
@@ -52,13 +51,13 @@ public class UsersController implements ApiControllerHelper {
 
     @GetMapping("me")
     public UserDto getMe(@RequestAttribute User user) {
-        return userMapper.userToUserDto(user);
+        return UserMapper.INSTANCE.toDto(user);
     }
 
     @PutMapping("me/username")
     @Transactional
     public UserDto changeUsername(@RequestBody UserDto input, @RequestAttribute User user) throws ApiErrorException {
-        if (input.getUsername().equals("")) {
+        if (input.getUsername().isEmpty()) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "invalid username"));
         }
         if (userRepository.findUserByUsername(input.getUsername()) != null) {
@@ -67,7 +66,7 @@ public class UsersController implements ApiControllerHelper {
         userRepository.updateUsername(user.getId(), input.getUsername());
         user = userRepository.findUserById(user.getId());
         eventsApi.addEvent(new ChangeUsernameEvent(user.getId(), user.getUsername()));
-        return userMapper.userToUserDto(user);
+        return UserMapper.INSTANCE.toDto(user);
     }
 
     @PutMapping("me/password")
@@ -94,6 +93,6 @@ public class UsersController implements ApiControllerHelper {
         }
         userRepository.updateColor(user.getId(), body.getColor());
         eventsApi.addEvent(new ChangeUserColorEvent(user.getId(), body.getColor()));
-        return userMapper.userToUserDto(userRepository.findUserById(user.getId()));
+        return UserMapper.INSTANCE.toDto(userRepository.findUserById(user.getId()));
     }
 }

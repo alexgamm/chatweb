@@ -60,7 +60,7 @@ public class GameController implements ApiControllerHelper {
         if (!room.getUsers().contains(user)) {
             throw badRequest("You are not a member of this room").toException();
         }
-        return GameMapper.INSTANCE.map(user.getId(), game);
+        return GameMapper.INSTANCE.toPersonalDto(user.getId(), game);
     }
 
     @Transactional

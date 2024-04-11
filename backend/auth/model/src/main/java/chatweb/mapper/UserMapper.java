@@ -2,17 +2,14 @@ package chatweb.mapper;
 
 import chatweb.entity.User;
 import chatweb.model.dto.UserDto;
-import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
+import org.mapstruct.factory.Mappers;
 
-@Mapper(
-        componentModel = MappingConstants.ComponentModel.SPRING,
-        injectionStrategy = InjectionStrategy.CONSTRUCTOR
-)
+@Mapper
 public interface UserMapper {
+    UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
     @Mapping(target = "hasPassword", expression = "java(user.getPassword() != null)")
-    UserDto userToUserDto(User user);
+    UserDto toDto(User user);
 }
