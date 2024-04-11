@@ -40,12 +40,9 @@
 
 {#if $game}
   <div class="bg-black bg-opacity-30 pb-6">
-    <div class="text-center p-5 pt-8">
-      <h1 class="text-4xl font-bold">🔤 Codenames</h1>
-    </div>
     <div class="flex flex-col items-center">
       <div
-        class="w-full grid grid-cols-5 gap-1 md:gap-4 max-w-5xl flex-1 p-4 justify-center"
+        class="w-full mt-6 grid grid-cols-5 gap-1 md:gap-4 max-w-5xl flex-1 p-4 justify-center"
       >
         {#each cardRows as row}
           {#each row as card}
@@ -59,15 +56,15 @@
         {/each}
       </div>
       <div
-        class="w-full grid grid-cols-3 gap-1 md:gap-4 max-w-5xl flex-1 p-4 justify-center mt-4"
+        class="w-full grid grid-cols-3 gap-1 md:gap-4 max-w-5xl flex-1 p-4 justify-center"
       >
         <div
-          class={`rounded-xl md:p-4 md:text-3xl py-2 break-words text-2xl text-center font-bold bg-opacity-30 ${COLORS[$game.teams[0].color].text} ${COLORS[$game.teams[0].color].bg}`}
+          class={`rounded-xl md:p-3 md:text-3xl py-1 break-words text-xl text-center font-bold bg-opacity-30 ${COLORS[$game.teams[0].color].text} ${COLORS[$game.teams[0].color].bg}`}
         >
           {$game?.state?.remainingCards?.[$game.teams[0].id] ?? ""}
         </div>
         <div
-          class={`relative rounded-xl md:p-4 md:text-3xl py-2 break-words text-2xl text-center font-semibold bg-opacity-30 bg-gray-700 overflow-hidden ${COLORS[turnTeam.color].text}`}
+          class={`relative rounded-xl md:p-3 md:text-3xl py-1 break-words text-xl text-center font-semibold bg-opacity-30 bg-gray-700 overflow-hidden ${COLORS[turnTeam.color].text}`}
         >
           {#if $game.state.turn}
             <span style={`opacity: ${Math.max(0.3, turnProgress * 2)}`}>
@@ -85,7 +82,7 @@
           {/if}
         </div>
         <div
-          class={`rounded-xl md:p-4 md:text-3xl py-2 break-words text-2xl text-center font-bold bg-opacity-30 ${COLORS[$game.teams[1].color].text} ${COLORS[$game.teams[1].color].bg}`}
+          class={`rounded-xl md:p-3 md:text-3xl py-1 break-words text-xl text-center font-bold bg-opacity-30 ${COLORS[$game.teams[1].color].text} ${COLORS[$game.teams[1].color].bg}`}
         >
           {$game?.state?.remainingCards?.[$game.teams[1].id] ?? ""}
         </div>
