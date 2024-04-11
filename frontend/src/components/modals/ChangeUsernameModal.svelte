@@ -21,7 +21,7 @@
         username: newUsername,
       });
     } catch (error) {
-      errorMessage = error;
+      errorMessage = error.message;
       state = "idle";
       return;
     }
