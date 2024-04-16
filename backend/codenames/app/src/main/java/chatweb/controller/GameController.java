@@ -140,7 +140,7 @@ public class GameController implements ApiControllerHelper {
     public ApiResponse pickCard(
             @PathVariable String gameId,
             @RequestAttribute User user,
-            PickCardRequest request
+            @RequestBody PickCardRequest request
     ) throws ApiErrorException {
         // TODO all team members should pick at the same card to invoke this method
         Game game = gameService.findGame(gameId);

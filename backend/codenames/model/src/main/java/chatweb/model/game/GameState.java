@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,12 +24,14 @@ public class GameState {
     private List<Integer> turnOrderTeamIds;
     private Turn turn;
     private Map<Integer, Long> remainingCards; // Map<teamId, number of remaining cards>
+    private Set<Integer> lostTeamIds;
 
     public GameStateBuilder copy() {
         return toBuilder()
                 .cards(Collections.unmodifiableList(cards))
                 .turnOrderTeamIds(Collections.unmodifiableList(turnOrderTeamIds))
-                .turn(turn.toBuilder().build());
+                .turn(turn.toBuilder().build())
+                .lostTeamIds(Collections.unmodifiableSet(lostTeamIds));
     }
 
     public boolean allCardsPicked(Integer teamId) {

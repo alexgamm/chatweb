@@ -32,12 +32,15 @@ public interface GameMapper {
         boolean areCardsRevealed = game.getState().getStatus() == Status.FINISHED
                 || game.getTeams().stream().anyMatch(team -> team.isLeader(userId));
         return game.getState().getCards().stream()
-                .map(card -> new Card(
-                        areCardsRevealed || card.getPickedByTeamId() != null ? card.getType() : null,
-                        card.getWord(),
-                        areCardsRevealed ? card.getTeamId() : null,
-                        card.getPickedByTeamId()
-                ))
+                .map(card -> {
+                    boolean isRevealed = areCardsRevealed || card.getPickedByTeamId() != null;
+                    return new Card(
+                            isRevealed ? card.getType() : null,
+                            card.getWord(),
+                            isRevealed ? card.getTeamId() : null,
+                            card.getPickedByTeamId()
+                    );
+                })
                 .toList();
     }
 

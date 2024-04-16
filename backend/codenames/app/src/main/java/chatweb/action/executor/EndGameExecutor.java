@@ -11,7 +11,7 @@ public class EndGameExecutor implements GameActionExecutor<EndGame> {
     @Override
     public GameActionExecutionResult execute(GameState state, EndGame action) throws IllegalStateException {
         return GameActionExecutionResult.builder()
-                .newState(state.copy().status(Status.FINISHED).build())
+                .newState(state.copy().status(Status.FINISHED).lostTeamIds(action.getLostTeamId()).build())
                 .cancelScheduledTask(true)
                 .build();
     }
