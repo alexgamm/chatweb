@@ -47,7 +47,10 @@ public interface GameMapper {
     @SuppressWarnings("unused")
     default Map<Integer, Long> countRemainingCards(List<Card> cards) {
         return cards.stream()
-                .filter(card -> card.getTeamId() != null && card.getPickedByTeamId() == null)
-                .collect(Collectors.groupingBy(Card::getTeamId, Collectors.counting()));
+                .filter(card -> card.getTeamId() != null)
+                .collect(Collectors.groupingBy(
+                        Card::getTeamId,
+                        Collectors.summingLong((card) -> card.getPickedByTeamId() == null ? 1 : 0))
+                );
     }
 }
