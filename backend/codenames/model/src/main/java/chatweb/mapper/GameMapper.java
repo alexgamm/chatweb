@@ -27,20 +27,20 @@ public interface GameMapper {
     @Mapping(target = "remainingCards", expression = "java(countRemainingCards(game.getState().getCards()))")
     GameState toPersonalState(Integer userId, Game game);
 
+    @Mapping(target = "type", ignore = true)
+    @Mapping(target = "teamId", ignore = true)
+    Card toUnrevealedCard(Card card);
+
     @SuppressWarnings("unused")
     default List<Card> toPersonalCards(Integer userId, Game game) {
+        List<Card> cards = game.getState().getCards();
         boolean areCardsRevealed = game.getState().getStatus() == Status.FINISHED
                 || game.getTeams().stream().anyMatch(team -> team.isLeader(userId));
-        return game.getState().getCards().stream()
-                .map(card -> {
-                    boolean isRevealed = areCardsRevealed || card.getPickedByTeamId() != null;
-                    return new Card(
-                            isRevealed ? card.getType() : null,
-                            card.getWord(),
-                            isRevealed ? card.getTeamId() : null,
-                            card.getPickedByTeamId()
-                    );
-                })
+        if (areCardsRevealed) {
+            return cards;
+        }
+        return cards.stream()
+                .map(card -> card.getPickedByTeamId() == null ? toUnrevealedCard(card) : card)
                 .toList();
     }
 

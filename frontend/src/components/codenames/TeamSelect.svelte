@@ -1,5 +1,5 @@
 <script>
-  import { COLORS } from "../../codenames/codenames-colors";
+  import { COLORS } from "../../codenames/codenames-utils";
   import SpectatorIcon from "../icons/SpectatorIcon.svelte";
   import UserIcon from "../icons/UserIcon.svelte";
 

@@ -2,24 +2,21 @@
   import { onMount, tick } from "svelte";
   import { addEventHandler } from "../contexts/events";
   import useApi from "../hooks/api";
-  import useMessageColor from "../hooks/message-color";
-  import { userColors } from "../stores/users";
+  import setSendDate from "../utils/message-send-date";
   import { reactionsOrder } from "../utils/reactions";
   import ChatMessage from "./ChatMessage.svelte";
-  import setSendDate from "../utils/message-send-date";
 
   export let room;
   export let onContextMenu;
   export let onReaction;
   export let messages;
+  export let addColor;
 
   const {
     authorized: { get },
   } = useApi();
   let messagesContainerWrapper;
   let loading = false;
-
-  $: addColor = useMessageColor($userColors);
 
   $: if (addColor) {
     messages = messages.map(addColor);

@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static chatweb.action.GameActionExecutionResult.PostTask.immediate;
@@ -57,7 +56,7 @@ public class PickCardExecutor implements GameActionExecutor<PickCard> {
         List<GameActionExecutionResult.PostTask> postTasks =
                 switch (pickedCard.getType()) {
                     case BLACK -> List.of(immediate(
-                            new EndGame(Set.of(action.getPickedTeamId()))
+                            new EndGame(action.getPickedTeamId(), null)
                     ));
                     case NEUTRAL -> List.of(immediate(
                             new ChangeTurn(action.getTurnSeconds())
@@ -65,11 +64,7 @@ public class PickCardExecutor implements GameActionExecutor<PickCard> {
                     case COLOR -> {
                         if (state.allCardsPicked(pickedCard.getTeamId())) {
                             yield List.of(immediate(
-                                    new EndGame(state.getTurnOrderTeamIds()
-                                            .stream()
-                                            .filter(id -> !id.equals(pickedCard.getTeamId()))
-                                            .collect(Collectors.toSet())
-                                    )
+                                    new EndGame(null, pickedCard.getTeamId())
                             ));
                         }
                         if (!action.getPickedTeamId().equals(pickedCard.getTeamId())) {

@@ -2,11 +2,13 @@ package chatweb.action;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-
-import java.util.Set;
+import org.jetbrains.annotations.Nullable;
 
 @RequiredArgsConstructor
 @Getter
 public class EndGame implements GameAction {
-    private final Set<Integer> lostTeamId;
+    @Nullable
+    private final Integer lostTeamId;
+    @Nullable
+    private final Integer wonTeamId;
 }

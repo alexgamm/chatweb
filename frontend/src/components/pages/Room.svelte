@@ -1,8 +1,12 @@
 <script>
   import { onMount } from "svelte";
   import { addEventHandler } from "../../contexts/events";
+  import useApi from "../../hooks/api";
+  import useMessageColor from "../../hooks/message-color";
   import { fetchGame, game, joinGame } from "../../stores/codenames";
+  import roomPasswordModal from "../../stores/room-password-modal";
   import user, { getUser } from "../../stores/user";
+  import { userColors } from "../../stores/users";
   import Chat from "../Chat.svelte";
   import CodenamesBoard from "../codenames/CodenamesBoard.svelte";
   import CodenamesTab from "../codenames/CodenamesTab.svelte";
@@ -15,11 +19,7 @@
   import UsersIcon from "../icons/UsersIcon.svelte";
   import ChangePasswordModal from "../modals/ChangePasswordModal.svelte";
   import ChangeUsernameModal from "../modals/ChangeUsernameModal.svelte";
-  import useApi from "../../hooks/api";
-  import ca from "date-fns/locale/ca";
   import RoomPasswordModal from "../modals/RoomPasswordModal.svelte";
-  import af from "date-fns/locale/af";
-  import roomPasswordModal from "../../stores/room-password-modal";
 
   export let room = "global";
 
@@ -28,6 +28,7 @@
   } = useApi();
 
   $: roomPrefix = room.split("-")[0];
+  $: addColor = useMessageColor($userColors, $game);
 
   const tabs = {
     global: [
@@ -105,7 +106,7 @@
     {#if roomPrefix === "codenames"}
       <CodenamesBoard />
     {/if}
-    <Chat {room} />
+    <Chat {room} {addColor} />
   </div>
   <div class="drawer-side overflow-hidden h-[100dvh]">
     <label for="drawer-toggle" class="drawer-overlay" />

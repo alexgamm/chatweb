@@ -1,9 +1,10 @@
 <script>
   import { navigate } from "svelte-routing";
   import { fade } from "svelte/transition";
-  import { COLORS } from "../../codenames/codenames-colors";
+  import { COLORS, TEAM_NAMES } from "../../codenames/codenames-utils";
   import useApi from "../../hooks/api";
   import { game } from "../../stores/codenames";
+  import { pushToast } from "../../stores/toast";
   import user from "../../stores/user";
   import LeaveIcon from "../icons/LeaveIcon.svelte";
   import PauseIcon from "../icons/PauseIcon.svelte";
@@ -12,8 +13,6 @@
   import SpectatorIcon from "../icons/SpectatorIcon.svelte";
   import StarIcon from "../icons/StarIcon.svelte";
   import TeamSelect from "./TeamSelect.svelte";
-  import ca from "date-fns/locale/ca";
-  import { pushToast } from "../../stores/toast";
 
   const {
     authorized: { post },
@@ -24,12 +23,17 @@
   );
 
   $: isLeader = currentTeam?.leader?.userId === $user?.id;
+  $: canBecomeLeader = !currentTeam?.leader;
 
   let teams;
 
   $: if ($game) {
     teams = [...$game.teams, { color: "GRAY", players: $game.viewers }];
   }
+
+  const isTeamLeader = (team, player) => player.userId === team?.leader?.userId;
+  const sortTeamPlayers = (team) => (a, b) =>
+    +isTeamLeader(team, b) - +isTeamLeader(team, a);
 
   const toggleGame = async () => {
     try {
@@ -42,7 +46,11 @@
   };
 
   const restartGame = async () => {
-    await post(`/api/codenames/game/${$game.id}/restart`);
+    try {
+      await post(`/api/codenames/game/${$game.id}/restart`);
+    } catch (error) {
+      pushToast({ type: "error", message: error.message });
+    }
   };
 
   const joinTeam = async (teamId, leader) => {
@@ -90,13 +98,19 @@
       </button>
     </div>
     {#each teams as team}
-      {#each team.players as player}
+      {#if team.players.length}
+        <li class="mb-2">
+          <h2 class={`text font-bold text-sm ${COLORS[team.color].text}`}>
+            {TEAM_NAMES[team.color]}
+          </h2>
+        </li>
+      {/if}
+      {#each team.players.sort(sortTeamPlayers(team)) as player}
         <li class="mb-2" in:fade>
-          <a
+          <div
             class={`flex justify-between items-center py-2 pl-4 pr-3 rounded-lg text-sm ${
               COLORS[team.color].bg
             } bg-opacity-10`}
-            href="#"
           >
             <div class="flex justify-between items-center gap-2 h-4">
               <strong class={player.typing ? "animate-pulse" : ""}>
@@ -109,19 +123,19 @@
               {/if}
             </div>
             <span class={`h-5 ${COLORS[team.color].text}`}>
-              {#if team.name === "spectators"}
+              {#if team.color === "GRAY"}
                 <SpectatorIcon />
-              {:else}
+              {:else if player.userId === team?.leader?.userId || canBecomeLeader}
                 <button on:click={() => toggleLeader()}>
                   <StarIcon
-                    variant={team.leader?.userId === player.userId
+                    variant={player.userId === team?.leader?.userId
                       ? "solid"
                       : ""}
                   />
                 </button>
               {/if}
             </span>
-          </a>
+          </div>
         </li>
       {/each}
     {/each}

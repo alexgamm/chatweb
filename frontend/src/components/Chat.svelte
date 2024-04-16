@@ -11,6 +11,7 @@
   import { reactionsOrder, toggleReaction } from "../utils/reactions";
 
   export let room;
+  export let addColor;
 
   const typingDebounce = useDebounce(300);
 
@@ -106,6 +107,7 @@
 
 <ChatMessageList
   {room}
+  {addColor}
   bind:messages
   onContextMenu={({ x, y, message }) => {
     showContextMenu = true;

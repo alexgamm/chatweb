@@ -31,7 +31,7 @@ public class GameState {
                 .cards(Collections.unmodifiableList(cards))
                 .turnOrderTeamIds(Collections.unmodifiableList(turnOrderTeamIds))
                 .turn(turn.toBuilder().build())
-                .lostTeamIds(Collections.unmodifiableSet(lostTeamIds));
+                .lostTeamIds(lostTeamIds == null ? null : Collections.unmodifiableSet(lostTeamIds));
     }
 
     public boolean allCardsPicked(Integer teamId) {
