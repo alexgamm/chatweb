@@ -6,7 +6,7 @@ import chatweb.action.GameAction;
 import chatweb.action.GameActionExecutionResult;
 import chatweb.action.PauseGame;
 import chatweb.action.PickCard;
-import chatweb.action.RestartGame;
+import chatweb.action.ResetGame;
 import chatweb.action.StartGame;
 import chatweb.action.executor.GameActionExecutor;
 import chatweb.client.EventsApiClient;
@@ -44,7 +44,7 @@ public class GameService {
             GameActionExecutor<EndGame> endGameExecutor,
             GameActionExecutor<PauseGame> pauseGameExecutor,
             GameActionExecutor<PickCard> pickCardExecutor,
-            GameActionExecutor<RestartGame> restartGameExecutor,
+            GameActionExecutor<ResetGame> resetGameExecutor,
             GameActionExecutor<StartGame> startGameExecutor
     ) {
         this.gameRepository = gameRepository;
@@ -55,7 +55,7 @@ public class GameService {
                 EndGame.class, endGameExecutor,
                 PauseGame.class, pauseGameExecutor,
                 PickCard.class, pickCardExecutor,
-                RestartGame.class, restartGameExecutor,
+                ResetGame.class, resetGameExecutor,
                 StartGame.class, startGameExecutor
         );
     }
@@ -77,7 +77,7 @@ public class GameService {
                 new Team(null, game, null, Color.BLUE, null)
         ));
         game = gameRepository.save(game);
-        executeAction(game, new RestartGame(game));
+        executeAction(game, new ResetGame(game));
         return game;
     }
 

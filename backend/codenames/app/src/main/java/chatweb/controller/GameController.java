@@ -3,7 +3,7 @@ package chatweb.controller;
 import chatweb.action.ChangeTurn;
 import chatweb.action.PauseGame;
 import chatweb.action.PickCard;
-import chatweb.action.RestartGame;
+import chatweb.action.ResetGame;
 import chatweb.action.StartGame;
 import chatweb.client.ChatApiClient;
 import chatweb.entity.Dictionary;
@@ -114,6 +114,9 @@ public class GameController implements ApiControllerHelper {
         if (game.getTeams().stream().anyMatch(team -> team.getLeader() == null || team.getPlayers().isEmpty())) {
             throw badRequest("Each team must have a leader and at least one player").toException();
         }
+        if (game.getState().getStatus() == Status.FINISHED) {
+            gameService.executeAction(game, new ResetGame(game));
+        }
         gameService.executeAction(game, new StartGame(game.getSettings().getTurnSeconds()));
         return new ApiResponse(true);
     }
@@ -197,16 +200,16 @@ public class GameController implements ApiControllerHelper {
     }
 
     @Transactional
-    @PostMapping("{gameId}/restart")
-    public ApiResponse restartGame(@PathVariable String gameId, @RequestAttribute User user) throws ApiErrorException {
+    @PostMapping("{gameId}/reset")
+    public ApiResponse resetGame(@PathVariable String gameId, @RequestAttribute User user) throws ApiErrorException {
         Game game = gameService.findGame(gameId);
         if (game == null) {
             throw notFound("Game is not found").toException();
         }
         if (!user.equals(game.getHost())) {
-            throw badRequest("Only host may restart the game").toException();
+            throw badRequest("Only host may reset the game").toException();
         }
-        gameService.executeAction(game, new RestartGame(game));
+        gameService.executeAction(game, new ResetGame(game));
         return new ApiResponse(true);
     }
 
@@ -239,7 +242,7 @@ public class GameController implements ApiControllerHelper {
         }
         Settings newSettings = copy.build();
         gameService.updateSettings(gameId, newSettings);
-        gameService.executeAction(game, new RestartGame(game));
+        gameService.executeAction(game, new ResetGame(game));
         return new ApiResponse(true);
     }
 

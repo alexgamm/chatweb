@@ -6,6 +6,6 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
-public class RestartGame implements GameAction {
+public class ResetGame implements GameAction {
     private final Game game;
 }

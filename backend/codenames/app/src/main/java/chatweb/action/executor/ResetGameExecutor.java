@@ -1,7 +1,7 @@
 package chatweb.action.executor;
 
 import chatweb.action.GameActionExecutionResult;
-import chatweb.action.RestartGame;
+import chatweb.action.ResetGame;
 import chatweb.entity.Dictionary;
 import chatweb.entity.Game;
 import chatweb.entity.Team;
@@ -19,12 +19,12 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class RestartGameExecutor implements GameActionExecutor<RestartGame> {
+public class ResetGameExecutor implements GameActionExecutor<ResetGame> {
 
     private final DictionaryRepository dictionaryRepository;
 
     @Override
-    public GameActionExecutionResult execute(GameState state, RestartGame action) throws IllegalStateException {
+    public GameActionExecutionResult execute(GameState state, ResetGame action) throws IllegalStateException {
         Dictionary dictionary = dictionaryRepository
                 .findById(action.getGame().getSettings().getDictionaryId())
                 .orElse(null);

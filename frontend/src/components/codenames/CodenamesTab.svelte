@@ -45,9 +45,9 @@
     }
   };
 
-  const restartGame = async () => {
+  const resetGame = async () => {
     try {
-      await post(`/api/codenames/game/${$game.id}/restart`);
+      await post(`/api/codenames/game/${$game.id}/reset`);
     } catch (error) {
       pushToast({ type: "error", message: error.message });
     }
@@ -92,7 +92,7 @@
       </button>
       <button
         class="btn flex flex-col h-20 rounded-xl gap-3 flex-1 btn-neutral"
-        on:click={() => restartGame()}
+        on:click={() => resetGame()}
       >
         <RefreshIcon /> Change cards
       </button>
