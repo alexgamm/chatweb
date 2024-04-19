@@ -21,8 +21,10 @@ import chatweb.model.api.CreateRoomResponse;
 import chatweb.model.api.GameDto;
 import chatweb.model.api.PickCardRequest;
 import chatweb.model.api.UpdateSettingsRequest;
+import chatweb.model.api.service.SendServiceMessageRequest;
 import chatweb.model.game.Settings;
 import chatweb.model.game.state.Status;
+import chatweb.model.message.LinkButton;
 import chatweb.repository.DictionaryRepository;
 import chatweb.service.GameService;
 import jakarta.transaction.Transactional;
@@ -37,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Optional;
 
 import static chatweb.model.api.ApiError.badRequest;
@@ -81,6 +84,11 @@ public class GameController implements ApiControllerHelper {
                         .orElse(null)
         ));
         Game game = gameService.createGame(roomResponse.getKey(), roomResponse.getId(), user, dictionary);
+        chatApiClient.sendMessage(new SendServiceMessageRequest(
+                user.getId(),
+                "Come play Codenames with me!",
+                List.of(new LinkButton("Join", game.getRoom().getKey()))
+        ));
         return new CreateGameResponse(game.getId());
     }
 

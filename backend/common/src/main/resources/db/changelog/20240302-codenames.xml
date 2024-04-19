@@ -110,4 +110,13 @@
                                  referencedTableName="users" referencedColumnNames="id"
                                  onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
+
+    <changeSet id="4-dictionaries-add-name-and-id-typed-integer" author="AlexGamm">
+        <addColumn tableName="dictionaries" schemaName="codenames">
+            <column name="name" type="text">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

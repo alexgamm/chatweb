@@ -28,6 +28,9 @@ public class Dictionary {
     @JdbcTypeCode(SqlTypes.JSON)
     private List<String> words;
 
+    @Column(name = "name")
+    private String name;
+
     public LinkedList<String> getRandomWords(int amount) {
         List<String> words = new ArrayList<>(getWords());
         Collections.shuffle(words);

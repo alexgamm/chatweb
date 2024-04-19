@@ -112,7 +112,8 @@ public class ChatGPTService {
                         user,
                         null,
                         message,
-                        new Date()
+                        new Date(),
+                        Collections.emptyList()
                 ));
                 eventsApi.addEvent(new NewMessageEvent(
                         MessageMapper.messageToMessageDto(completionMessage, null, false)
