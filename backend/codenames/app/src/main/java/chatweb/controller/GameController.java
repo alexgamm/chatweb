@@ -87,7 +87,7 @@ public class GameController implements ApiControllerHelper {
         chatApiClient.sendMessage(new SendServiceMessageRequest(
                 user.getId(),
                 "Come play Codenames with me!",
-                List.of(new LinkButton("Join", game.getRoom().getKey()))
+                List.of(new LinkButton("Join", "/" + game.getRoom().getKey()))
         ));
         return new CreateGameResponse(game.getId());
     }
