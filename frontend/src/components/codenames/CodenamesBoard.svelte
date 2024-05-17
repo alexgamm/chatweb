@@ -3,12 +3,13 @@
   import { COLORS, TEAM_NAMES } from "../../codenames/codenames-utils";
 
   import useApi from "../../hooks/api";
-  import { game } from "../../stores/codenames";
+  import { dropGame, game } from "../../stores/codenames";
   import { pushToast } from "../../stores/toast";
   import user from "../../stores/user";
   import Countdown from "../common/Countdown.svelte";
   import SparksIcon from "../icons/SparksIcon.svelte";
   import TapIcon from "../icons/TapIcon.svelte";
+  import { onMount } from "svelte";
 
   let turnProgress;
 
@@ -66,6 +67,10 @@
       pushToast({ type: "error", message: error.message });
     }
   };
+
+  onMount(() => {
+    return () => dropGame();
+  });
 </script>
 
 {#if $game}
@@ -143,6 +148,10 @@
         </div>
       </div>
     </div>
+  </div>
+{:else}
+  <div class="flex justify-center mt-36">
+    <span class="loading loading-spinner loading-lg text-primary" />
   </div>
 {/if}
 

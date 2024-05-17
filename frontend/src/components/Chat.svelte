@@ -70,6 +70,7 @@
     repliedMessage = null;
     editedMessage = null;
   };
+
   const onInput = () =>
     typingDebounce(async () => {
       try {
@@ -78,6 +79,7 @@
         console.error("could not send typing", error);
       }
     });
+
   const deleteMessage = async (id) => {
     try {
       await del(`/api/messages/${id}`);
@@ -115,6 +117,7 @@
     selectedMessage = message;
   }}
   onReaction={sendReaction}
+  hideLoader={room?.startsWith("codenames")}
 />
 {#if repliedMessage || editedMessage}
   <div class="alert shadow-lg bg-primary bg-opacity-20 mb-4">

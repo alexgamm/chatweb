@@ -11,6 +11,7 @@
   export let onReaction;
   export let messages;
   export let addColor;
+  export let hideLoader = false;
 
   const {
     authorized: { get },
@@ -133,7 +134,7 @@
   }}
 >
   <div class="flex justify-center min-h-16">
-    {#if loading}
+    {#if loading && !hideLoader}
       <span class="loading loading-spinner text-primary" />
     {/if}
   </div>

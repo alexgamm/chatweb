@@ -28,3 +28,5 @@ export const fetchGame = async (gameId) => {
   game.set(response);
   return response;
 };
+
+export const dropGame = () => game.set(null);

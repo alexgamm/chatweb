@@ -16,6 +16,6 @@
   <Route path="/tg/oauth/redirect" component={TelegramOAuthRedirect} />
   <Route path="/login" component={Login} />
   <Route path="/room/:room" component={Room} />
-  <Route path="/" component={Room} />
+  <Route component={Room} />
 </Router>
 <Toasts />
