@@ -131,6 +131,4 @@
     />
   </svg>
 </label>
-<ChangeUsernameModal />
-<ChangePasswordModal />
 <RoomPasswordModal onSubmit={onPasswordSubmit} />
