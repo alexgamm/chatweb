@@ -24,7 +24,7 @@ import static chatweb.model.api.ApiError.badRequest;
 import static java.util.UUID.randomUUID;
 
 @RestController
-@RequestMapping("api/service/messages")
+@RequestMapping("/api/service/messages")
 @RequiredArgsConstructor
 public class ServiceMessagesController {
     private final UserRepository userRepository;

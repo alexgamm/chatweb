@@ -18,8 +18,10 @@ public class WebConfiguration extends CommonWebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(userAuthInterceptor)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/api/rooms");
+                .excludePathPatterns("/api/rooms")
+                .excludePathPatterns("/api/service/**");
         registry.addInterceptor(serviceAuthInterceptor)
-                .addPathPatterns("/api/rooms");
+                .addPathPatterns("/api/rooms")
+                .addPathPatterns("/api/service/**");
     }
 }

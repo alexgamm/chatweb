@@ -77,7 +77,7 @@
         {#each cardRows as row}
           {#each row as card}
             <button
-              class={`word-card ${cardColor(card)} ${card.pickedByTeamId ? "bg-opacity-60" : "bg-opacity-30"}`}
+              class={`word-card ${cardColor(card)} ${card.pickedByTeamId ? "bg-opacity-60" : "bg-opacity-30"} ${$game?.settings?.dictionaryId === "emoji" ? "word-card--emoji" : ""}`}
               on:click={() => pickCard(card)}
             >
               {card.word}
@@ -149,6 +149,9 @@
 <style lang="postcss">
   .word-card {
     @apply rounded-lg text-gray-300 md:p-4 md:text-base py-2 break-words text-xs text-center hover:bg-opacity-70 transition cursor-pointer font-semibold;
+  }
+  .word-card--emoji {
+    @apply text-2xl;
   }
   .won-team {
     @apply flex justify-center items-center gap-2 rounded-xl md:p-3 md:py-1 md:text-2xl py-1 break-words text-xl text-center duration-100 font-bold bg-opacity-30 overflow-hidden;

@@ -1,12 +1,16 @@
 <script>
+  import { onMount } from "svelte";
   import { navigate } from "svelte-routing";
   import useApi from "../../../hooks/api";
-  import fi from "date-fns/locale/fi";
+  import { pushToast } from "../../../stores/toast";
 
   export let title;
 
+  let dictionaries = [];
+  let dictionaryId;
+
   const {
-    authorized: { post },
+    authorized: { get, post },
   } = useApi();
 
   let password = "";
@@ -19,7 +23,7 @@
     let game;
     try {
       game = await post(`/api/codenames/game`, {
-        dictionaryId: "test",
+        dictionaryId,
         password,
       });
     } catch (error) {
@@ -30,11 +34,35 @@
     }
     navigate(`/room/${game.id}`);
   };
+
+  onMount(async () => {
+    try {
+      dictionaries = await get(`/api/codenames/dictionaries`).then(
+        ({ dictionaries }) => dictionaries
+      );
+      dictionaryId = dictionaries[0]?.id;
+    } catch (error) {
+      pushToast({ type: "error", message: error.message });
+    }
+  });
 </script>
 
 <div class="rounded-xl bg-neutral-focus p-3">
   <h2 class="text-lg font-bold mb-2">{title}</h2>
   <form on:submit|preventDefault={submit}>
+    <div class="form-control">
+      <select
+        class="select select-bordered select-sm w-full max-w-xs"
+        on:change={({ target: { value } }) => (dictionaryId = value)}
+      >
+        {#each dictionaries as dictionary (dictionary.id)}
+          <option
+            value={dictionary.id}
+            selected={dictionary.id === dictionaryId}>{dictionary.name}</option
+          >
+        {/each}
+      </select>
+    </div>
     <div class="form-control">
       <label class="label" for="password">
         <span class="label-text text-xs">password (optional)</span>
