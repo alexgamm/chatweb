@@ -24,7 +24,8 @@ public class MessageMapper {
                         ? messageToMessageDto(message.getRepliedMessage(), userId, false, false)
                         : null,
                 message.getSendDate(),
-                includeReactions ? groupReactions(message.getReactions(), userId) : null
+                includeReactions ? groupReactions(message.getReactions(), userId) : null,
+                message.getButtons()
         );
     }
 

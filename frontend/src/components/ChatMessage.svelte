@@ -1,4 +1,5 @@
 <script>
+  import { Link } from "svelte-routing";
   import ChatMessageReactions from "./ChatMessageReactions.svelte";
 
   export let message;
@@ -14,7 +15,7 @@
     </time>
   </div>
   <div
-    class={`chat-bubble w-auto max-w-4xl text-gray-200 break-all ${message.color}`}
+    class={`relative chat-bubble w-auto max-w-4xl text-gray-200 break-all ${message.color} ${message.reactions?.length ? "mb-6" : ""}`}
     on:contextmenu|preventDefault={onContextMenu}
   >
     {#if message.repliedMessage}
@@ -33,6 +34,22 @@
       </div>
     {/if}
     {message.message}
-    <ChatMessageReactions reactions={message.reactions ?? []} {onReaction} />
+    {#if message.buttons}
+      <div class="flex gap-2 mt-2">
+        {#each message.buttons as button}
+          <Link
+            class="btn btn-sm w-full max-w-xs bg-opacity-30 hover:bg-opacity-50 border-transparent hover:border-transparent"
+            to={button.link}
+          >
+            {button.text}
+          </Link>
+        {/each}
+      </div>
+    {/if}
+    {#if message.reactions}
+      <div class="absolute right-0 -bottom-8">
+        <ChatMessageReactions reactions={message.reactions} {onReaction} />
+      </div>
+    {/if}
   </div>
 </div>

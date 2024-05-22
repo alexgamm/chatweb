@@ -12,8 +12,9 @@ import org.jetbrains.annotations.Nullable;
 public class NewMessageEvent implements IRoomEvent {
     private MessageDto message;
 
+    @Nullable
     @Override
-    public @Nullable String getRoom() {
+    public String getRoom() {
         return message.getRoom();
     }
 }

@@ -1,12 +1,24 @@
 package chatweb.entity;
 
-import jakarta.persistence.*;
+import chatweb.model.message.Button;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @NoArgsConstructor
@@ -28,7 +40,7 @@ public class Message {
     private Room room;
 
     @Setter
-    @OneToOne()
+    @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
@@ -43,6 +55,10 @@ public class Message {
 
     @Column(name = "send_date")
     private Date sendDate;
+
+    @Column(name = "buttons")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private List<Button> buttons;
 
     public Integer getRoomId() {
         return room == null ? null : room.getId();

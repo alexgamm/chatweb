@@ -10,6 +10,9 @@
   import useDebounce from "../utils/debounce";
   import { reactionsOrder, toggleReaction } from "../utils/reactions";
 
+  export let room;
+  export let addColor;
+
   const typingDebounce = useDebounce(300);
 
   let messages = [];
@@ -54,6 +57,7 @@
         await post("/api/messages", {
           message: messageText,
           repliedMessageId: repliedMessage?.id,
+          room: room === "global" ? null : room,
         });
       }
     } catch (error) {
@@ -66,14 +70,16 @@
     repliedMessage = null;
     editedMessage = null;
   };
+
   const onInput = () =>
     typingDebounce(async () => {
       try {
-        await put("/api/messages/typing");
+        await put(`/api/messages/typing?room=${room === "global" ? "" : room}`);
       } catch (error) {
         console.error("could not send typing", error);
       }
     });
+
   const deleteMessage = async (id) => {
     try {
       await del(`/api/messages/${id}`);
@@ -102,6 +108,8 @@
 </script>
 
 <ChatMessageList
+  {room}
+  {addColor}
   bind:messages
   onContextMenu={({ x, y, message }) => {
     showContextMenu = true;
@@ -109,6 +117,7 @@
     selectedMessage = message;
   }}
   onReaction={sendReaction}
+  hideLoader={room?.startsWith("codenames")}
 />
 {#if repliedMessage || editedMessage}
   <div class="alert shadow-lg bg-primary bg-opacity-20 mb-4">
@@ -133,7 +142,7 @@
   </div>
 {/if}
 
-<form on:submit|preventDefault={submit}>
+<form class="p-2" on:submit|preventDefault={submit}>
   <input
     class="input input-bordered input-primary w-full"
     type="text"

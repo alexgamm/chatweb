@@ -17,7 +17,7 @@ const useApi = () => {
       if (response.status === 401) {
         navigate("/login");
       }
-      throw responseBody.message;
+      throw responseBody;
     }
     return responseBody;
   };

@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "devp": "vite --mode production",
     "build": "vite build",
     "preview": "vite preview"
   },
@@ -20,6 +21,7 @@
   },
   "dependencies": {
     "daisyui": "^3.1.7",
-    "date-fns": "^2.30.0"
+    "date-fns": "^2.30.0",
+    "lodash": "^4.17.21"
   }
 }

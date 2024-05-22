@@ -8,6 +8,7 @@ export const addEventHandler = (eventType, handler) => {
     if (!accessToken) {
       return;
     }
+    // TODO Handle expired token
     socket = new WebSocket(`${baseUrl}/api/ws/events?access_token=${accessToken}`);
     socket.addEventListener("message", (event) => {
       const eventData = JSON.parse(event.data);

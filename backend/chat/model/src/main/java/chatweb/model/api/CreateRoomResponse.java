@@ -8,5 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateRoomResponse {
-    private Integer roomId;
+    private Integer id;
+    private String key;
 }

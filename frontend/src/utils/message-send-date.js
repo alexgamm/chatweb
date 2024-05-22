@@ -31,6 +31,7 @@ const format = (sendDate) => {
 
 const setSendDate = (message) => ({
   ...message,
+  sendDate: new Date(message.sendDate),
   sendDateFormatted: format(message.sendDate),
 });
 

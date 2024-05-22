@@ -22,7 +22,7 @@
         password,
       });
     } catch (error) {
-      errorMessage = error;
+      errorMessage = error.message;
       return;
     } finally {
       state = "idle";

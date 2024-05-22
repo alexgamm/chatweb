@@ -8,9 +8,18 @@ import chatweb.entity.User;
 import chatweb.exception.ApiErrorException;
 import chatweb.exception.InvalidRoomKeyException;
 import chatweb.mapper.MessageMapper;
-import chatweb.model.api.*;
+import chatweb.model.api.ApiError;
+import chatweb.model.api.EmptyResponse;
+import chatweb.model.api.MessageIdResponse;
+import chatweb.model.api.MessagesResponse;
+import chatweb.model.api.ReactionRequest;
+import chatweb.model.api.SendMessageRequest;
 import chatweb.model.dto.MessageDto;
-import chatweb.model.event.*;
+import chatweb.model.event.DeletedMessageEvent;
+import chatweb.model.event.EditedMessageEvent;
+import chatweb.model.event.NewMessageEvent;
+import chatweb.model.event.ServiceReactionEvent;
+import chatweb.model.event.TypingEvent;
 import chatweb.repository.MessageRepository;
 import chatweb.repository.RoomRepository;
 import chatweb.service.ChatGPTService;
@@ -19,7 +28,17 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
 import java.util.Date;
@@ -54,6 +73,7 @@ public class MessagesController implements ApiControllerHelper {
         } else {
             roomId = null;
         }
+        // TODO Check if user is member
         List<Message> messages = messageRepository.findMessages(count, roomId, from);
         return new MessagesResponse(
                 messages.stream()
@@ -94,7 +114,8 @@ public class MessagesController implements ApiControllerHelper {
                 user,
                 Collections.emptySet(),
                 repliedMessage,
-                new Date()
+                new Date(),
+                Collections.emptyList()
         ));
         MessageDto messageDto = MessageMapper.messageToMessageDto(message, user.getId(), false);
         eventsApi.addEvent(new NewMessageEvent(messageDto));

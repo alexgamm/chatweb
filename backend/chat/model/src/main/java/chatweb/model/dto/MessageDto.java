@@ -1,11 +1,13 @@
 package chatweb.model.dto;
 
+import chatweb.model.message.Button;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 
@@ -22,6 +24,7 @@ public class MessageDto {
     private MessageDto repliedMessage;
     private Date sendDate;
     private Set<Reaction> reactions;
+    private List<Button> buttons;
 
     @Getter
     @RequiredArgsConstructor

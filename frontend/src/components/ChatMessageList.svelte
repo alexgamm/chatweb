@@ -2,23 +2,22 @@
   import { onMount, tick } from "svelte";
   import { addEventHandler } from "../contexts/events";
   import useApi from "../hooks/api";
-  import useMessageColor from "../hooks/message-color";
-  import { userColors } from "../stores/users";
+  import setSendDate from "../utils/message-send-date";
   import { reactionsOrder } from "../utils/reactions";
   import ChatMessage from "./ChatMessage.svelte";
-  import setSendDate from "../utils/message-send-date";
 
+  export let room;
   export let onContextMenu;
   export let onReaction;
   export let messages;
+  export let addColor;
+  export let hideLoader = false;
 
   const {
     authorized: { get },
   } = useApi();
   let messagesContainerWrapper;
   let loading = false;
-
-  $: addColor = useMessageColor($userColors);
 
   $: if (addColor) {
     messages = messages.map(addColor);
@@ -34,6 +33,9 @@
     const params = { count };
     if (from) {
       params.from = from;
+    }
+    if (room && room !== "global") {
+      params.room = room;
     }
     loading = true;
     let responseBody;
@@ -67,6 +69,7 @@
   };
   const scrollBottom = async () => {
     await tick();
+    if (!messagesContainerWrapper) return;
     messagesContainerWrapper.scrollTo({
       top: messagesContainerWrapper.scrollHeight,
       behavior: "smooth",
@@ -117,7 +120,7 @@
 </script>
 
 <div
-  class="messages-container-wrapper flex-1 min-h-0 overflow-auto py-2"
+  class="messages-container-wrapper flex-1 min-h-0 overflow-auto p-2"
   bind:this={messagesContainerWrapper}
   on:scroll={(scrollEvent) => {
     if (scrollEvent.target.scrollTop === 0) {
@@ -131,7 +134,7 @@
   }}
 >
   <div class="flex justify-center min-h-16">
-    {#if loading}
+    {#if loading && !hideLoader}
       <span class="loading loading-spinner text-primary" />
     {/if}
   </div>
