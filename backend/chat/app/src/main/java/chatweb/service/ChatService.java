@@ -13,8 +13,8 @@ import chatweb.model.message.Button;
 import chatweb.repository.MessageRepository;
 import chatweb.repository.UserRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.CollectionType;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.server.service.GrpcService;
@@ -29,13 +29,15 @@ import static java.util.UUID.randomUUID;
 @GrpcService
 @RequiredArgsConstructor
 public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
+
+    private static final TypeReference<List<Button>> BUTTON_LIST_TR = new TypeReference<>() {
+    };
+
     private final ObjectMapper objectMapper;
     private final RoomsService roomsService;
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
     private final EventsRpcClient eventsRpc;
-    private final CollectionType buttonListType = objectMapper.getTypeFactory()
-            .constructCollectionType(List.class, Button.class);
 
     @Override
     public void createRoom(
@@ -65,7 +67,7 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
         }
         List<Button> buttons;
         try {
-            buttons = objectMapper.readValue(request.getButtonsJson(), buttonListType);
+            buttons = objectMapper.readValue(request.getButtonsJson(), BUTTON_LIST_TR);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
