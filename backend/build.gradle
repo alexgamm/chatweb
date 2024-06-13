@@ -1,7 +1,8 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.1.0'
+    id 'org.springframework.boot' version "$springBootVersion"
     id 'io.spring.dependency-management' version '1.1.0'
+    id "com.google.protobuf" version "$protobufPluginVersion"
 }
 
 group = 'chatweb'
@@ -17,6 +18,7 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'com.google.protobuf'
 
     java {
         sourceCompatibility = '17'
@@ -25,6 +27,22 @@ subprojects {
     configurations {
         compileOnly {
             extendsFrom annotationProcessor
+        }
+    }
+
+    protobuf {
+        protoc {
+            artifact = "com.google.protobuf:protoc:${protobufVersion}"
+        }
+        plugins {
+            grpc {
+                artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
+            }
+        }
+        generateProtoTasks {
+            all()*.plugins {
+                grpc {}
+            }
         }
     }
 
@@ -37,6 +55,17 @@ subprojects {
         implementation 'org.springframework.boot:spring-boot-starter-actuator'
         implementation 'org.springframework.boot:spring-boot-starter-websocket'
         annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+        implementation "net.devh:grpc-client-spring-boot-starter:${springBootGrpcVersion}"
+        implementation "net.devh:grpc-server-spring-boot-starter:${springBootGrpcVersion}"
+        implementation "io.grpc:grpc-netty-shaded:${grpcVersion}"
+        implementation "io.grpc:grpc-stub:${grpcVersion}"
+        implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+        if (JavaVersion.current().isJava9Compatible()) {
+            // Workaround for @javax.annotation.Generated
+            // see: https://github.com/grpc/grpc-java/issues/3633
+            compileOnly 'org.apache.tomcat:annotations-api:6.0.53'
+            annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+        }
         implementation 'org.apache.httpcomponents:httpclient:4.5.14'
         implementation 'org.liquibase:liquibase-core'
         implementation 'org.jetbrains:annotations:23.0.0'
@@ -48,6 +77,7 @@ subprojects {
         implementation 'ch.qos.logback:logback-core:1.3.5'
         implementation 'ch.qos.logback:logback-classic:1.3.5'
         implementation "io.jsonwebtoken:jjwt-api:${jjwtVersion}"
+
         runtimeOnly "io.jsonwebtoken:jjwt-impl:${jjwtVersion}"
         runtimeOnly "io.jsonwebtoken:jjwt-jackson:${jjwtVersion}"
         compileOnly 'org.projectlombok:lombok'

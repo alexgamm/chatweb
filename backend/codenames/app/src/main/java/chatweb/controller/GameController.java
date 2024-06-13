@@ -5,7 +5,8 @@ import chatweb.action.PauseGame;
 import chatweb.action.PickCard;
 import chatweb.action.ResetGame;
 import chatweb.action.StartGame;
-import chatweb.client.ChatApiClient;
+import chatweb.chat.ChatServiceOuterClass;
+import chatweb.client.ChatRpcClient;
 import chatweb.entity.Dictionary;
 import chatweb.entity.Game;
 import chatweb.entity.Room;
@@ -16,12 +17,9 @@ import chatweb.mapper.GameMapper;
 import chatweb.model.api.ApiResponse;
 import chatweb.model.api.CreateGameRequest;
 import chatweb.model.api.CreateGameResponse;
-import chatweb.model.api.CreateRoomRequest;
-import chatweb.model.api.CreateRoomResponse;
 import chatweb.model.api.GameDto;
 import chatweb.model.api.PickCardRequest;
 import chatweb.model.api.UpdateSettingsRequest;
-import chatweb.model.api.service.SendServiceMessageRequest;
 import chatweb.model.game.Settings;
 import chatweb.model.game.state.Status;
 import chatweb.model.message.LinkButton;
@@ -49,7 +47,7 @@ import static chatweb.model.api.ApiError.notFound;
 @RequestMapping("api/codenames/game")
 @RequiredArgsConstructor
 public class GameController implements ApiControllerHelper {
-    private final ChatApiClient chatApiClient;
+    private final ChatRpcClient chatRpcClient;
     private final DictionaryRepository dictionaryRepository;
     private final GameService gameService;
 
@@ -76,19 +74,19 @@ public class GameController implements ApiControllerHelper {
         if (dictionary == null) {
             throw badRequest("Dictionary is not found").toException();
         }
-        CreateRoomResponse roomResponse = chatApiClient.createRoom(new CreateRoomRequest(
+        ChatServiceOuterClass.CreateRoomResponse roomResponse = chatRpcClient.createRoom(
                 user.getId(),
                 "codenames",
                 Optional.ofNullable(request.getPassword())
                         .filter(password -> !password.isBlank())
                         .orElse(null)
-        ));
+        );
         Game game = gameService.createGame(roomResponse.getKey(), roomResponse.getId(), user, dictionary);
-        chatApiClient.sendMessage(new SendServiceMessageRequest(
+        chatRpcClient.sendMessage(
                 user.getId(),
                 "Come play Codenames with me!",
                 List.of(new LinkButton("Join", String.format("/room/%s", game.getRoom().getKey())))
-        ));
+        );
         return new CreateGameResponse(game.getId());
     }
 

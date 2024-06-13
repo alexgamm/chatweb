@@ -1,5 +1,7 @@
 package chatweb.service;
 
+import chatweb.events.EventsServiceGrpc;
+import chatweb.events.EventsServiceOuterClass;
 import chatweb.model.event.IEvent;
 import chatweb.model.event.IRoomEvent;
 import chatweb.model.event.PersonalEventProducer;
@@ -7,9 +9,11 @@ import chatweb.model.event.UserOnlineEvent;
 import chatweb.repository.RoomRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.protobuf.Empty;
+import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+import net.devh.boot.grpc.server.service.GrpcService;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -19,10 +23,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Service
+@GrpcService
 @Slf4j
 @RequiredArgsConstructor
-public class EventsService {
+public class EventsService extends EventsServiceGrpc.EventsServiceImplBase {
     private final Map<Integer, Set<WebSocketSession>> sessions = new ConcurrentHashMap<>();
     private final RoomRepository roomRepository;
     private final ObjectMapper objectMapper;
@@ -90,7 +94,33 @@ public class EventsService {
         return countSessions(userId) > 0;
     }
 
-    public Set<Integer> getOnlineUserIds() {
-        return sessions.keySet();
+    @Override
+    public void getOnlineUserIds(
+            Empty request,
+            StreamObserver<EventsServiceOuterClass.UserOnlineResponse> responseObserver
+    ) {
+        responseObserver.onNext(
+                EventsServiceOuterClass.UserOnlineResponse.newBuilder()
+                        .addAllOnlineUserIds(sessions.keySet())
+                        .build()
+        );
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void addEvent(EventsServiceOuterClass.AddEventRequest request, StreamObserver<Empty> responseObserver) {
+        IEvent event;
+        try {
+            event = objectMapper.readValue(request.getEventJson(), IEvent.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        if (event instanceof PersonalEventProducer personalEventProducer) {
+            addEvent(personalEventProducer);
+        } else {
+            addEvent(event);
+        }
+        responseObserver.onNext(Empty.getDefaultInstance());
+        responseObserver.onCompleted();
     }
 }

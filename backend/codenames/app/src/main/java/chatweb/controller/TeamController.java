@@ -1,7 +1,7 @@
 package chatweb.controller;
 
 import chatweb.action.PauseGame;
-import chatweb.client.EventsApiClient;
+import chatweb.client.EventsRpcClient;
 import chatweb.entity.Game;
 import chatweb.entity.Team;
 import chatweb.entity.User;
@@ -31,7 +31,7 @@ public class TeamController implements ApiControllerHelper {
 
     private final TeamService teamService;
     private final GameService gameService;
-    private final EventsApiClient eventsApi;
+    private final EventsRpcClient eventsRpc;
 
     @Transactional
     @PostMapping("{teamId}/join")
@@ -66,7 +66,7 @@ public class TeamController implements ApiControllerHelper {
         }
         gameService.removeViewer(game, user);
         teamService.addPlayer(team, user, request.isLeader());
-        eventsApi.addEvent(new ServiceGameUpdatedEvent(gameService.findGame(game.getId())));
+        eventsRpc.addEvent(new ServiceGameUpdatedEvent(gameService.findGame(game.getId())));
         return new ApiResponse(true);
     }
 

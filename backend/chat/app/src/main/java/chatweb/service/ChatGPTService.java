@@ -1,6 +1,6 @@
 package chatweb.service;
 
-import chatweb.client.EventsApiClient;
+import chatweb.client.EventsRpcClient;
 import chatweb.configuration.properties.ChatGPTProperties;
 import chatweb.entity.User;
 import chatweb.exception.chatgpt.ChatCompletionException;
@@ -36,7 +36,7 @@ public class ChatGPTService {
     private final ChatGPTProperties chatGPTProperties;
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
-    private final EventsApiClient eventsApi;
+    private final EventsRpcClient eventsRpc;
     private final WebClient webClient;
 
     public ChatGPTService(
@@ -44,14 +44,14 @@ public class ChatGPTService {
             ChatGPTProperties chatGPTProperties,
             UserRepository userRepository,
             MessageRepository messageRepository,
-            EventsApiClient eventsApi,
+            EventsRpcClient eventsRpc,
             @Qualifier("chatGPTWebClient") WebClient webClient
     ) {
         this.taskScheduler = taskScheduler;
         this.chatGPTProperties = chatGPTProperties;
         this.userRepository = userRepository;
         this.messageRepository = messageRepository;
-        this.eventsApi = eventsApi;
+        this.eventsRpc = eventsRpc;
         this.webClient = webClient;
     }
 
@@ -115,7 +115,7 @@ public class ChatGPTService {
                         new Date(),
                         Collections.emptyList()
                 ));
-                eventsApi.addEvent(new NewMessageEvent(
+                eventsRpc.addEvent(new NewMessageEvent(
                         MessageMapper.messageToMessageDto(completionMessage, null, false)
                 ));
             } catch (ChatCompletionException e) {

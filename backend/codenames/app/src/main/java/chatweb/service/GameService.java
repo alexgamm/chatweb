@@ -9,7 +9,7 @@ import chatweb.action.PickCard;
 import chatweb.action.ResetGame;
 import chatweb.action.StartGame;
 import chatweb.action.executor.GameActionExecutor;
-import chatweb.client.EventsApiClient;
+import chatweb.client.EventsRpcClient;
 import chatweb.entity.Dictionary;
 import chatweb.entity.Game;
 import chatweb.entity.Room;
@@ -33,13 +33,13 @@ public class GameService {
 
     private final Map<Class<? extends GameAction>, GameActionExecutor<? extends GameAction>> actionExecutors;
     private final GameSchedulingService gameSchedulingService;
-    private final EventsApiClient eventsApi;
+    private final EventsRpcClient eventsRpc;
 
 
     public GameService(
             GameRepository gameRepository,
             GameSchedulingService gameSchedulingService,
-            EventsApiClient eventsApi,
+            EventsRpcClient eventsRpc,
             GameActionExecutor<ChangeTurn> changeTurnExecutor,
             GameActionExecutor<EndGame> endGameExecutor,
             GameActionExecutor<PauseGame> pauseGameExecutor,
@@ -49,7 +49,7 @@ public class GameService {
     ) {
         this.gameRepository = gameRepository;
         this.gameSchedulingService = gameSchedulingService;
-        this.eventsApi = eventsApi;
+        this.eventsRpc = eventsRpc;
         this.actionExecutors = Map.of(
                 ChangeTurn.class, changeTurnExecutor,
                 EndGame.class, endGameExecutor,
@@ -88,7 +88,7 @@ public class GameService {
 
     public void addViewer(Game game, User viewer) {
         game.getViewers().add(viewer);
-        eventsApi.addEvent(new ServiceGameUpdatedEvent(game));
+        eventsRpc.addEvent(new ServiceGameUpdatedEvent(game));
     }
 
     public void removeViewer(Game game, User viewer) {
@@ -104,7 +104,7 @@ public class GameService {
         }
         GameActionExecutionResult result = executor.execute(game.getState(), action);
         game.setState(result.getNewState());
-        eventsApi.addEvent(new ServiceGameUpdatedEvent(game));
+        eventsRpc.addEvent(new ServiceGameUpdatedEvent(game));
         if (result.isCancelScheduledTask()) {
             gameSchedulingService.cancelTaskIfExists(game.getId());
         }
