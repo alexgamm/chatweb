@@ -1,0 +1,28 @@
+syntax = "proto3";
+option java_package = "chatweb.chat";
+
+message CreateRoomResponse {
+  int32 id = 1;
+  string key = 2;
+}
+
+message MessageIdResponse {
+  string messageId = 1;
+}
+
+message CreateRoomRequest {
+  int32 creatorId = 1;
+  string prefix = 2;
+  string password = 3;
+}
+
+message SendMessageRequest {
+  int32 userId = 1;
+  string message = 2;
+  string buttonsJson = 3;
+}
+
+service ChatService {
+  rpc CreateRoom(CreateRoomRequest) returns (CreateRoomResponse);
+  rpc SendMessage(SendMessageRequest) returns (MessageIdResponse);
+}

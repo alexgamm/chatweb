@@ -1,6 +1,6 @@
 package chatweb.controller;
 
-import chatweb.client.EventsApiClient;
+import chatweb.client.EventsRpcClient;
 import chatweb.entity.Message;
 import chatweb.entity.Reaction;
 import chatweb.entity.Room;
@@ -53,7 +53,7 @@ import static java.util.UUID.randomUUID;
 public class MessagesController implements ApiControllerHelper {
 
     private final MessageRepository messageRepository;
-    private final EventsApiClient eventsApi;
+    private final EventsRpcClient eventsRpc;
     private final ChatGPTService chatGPTService;
     private final RoomRepository roomRepository;
 
@@ -118,7 +118,7 @@ public class MessagesController implements ApiControllerHelper {
                 Collections.emptyList()
         ));
         MessageDto messageDto = MessageMapper.messageToMessageDto(message, user.getId(), false);
-        eventsApi.addEvent(new NewMessageEvent(messageDto));
+        eventsRpc.addEvent(new NewMessageEvent(messageDto));
         chatGPTService.handleMessage(message);
         return new MessageIdResponse(message.getId());
     }
@@ -137,7 +137,7 @@ public class MessagesController implements ApiControllerHelper {
             throw new ApiErrorException(new ApiError(HttpStatus.FORBIDDEN, "you can delete only your messages"));
         }
         messageRepository.deleteMessageById(message.getId());
-        eventsApi.addEvent(new DeletedMessageEvent(message.getRoomKey(), message.getId()));
+        eventsRpc.addEvent(new DeletedMessageEvent(message.getRoomKey(), message.getId()));
         return new MessageIdResponse(messageId);
     }
 
@@ -160,7 +160,7 @@ public class MessagesController implements ApiControllerHelper {
         message.setMessage(body.getMessage().trim());
         messageRepository.save(message);
         MessageDto messageDto = MessageMapper.messageToMessageDto(message, user.getId(), true);
-        eventsApi.addEvent(new EditedMessageEvent(
+        eventsRpc.addEvent(new EditedMessageEvent(
                 MessageMapper.messageToMessageDto(message, null, false)
         ));
         return messageDto;
@@ -206,7 +206,7 @@ public class MessagesController implements ApiControllerHelper {
             message.getReactions().remove(existingReaction);
         }
         Message saved = messageRepository.save(message);
-        eventsApi.addEvent(new ServiceReactionEvent(
+        eventsRpc.addEvent(new ServiceReactionEvent(
                 saved.getRoomKey(),
                 saved.getId(),
                 saved.getReactions()
@@ -232,7 +232,7 @@ public class MessagesController implements ApiControllerHelper {
         if (roomId != null && !roomRepository.isUserInRoom(roomId, user.getId())) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "you are not in the room"));
         }
-        eventsApi.addEvent(new TypingEvent(room, user.getId()));
+        eventsRpc.addEvent(new TypingEvent(room, user.getId()));
         return ResponseEntity.ok(new EmptyResponse());
     }
 }

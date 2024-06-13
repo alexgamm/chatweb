@@ -1,6 +1,6 @@
 package chatweb.controller;
 
-import chatweb.client.EventsApiClient;
+import chatweb.client.EventsRpcClient;
 import chatweb.entity.User;
 import chatweb.exception.ApiErrorException;
 import chatweb.mapper.UserMapper;
@@ -27,17 +27,17 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Set;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("api/users")
-@RequiredArgsConstructor
 public class UsersController implements ApiControllerHelper {
     private final UserRepository userRepository;
-    private final EventsApiClient eventsApi;
+    private final EventsRpcClient eventsRpc;
 
     @GetMapping
     public UserListResponse users() {
         // TODO introduce pagination
-        Set<Integer> onlineUserIds = eventsApi.getOnlineUserIds();
+        Set<Integer> onlineUserIds = eventsRpc.getOnlineUserIds();
         List<UserListResponse.User> list = userRepository.findAll().stream()
                 .map(user -> new UserListResponse.User(
                         user.getId(),
@@ -65,7 +65,7 @@ public class UsersController implements ApiControllerHelper {
         }
         userRepository.updateUsername(user.getId(), input.getUsername());
         user = userRepository.findUserById(user.getId());
-        eventsApi.addEvent(new ChangeUsernameEvent(user.getId(), user.getUsername()));
+        eventsRpc.addEvent(new ChangeUsernameEvent(user.getId(), user.getUsername()));
         return UserMapper.INSTANCE.toDto(user);
     }
 
@@ -92,7 +92,7 @@ public class UsersController implements ApiControllerHelper {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "color is required"));
         }
         userRepository.updateColor(user.getId(), body.getColor());
-        eventsApi.addEvent(new ChangeUserColorEvent(user.getId(), body.getColor()));
+        eventsRpc.addEvent(new ChangeUserColorEvent(user.getId(), body.getColor()));
         return UserMapper.INSTANCE.toDto(userRepository.findUserById(user.getId()));
     }
 }
