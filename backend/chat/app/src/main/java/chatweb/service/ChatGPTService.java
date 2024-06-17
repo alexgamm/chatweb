@@ -1,6 +1,5 @@
 package chatweb.service;
 
-import chatweb.client.EventsRpcClient;
 import chatweb.configuration.properties.ChatGPTProperties;
 import chatweb.entity.User;
 import chatweb.exception.chatgpt.ChatCompletionException;
@@ -9,12 +8,13 @@ import chatweb.model.api.chatgpt.ChatCompletionRequest;
 import chatweb.model.api.chatgpt.ChatCompletionResponse;
 import chatweb.model.api.chatgpt.Message;
 import chatweb.model.event.NewMessageEvent;
+import chatweb.producer.EventsKafkaProducer;
 import chatweb.repository.MessageRepository;
 import chatweb.repository.UserRepository;
 import chatweb.utils.UserColorUtils;
-import org.apache.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
@@ -36,22 +36,23 @@ public class ChatGPTService {
     private final ChatGPTProperties chatGPTProperties;
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
-    private final EventsRpcClient eventsRpc;
+    private final EventsKafkaProducer eventsProducer;
     private final WebClient webClient;
+
 
     public ChatGPTService(
             TaskScheduler taskScheduler,
             ChatGPTProperties chatGPTProperties,
             UserRepository userRepository,
             MessageRepository messageRepository,
-            EventsRpcClient eventsRpc,
+            EventsKafkaProducer eventsProducer,
             @Qualifier("chatGPTWebClient") WebClient webClient
     ) {
         this.taskScheduler = taskScheduler;
         this.chatGPTProperties = chatGPTProperties;
         this.userRepository = userRepository;
         this.messageRepository = messageRepository;
-        this.eventsRpc = eventsRpc;
+        this.eventsProducer = eventsProducer;
         this.webClient = webClient;
     }
 
@@ -115,7 +116,7 @@ public class ChatGPTService {
                         new Date(),
                         Collections.emptyList()
                 ));
-                eventsRpc.addEvent(new NewMessageEvent(
+                eventsProducer.addEvent(new NewMessageEvent(
                         MessageMapper.messageToMessageDto(completionMessage, null, false)
                 ));
             } catch (ChatCompletionException e) {

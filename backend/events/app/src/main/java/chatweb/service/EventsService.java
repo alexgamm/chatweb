@@ -14,6 +14,9 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.service.GrpcService;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -23,9 +26,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static chatweb.utils.KafkaTopics.EVENTS;
+
 @GrpcService
 @Slf4j
 @RequiredArgsConstructor
+@EnableScheduling
 public class EventsService extends EventsServiceGrpc.EventsServiceImplBase {
     private final Map<Integer, Set<WebSocketSession>> sessions = new ConcurrentHashMap<>();
     private final RoomRepository roomRepository;
@@ -107,20 +113,25 @@ public class EventsService extends EventsServiceGrpc.EventsServiceImplBase {
         responseObserver.onCompleted();
     }
 
-    @Override
-    public void addEvent(EventsServiceOuterClass.AddEventRequest request, StreamObserver<Empty> responseObserver) {
-        IEvent event;
-        try {
-            event = objectMapper.readValue(request.getEventJson(), IEvent.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+    @KafkaListener(id = "events", topics = EVENTS)
+    public void listen(IEvent event) {
         if (event instanceof PersonalEventProducer personalEventProducer) {
             addEvent(personalEventProducer);
         } else {
             addEvent(event);
         }
-        responseObserver.onNext(Empty.getDefaultInstance());
-        responseObserver.onCompleted();
+    }
+
+    @Scheduled(fixedRate = 30000)
+    public void sendPingMessages() {
+        sessions.values().forEach(sessions -> {
+            sessions.forEach(session -> {
+                try {
+                    session.sendMessage(new TextMessage("PING"));
+                } catch (Throwable e) {
+                    log.warn("Could not send ping", e);
+                }
+            });
+        });
     }
 }

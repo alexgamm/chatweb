@@ -3,7 +3,6 @@ package chatweb.service;
 import chatweb.configuration.properties.GoogleOAuthProperties;
 import chatweb.model.google.OAuthTokenResponse;
 import chatweb.model.google.UserInfo;
-import org.apache.http.client.utils.URIBuilder;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.http.MediaType;
@@ -12,9 +11,9 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 @Service
 @EnableConfigurationProperties(GoogleOAuthProperties.class)
@@ -63,16 +62,12 @@ public class GoogleOAuthService {
     }
 
     public String getOauthUrl() {
-        try {
-            return new URIBuilder(OAUTH_URI)
-                    .addParameter("client_id", googleOAuthProperties.getClientId())
-                    .addParameter("redirect_uri", googleOAuthProperties.getRedirectUri())
-                    .addParameter("response_type", "code")
-                    .addParameter("scope", "email")
-                    .build()
-                    .toString();
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+        return UriComponentsBuilder.fromHttpUrl(OAUTH_URI)
+                .queryParam("client_id", googleOAuthProperties.getClientId())
+                .queryParam("redirect_uri", googleOAuthProperties.getRedirectUri())
+                .queryParam("response_type", "code")
+                .queryParam("scope", "email")
+                .build()
+                .toString();
     }
 }

@@ -2,7 +2,6 @@ package chatweb.service;
 
 import chatweb.chat.ChatServiceGrpc;
 import chatweb.chat.ChatServiceOuterClass;
-import chatweb.client.EventsRpcClient;
 import chatweb.entity.Message;
 import chatweb.entity.Room;
 import chatweb.entity.User;
@@ -10,6 +9,7 @@ import chatweb.mapper.MessageMapper;
 import chatweb.model.dto.MessageDto;
 import chatweb.model.event.NewMessageEvent;
 import chatweb.model.message.Button;
+import chatweb.producer.EventsKafkaProducer;
 import chatweb.repository.MessageRepository;
 import chatweb.repository.UserRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -37,7 +37,7 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
     private final RoomsService roomsService;
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
-    private final EventsRpcClient eventsRpc;
+    private final EventsKafkaProducer eventsProducer;
 
     @Override
     public void createRoom(
@@ -82,7 +82,7 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
                 buttons
         ));
         MessageDto messageDto = MessageMapper.messageToMessageDto(message, user.getId(), false);
-        eventsRpc.addEvent(new NewMessageEvent(messageDto));
+        eventsProducer.addEvent(new NewMessageEvent(messageDto));
         responseObserver.onNext(
                 ChatServiceOuterClass.MessageIdResponse.newBuilder()
                         .setMessageId(messageDto.getId())

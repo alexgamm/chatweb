@@ -2,7 +2,7 @@ dependencies {
     implementation project(":common")
     implementation project(":auth:model")
     implementation project(":auth:infrastructure")
-    implementation project(":events:client")
+    implementation project(":events:kafka")
     implementation project(":events:model")
     implementation project(":chat:client")
     implementation project(":chat:events")
