@@ -7,11 +7,6 @@ message UserOnlineResponse {
   repeated int32 onlineUserIds = 1;
 }
 
-message AddEventRequest {
-  string eventJson = 1;
-}
-
 service EventsService {
   rpc GetOnlineUserIds(google.protobuf.Empty) returns (UserOnlineResponse);
-  rpc AddEvent(AddEventRequest) returns (google.protobuf.Empty);
 }

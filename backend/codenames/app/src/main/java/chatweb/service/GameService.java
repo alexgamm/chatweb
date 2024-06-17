@@ -9,7 +9,6 @@ import chatweb.action.PickCard;
 import chatweb.action.ResetGame;
 import chatweb.action.StartGame;
 import chatweb.action.executor.GameActionExecutor;
-import chatweb.client.EventsRpcClient;
 import chatweb.entity.Dictionary;
 import chatweb.entity.Game;
 import chatweb.entity.Room;
@@ -18,6 +17,7 @@ import chatweb.entity.User;
 import chatweb.model.Color;
 import chatweb.model.event.ServiceGameUpdatedEvent;
 import chatweb.model.game.Settings;
+import chatweb.producer.EventsKafkaProducer;
 import chatweb.repository.GameRepository;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,13 +33,13 @@ public class GameService {
 
     private final Map<Class<? extends GameAction>, GameActionExecutor<? extends GameAction>> actionExecutors;
     private final GameSchedulingService gameSchedulingService;
-    private final EventsRpcClient eventsRpc;
+    private final EventsKafkaProducer eventsProducer;
 
 
     public GameService(
             GameRepository gameRepository,
             GameSchedulingService gameSchedulingService,
-            EventsRpcClient eventsRpc,
+            EventsKafkaProducer eventsProducer,
             GameActionExecutor<ChangeTurn> changeTurnExecutor,
             GameActionExecutor<EndGame> endGameExecutor,
             GameActionExecutor<PauseGame> pauseGameExecutor,
@@ -49,7 +49,7 @@ public class GameService {
     ) {
         this.gameRepository = gameRepository;
         this.gameSchedulingService = gameSchedulingService;
-        this.eventsRpc = eventsRpc;
+        this.eventsProducer = eventsProducer;
         this.actionExecutors = Map.of(
                 ChangeTurn.class, changeTurnExecutor,
                 EndGame.class, endGameExecutor,
@@ -88,7 +88,7 @@ public class GameService {
 
     public void addViewer(Game game, User viewer) {
         game.getViewers().add(viewer);
-        eventsRpc.addEvent(new ServiceGameUpdatedEvent(game));
+        eventsProducer.addEvent(new ServiceGameUpdatedEvent(game));
     }
 
     public void removeViewer(Game game, User viewer) {
@@ -104,7 +104,7 @@ public class GameService {
         }
         GameActionExecutionResult result = executor.execute(game.getState(), action);
         game.setState(result.getNewState());
-        eventsRpc.addEvent(new ServiceGameUpdatedEvent(game));
+        eventsProducer.addEvent(new ServiceGameUpdatedEvent(game));
         if (result.isCancelScheduledTask()) {
             gameSchedulingService.cancelTaskIfExists(game.getId());
         }

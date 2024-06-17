@@ -1,7 +1,6 @@
 package chatweb.controller;
 
 import chatweb.action.PauseGame;
-import chatweb.client.EventsRpcClient;
 import chatweb.entity.Game;
 import chatweb.entity.Team;
 import chatweb.entity.User;
@@ -11,6 +10,7 @@ import chatweb.model.api.ApiResponse;
 import chatweb.model.api.JoinTeamRequest;
 import chatweb.model.event.ServiceGameUpdatedEvent;
 import chatweb.model.game.state.Status;
+import chatweb.producer.EventsKafkaProducer;
 import chatweb.service.GameService;
 import chatweb.service.TeamService;
 import jakarta.transaction.Transactional;
@@ -31,7 +31,7 @@ public class TeamController implements ApiControllerHelper {
 
     private final TeamService teamService;
     private final GameService gameService;
-    private final EventsRpcClient eventsRpc;
+    private final EventsKafkaProducer eventsProducer;
 
     @Transactional
     @PostMapping("{teamId}/join")
@@ -66,7 +66,7 @@ public class TeamController implements ApiControllerHelper {
         }
         gameService.removeViewer(game, user);
         teamService.addPlayer(team, user, request.isLeader());
-        eventsRpc.addEvent(new ServiceGameUpdatedEvent(gameService.findGame(game.getId())));
+        eventsProducer.addEvent(new ServiceGameUpdatedEvent(gameService.findGame(game.getId())));
         return new ApiResponse(true);
     }
 

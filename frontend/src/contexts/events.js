@@ -11,6 +11,7 @@ export const addEventHandler = (eventType, handler) => {
     // TODO Handle expired token
     socket = new WebSocket(`${baseUrl}/api/ws/events?access_token=${accessToken}`);
     socket.addEventListener("message", (event) => {
+      if (event.data === "PING") return;
       const eventData = JSON.parse(event.data);
       const eventHandlers = handlers[eventData.type?.slice(1)] ?? [];
       eventHandlers.forEach(handler => handler(eventData));

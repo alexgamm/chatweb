@@ -6,11 +6,10 @@ import chatweb.model.telegram.TelegramOAuthResult;
 import chatweb.utils.HashUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.apache.http.client.utils.URIBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URISyntaxException;
 import java.util.Base64;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -50,14 +49,10 @@ public class TelegramOAuthService {
     }
 
     public String getOauthUrl() {
-        try {
-            return new URIBuilder(OAUTH_URI)
-                    .addParameter("bot_id", telegramOAuthProperties.getBotId())
-                    .addParameter("origin", telegramOAuthProperties.getRedirectUri())
-                    .build()
-                    .toString();
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+        return UriComponentsBuilder.fromHttpUrl(OAUTH_URI)
+                .queryParam("bot_id", telegramOAuthProperties.getBotId())
+                .queryParam("origin", telegramOAuthProperties.getRedirectUri())
+                .build()
+                .toString();
     }
 }

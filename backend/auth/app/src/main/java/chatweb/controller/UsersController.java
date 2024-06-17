@@ -11,6 +11,7 @@ import chatweb.model.api.UserListResponse;
 import chatweb.model.dto.UserDto;
 import chatweb.model.event.ChangeUserColorEvent;
 import chatweb.model.event.ChangeUsernameEvent;
+import chatweb.producer.EventsKafkaProducer;
 import chatweb.repository.UserRepository;
 import chatweb.utils.PasswordUtils;
 import jakarta.transaction.Transactional;
@@ -33,6 +34,7 @@ import java.util.Set;
 public class UsersController implements ApiControllerHelper {
     private final UserRepository userRepository;
     private final EventsRpcClient eventsRpc;
+    private final EventsKafkaProducer eventsProducer;
 
     @GetMapping
     public UserListResponse users() {
@@ -65,7 +67,7 @@ public class UsersController implements ApiControllerHelper {
         }
         userRepository.updateUsername(user.getId(), input.getUsername());
         user = userRepository.findUserById(user.getId());
-        eventsRpc.addEvent(new ChangeUsernameEvent(user.getId(), user.getUsername()));
+        eventsProducer.addEvent(new ChangeUsernameEvent(user.getId(), user.getUsername()));
         return UserMapper.INSTANCE.toDto(user);
     }
 
@@ -92,7 +94,7 @@ public class UsersController implements ApiControllerHelper {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "color is required"));
         }
         userRepository.updateColor(user.getId(), body.getColor());
-        eventsRpc.addEvent(new ChangeUserColorEvent(user.getId(), body.getColor()));
+        eventsProducer.addEvent(new ChangeUserColorEvent(user.getId(), body.getColor()));
         return UserMapper.INSTANCE.toDto(userRepository.findUserById(user.getId()));
     }
 }
