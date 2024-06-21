@@ -15,6 +15,9 @@ public class WebConfiguration extends CommonWebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(userAuthInterceptor)
-                .addPathPatterns("/**");
+                .addPathPatterns("/**")
+                .excludePathPatterns("/v3/api-docs")
+                .excludePathPatterns("/v3/api-docs/**")
+                .excludePathPatterns("/swagger-ui/**");
     }
 }

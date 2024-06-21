@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -18,8 +20,9 @@ public abstract class CommonWebMvcConfigurer implements WebMvcConfigurer {
 
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-        MappingJackson2HttpMessageConverter jsonConverter = new MappingJackson2HttpMessageConverter(objectMapper);
-        converters.add(jsonConverter);
+        converters.add(new ByteArrayHttpMessageConverter());
+        converters.add(new StringHttpMessageConverter());
+        converters.add(new MappingJackson2HttpMessageConverter(objectMapper));
     }
 
     @Bean
