@@ -26,6 +26,7 @@ import chatweb.service.ChatGPTService;
 import chatweb.utils.RoomUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -221,7 +222,7 @@ public class MessagesController implements ApiControllerHelper {
             @RequestParam(required = false) String room
     ) throws ApiErrorException {
         Integer roomId;
-        if (room != null) {
+        if (StringUtils.isNotBlank(room)) {
             try {
                 roomId = RoomUtils.idFromKey(room);
             } catch (InvalidRoomKeyException e) {
