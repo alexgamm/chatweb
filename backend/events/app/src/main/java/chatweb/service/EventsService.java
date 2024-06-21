@@ -1,7 +1,5 @@
 package chatweb.service;
 
-import chatweb.events.EventsServiceGrpc;
-import chatweb.events.EventsServiceOuterClass;
 import chatweb.model.event.IEvent;
 import chatweb.model.event.IRoomEvent;
 import chatweb.model.event.PersonalEventProducer;
@@ -9,14 +7,14 @@ import chatweb.model.event.UserOnlineEvent;
 import chatweb.repository.RoomRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.protobuf.Empty;
-import io.grpc.stub.StreamObserver;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.devh.boot.grpc.server.service.GrpcService;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -27,15 +25,22 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static chatweb.utils.KafkaTopics.EVENTS;
+import static chatweb.utils.RedisKeys.ONLINE_USER_IDS;
 
-@GrpcService
+@Service
 @Slf4j
 @RequiredArgsConstructor
 @EnableScheduling
-public class EventsService extends EventsServiceGrpc.EventsServiceImplBase {
+public class EventsService {
     private final Map<Integer, Set<WebSocketSession>> sessions = new ConcurrentHashMap<>();
     private final RoomRepository roomRepository;
     private final ObjectMapper objectMapper;
+    private final RedisTemplate<String, Integer> redisTemplate;
+
+    @PostConstruct
+    public void init() {
+        redisTemplate.delete(ONLINE_USER_IDS);
+    }
 
     public void addEvent(IEvent event) {
         addEvent((userId) -> event);
@@ -77,6 +82,7 @@ public class EventsService extends EventsServiceGrpc.EventsServiceImplBase {
             return userSessions;
         });
         if (countSessions(userId) == 1) {
+            redisTemplate.opsForSet().add(ONLINE_USER_IDS, userId);
             addEvent(new UserOnlineEvent(userId, true));
         }
     }
@@ -88,6 +94,7 @@ public class EventsService extends EventsServiceGrpc.EventsServiceImplBase {
         });
         sessions.values().removeIf(Set::isEmpty);
         if (!hasSessions(userId)) {
+            redisTemplate.opsForSet().remove(ONLINE_USER_IDS, userId);
             addEvent(new UserOnlineEvent(userId, false));
         }
     }
@@ -98,19 +105,6 @@ public class EventsService extends EventsServiceGrpc.EventsServiceImplBase {
 
     private boolean hasSessions(int userId) {
         return countSessions(userId) > 0;
-    }
-
-    @Override
-    public void getOnlineUserIds(
-            Empty request,
-            StreamObserver<EventsServiceOuterClass.UserOnlineResponse> responseObserver
-    ) {
-        responseObserver.onNext(
-                EventsServiceOuterClass.UserOnlineResponse.newBuilder()
-                        .addAllOnlineUserIds(sessions.keySet())
-                        .build()
-        );
-        responseObserver.onCompleted();
     }
 
     @KafkaListener(id = "events", topics = EVENTS)
