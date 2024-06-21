@@ -55,6 +55,8 @@ subprojects {
         implementation 'org.springframework.boot:spring-boot-starter-actuator'
         implementation 'org.springframework.boot:spring-boot-starter-websocket'
         implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+        implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+
         implementation 'org.springframework.kafka:spring-kafka'
         annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
         implementation "net.devh:grpc-client-spring-boot-starter:${springBootGrpcVersion}"
