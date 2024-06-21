@@ -1,6 +1,5 @@
 package chatweb.controller;
 
-import chatweb.client.EventsRpcClient;
 import chatweb.entity.User;
 import chatweb.exception.ApiErrorException;
 import chatweb.mapper.UserMapper;
@@ -14,8 +13,10 @@ import chatweb.model.event.ChangeUsernameEvent;
 import chatweb.producer.EventsKafkaProducer;
 import chatweb.repository.UserRepository;
 import chatweb.utils.PasswordUtils;
+import chatweb.utils.RedisKeys;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,18 +34,18 @@ import java.util.Set;
 @RequestMapping("api/users")
 public class UsersController implements ApiControllerHelper {
     private final UserRepository userRepository;
-    private final EventsRpcClient eventsRpc;
     private final EventsKafkaProducer eventsProducer;
+    private final RedisTemplate<String, Integer> redisTemplate;
 
     @GetMapping
     public UserListResponse users() {
         // TODO introduce pagination
-        Set<Integer> onlineUserIds = eventsRpc.getOnlineUserIds();
+        Set<Integer> onlineUserIds = redisTemplate.opsForSet().members(RedisKeys.ONLINE_USER_IDS);
         List<UserListResponse.User> list = userRepository.findAll().stream()
                 .map(user -> new UserListResponse.User(
                         user.getId(),
                         user.getUsername(),
-                        onlineUserIds.contains(user.getId()),
+                        onlineUserIds != null && onlineUserIds.contains(user.getId()),
                         user.getColor()
                 ))
                 .toList();
