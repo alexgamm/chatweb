@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy-auth-backend:
-    uses: ./.github/workflows/backend.yml
+  build-auth-backend:
+    uses: ./.github/workflows/build-backend.yml
     with:
       app-name: auth
     secrets: inherit
