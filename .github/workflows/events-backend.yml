@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy-events-backend:
-    uses: ./.github/workflows/backend.yml
+  build-events-backend:
+    uses: ./.github/workflows/build-backend.yml
     with:
       app-name: events
     secrets: inherit
