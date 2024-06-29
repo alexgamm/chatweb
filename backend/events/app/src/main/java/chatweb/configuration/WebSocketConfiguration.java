@@ -23,6 +23,7 @@ public class WebSocketConfiguration implements WebSocketConfigurer {
     @Override
     public void registerWebSocketHandlers(@NotNull WebSocketHandlerRegistry registry) {
         registry.addHandler(new EventsWebSocketHandler(eventsService), "/api/ws/events")
+                .setAllowedOriginPatterns("*")
                 .addInterceptors(new UserAuthWebSocketInterceptor(userAuthHelper));
     }
 
