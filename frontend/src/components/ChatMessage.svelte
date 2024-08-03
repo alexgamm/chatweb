@@ -15,7 +15,7 @@
     </time>
   </div>
   <div
-    class={`relative chat-bubble w-auto max-w-4xl text-gray-200 break-all ${message.color} ${message.reactions?.length ? "mb-6" : ""}`}
+    class={`relative chat-bubble w-auto max-w-4xl text-gray-200 break-all bg-opacity-80 ${message.color} ${message.reactions?.length ? "mb-6" : ""}`}
     on:contextmenu|preventDefault={onContextMenu}
   >
     {#if message.repliedMessage}
@@ -48,7 +48,7 @@
     {/if}
     {#if message.reactions}
       <div class="absolute right-0 -bottom-8">
-        <ChatMessageReactions reactions={message.reactions} {onReaction} />
+        <ChatMessageReactions color={message.color} reactions={message.reactions} {onReaction} />
       </div>
     {/if}
   </div>
