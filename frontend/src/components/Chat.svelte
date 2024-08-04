@@ -2,13 +2,13 @@
   import { onMount } from "svelte";
   import useApi from "../hooks/api";
   import user from "../stores/user";
+  import useDebounce from "../utils/debounce";
+  import { reactionsOrder, toggleReaction } from "../utils/reactions";
   import ChatMessageList from "./ChatMessageList.svelte";
   import MessageContextMenu from "./MessageContextMenu.svelte";
   import CloseIcon from "./icons/CloseIcon.svelte";
   import EditIcon from "./icons/EditIcon.svelte";
   import ReplyIcon from "./icons/ReplyIcon.svelte";
-  import useDebounce from "../utils/debounce";
-  import { reactionsOrder, toggleReaction } from "../utils/reactions";
 
   export let room;
   export let addColor;
@@ -39,6 +39,7 @@
     });
   });
 
+  let messageTextInput;
   let messageText = "";
   let repliedMessage;
   let editedMessage;
@@ -69,6 +70,8 @@
     messageText = "";
     repliedMessage = null;
     editedMessage = null;
+    console.log(messageTextInput);
+    requestAnimationFrame(() => messageTextInput.focus());
   };
 
   const onInput = () =>
@@ -148,6 +151,7 @@
     type="text"
     placeholder="type something..."
     autocomplete="off"
+    bind:this={messageTextInput}
     bind:value={messageText}
     on:input={onInput}
     disabled={submitting}

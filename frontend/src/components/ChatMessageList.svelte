@@ -32,7 +32,7 @@
     }
     const params = { count };
     if (from) {
-      params.from = from;
+      params.from = new Date(from).getTime();
     }
     if (room && room !== "global") {
       params.room = room;
@@ -64,7 +64,7 @@
     await tick();
     const scrollTop = messages
       .slice(0, responseBody.messages.length)
-      .reduce((acc, curr) => acc + curr.elemHeight, 0);
+      .reduce((acc, curr) => acc + curr.elem.clientHeight, 0);
     messagesContainerWrapper.scrollTop = scrollTop;
   };
   const scrollBottom = async () => {
@@ -75,6 +75,15 @@
       behavior: "smooth",
     });
   };
+
+  const isLastMessageVisible = () => {
+    const { scrollHeight, clientHeight, scrollTop } = messagesContainerWrapper;
+    return (
+      scrollHeight - clientHeight - scrollTop <
+      messages.at(-1).elem.clientHeight
+    );
+  };
+
   onMount(() => {
     loadMessages(20).then(scrollBottom);
     addEventHandler("NewMessageEvent", (event) => {
@@ -102,15 +111,21 @@
     addEventHandler("DeletedMessageEvent", (event) => {
       messages = messages.filter(({ id }) => id !== event.messageId);
     });
-    addEventHandler("ReactionEvent", (event) => {
+    addEventHandler("ReactionEvent", async (event) => {
+      const foundMessage = messages.find(({ id }) => id === event.messageId);
+      if (!foundMessage) return;
       messages = messages.map((message) =>
-        message.id === event.messageId
+        message === foundMessage
           ? {
               ...message,
               reactions: event.reactions.sort(reactionsOrder),
             }
           : message
       );
+      if (messages.at(-1)?.id === foundMessage.id && isLastMessageVisible()) {
+        await tick();
+        scrollBottom();
+      }
     });
     const setSendDateInterval = setInterval(() => {
       messages = messages.map(setSendDate);

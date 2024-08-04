@@ -7,7 +7,7 @@
   export let onReaction;
 </script>
 
-<div class="chat chat-start" bind:clientHeight={message.elemHeight}>
+<div class="chat chat-start" bind:this={message.elem}>
   <div class="chat-header font-bold mb-1 break-all">
     {message.username}
     <time class="text-xs font-normal opacity-50">
@@ -15,7 +15,7 @@
     </time>
   </div>
   <div
-    class={`relative chat-bubble w-auto max-w-4xl text-gray-200 break-all bg-opacity-80 ${message.color} ${message.reactions?.length ? "mb-6" : ""}`}
+    class={`chat-bubble w-auto max-w-4xl text-gray-200 break-all bg-opacity-80 ${message.color} ${message.reactions?.length ? "mb-8" : ""}`}
     on:contextmenu|preventDefault={onContextMenu}
   >
     {#if message.repliedMessage}
@@ -35,10 +35,10 @@
     {/if}
     {message.message}
     {#if message.buttons}
-      <div class="flex gap-2 mt-2">
+      <div class="flex gap-2 pt-2">
         {#each message.buttons as button}
           <Link
-            class="btn btn-sm w-full max-w-xs bg-opacity-30 hover:bg-opacity-50 border-transparent hover:border-transparent"
+            class="btn btn-sm w-full max-w-xs bg-opacity-40 hover:bg-opacity-60 border-transparent hover:border-transparent"
             to={button.link}
           >
             {button.text}
@@ -46,8 +46,8 @@
         {/each}
       </div>
     {/if}
-    {#if message.reactions}
-      <div class="absolute right-0 -bottom-8">
+    {#if message.reactions?.length}
+      <div class="-mt-10 translate-x-4 translate-y-11">
         <ChatMessageReactions color={message.color} reactions={message.reactions} {onReaction} />
       </div>
     {/if}

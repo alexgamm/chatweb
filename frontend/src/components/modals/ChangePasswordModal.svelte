@@ -37,8 +37,8 @@
         oldPassword,
         newPassword,
       });
-    } catch (error) {
-      errorMessage = error;
+    } catch ({ message }) {
+      errorMessage = message;
       state = "idle";
       return;
     }
@@ -59,7 +59,7 @@
     newPassword = "";
   }}
 >
-  <div class="relative rounded-lg shadow bg-gray-700 modal-box w-80">
+  <div class="relative rounded-lg shadow bg-violet-400 bg-opacity-20 modal-box w-80">
     <button
       type="button"
       class="absolute top-3 right-2.5 text-gray-400 bg-transparent
