@@ -17,9 +17,8 @@
   import GamesIcon from "../icons/GamesIcon.svelte";
   import SettingsIcon from "../icons/SettingsIcon.svelte";
   import UsersIcon from "../icons/UsersIcon.svelte";
-  import ChangePasswordModal from "../modals/ChangePasswordModal.svelte";
-  import ChangeUsernameModal from "../modals/ChangeUsernameModal.svelte";
   import RoomPasswordModal from "../modals/RoomPasswordModal.svelte";
+  import Splash from "../Splash.svelte";
 
   export let room = "global";
 
@@ -133,8 +132,6 @@
     </svg>
   </label>
 {:else}
-  <div class="flex justify-center items-center h-screen">
-    <span class="loading loading-spinner text-primary w-16" />
-  </div>
+  <Splash />
 {/if}
 <RoomPasswordModal onSubmit={onPasswordSubmit} />
