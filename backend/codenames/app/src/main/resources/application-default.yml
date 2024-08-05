@@ -1,0 +1,2 @@
+spring.kafka.admin.auto-create: false
+grpc.client.chat.negotiation-type: plaintext

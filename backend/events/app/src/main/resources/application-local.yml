@@ -1,0 +1,7 @@
+server.port: 23458
+spring:
+  datasource.url: jdbc:postgresql://localhost:5432/chilldrill?user=chilldrill&password=chilldrill
+  kafka.consumer.bootstrap-servers: localhost:19092
+  data.redis.url: redis://localhost:6379
+
+jwt.secret: localsecretlocalsecretlocalsecre

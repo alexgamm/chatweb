@@ -1,0 +1,26 @@
+server.port: 23456
+spring:
+  datasource.url: jdbc:postgresql://localhost:5432/chilldrill?user=chilldrill&password=chilldrill
+  kafka.producer.bootstrap-servers: localhost:19092
+  data.redis.url: redis://localhost:6379
+
+jwt:
+  secret: localsecretlocalsecretlocalsecre
+  token-lifetime-seconds: 3600000
+
+google.oauth:
+  client-id:
+  client-secret:
+  redirect-uri: http://localhost:5173/google/oauth/redirect
+
+tg.oauth:
+  bot-id:
+  bot-token:
+  redirect-uri: http://127.0.0.1:5173/tg/oauth/redirect
+
+smtp:
+  email: noreply@chilldrill.fun
+  from-name: Chilldrill no-reply
+  host: smtp.mailgun.com
+  port: 465
+  password:
