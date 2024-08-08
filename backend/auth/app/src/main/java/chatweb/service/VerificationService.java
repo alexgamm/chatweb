@@ -18,7 +18,10 @@ public class VerificationService {
 
     public boolean createAndSendVerification(User user) {
         String code = RandomStringUtils.random(6, false, true);
-        boolean sent = verificationCodeTemplate.send(user.getEmail().toLowerCase(), new VerificationCodeContext(code));
+        boolean sent = verificationCodeTemplate.send(
+                user.getEmail().toLowerCase(),
+                new VerificationCodeContext(user.getUsername(), code)
+        );
         if (sent) {
             createVerification(user.getId(), code);
             return true;

@@ -1,0 +1,20 @@
+<html lang="en" th:fragment="layout (content)" xmlns:th="http://www.thymeleaf.org">
+<body style="text-align: center; background: #1d232a; color: #a6adba; font-family: 'Helvetica'">
+<table cellspacing="0" cellpadding="0" border="0"
+       style="width: 100%; max-width: 600px; margin: 0 auto; padding: 80px 80px 20px;">
+    <tr>
+        <td>
+            <img src="https://static.chilldrill.fun/chilldrill.png"
+                 style="width: 240px; margin-right: 30px; margin-bottom: 20px"/>
+            <p style="color: #a6adba; font-size: 18px; font-weight: 600">
+                Long time no see, <b th:text="${username}">Sasha</b>!
+            </p>
+        </td>
+    </tr>
+    <tr th:replace="${content}"></tr>
+    <tr>
+        <td><p style="padding-top: 100px; opacity: 30%; font-size: 14px;">inspired by chilldrillians</p></td>
+    </tr>
+</table>
+</body>
+</html>

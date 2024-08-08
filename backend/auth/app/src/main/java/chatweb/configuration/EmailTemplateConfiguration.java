@@ -2,6 +2,7 @@ package chatweb.configuration;
 
 import chatweb.email.EmailTemplate;
 import chatweb.email.SmtpSender;
+import chatweb.email.context.ResetPasswordContext;
 import chatweb.email.context.VerificationCodeContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +21,19 @@ public class EmailTemplateConfiguration {
                 templateEngine,
                 "Verification code",
                 "verification-code"
+        );
+    }
+
+    @Bean
+    public EmailTemplate<ResetPasswordContext> resetPasswordTemplate(
+            SmtpSender smtpSender,
+            TemplateEngine templateEngine
+    ){
+        return new EmailTemplate<>(
+                smtpSender,
+                templateEngine,
+                "Password reset",
+                "reset-password"
         );
     }
 }

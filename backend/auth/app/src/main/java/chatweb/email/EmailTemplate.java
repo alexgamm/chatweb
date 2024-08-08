@@ -1,12 +1,10 @@
 package chatweb.email;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.IContext;
 
 @RequiredArgsConstructor
-@Getter
 public class EmailTemplate<Ctx extends IContext> {
 
     private final SmtpSender smtpSender;
