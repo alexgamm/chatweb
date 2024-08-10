@@ -68,18 +68,16 @@ public class ResetPasswordController implements ApiControllerHelper {
                 .path("/reset-password/{sessionId}")
                 .build(Map.of("sessionId", sessionId))
                 .toString();
-        boolean sent = resetPasswordTemplate.send(
+        resetPasswordTemplate.send(
                 email,
                 new ResetPasswordContext(user.getUsername(), uri)
         );
-        if (sent) {
-            resetPasswordSessionRepository.save(
-                    new ResetPasswordSession()
-                            .setId(sessionId)
-                            .setEmail(email)
-                            .setTtlSeconds(sessionTtl.toSeconds())
-            );
-        }
+        resetPasswordSessionRepository.save(
+                new ResetPasswordSession()
+                        .setId(sessionId)
+                        .setEmail(email)
+                        .setTtlSeconds(sessionTtl.toSeconds())
+        );
         return ResponseEntity.ok(new EmptyResponse());
     }
 

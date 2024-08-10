@@ -16,17 +16,13 @@ public class VerificationService {
     private final VerificationRepository verificationRepository;
     private final EmailTemplate<VerificationCodeContext> verificationCodeTemplate;
 
-    public boolean createAndSendVerification(User user) {
+    public void createAndSendVerification(User user) {
         String code = RandomStringUtils.random(6, false, true);
-        boolean sent = verificationCodeTemplate.send(
+        createVerification(user.getId(), code);
+        verificationCodeTemplate.send(
                 user.getEmail().toLowerCase(),
                 new VerificationCodeContext(user.getUsername(), code)
         );
-        if (sent) {
-            createVerification(user.getId(), code);
-            return true;
-        }
-        return false;
     }
 
     public Verification findVerification(int userId) {
