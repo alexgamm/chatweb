@@ -1,0 +1,8 @@
+server.port: 23459
+spring:
+  datasource.url: jdbc:postgresql://localhost:5432/chilldrill?user=chilldrill&password=chilldrill
+  kafka.producer.bootstrap-servers: localhost:19092
+
+jwt.secret: localsecretlocalsecretlocalsecre
+
+grpc.client.chat.address: static://localhost:23457

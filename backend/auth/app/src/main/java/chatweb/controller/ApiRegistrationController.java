@@ -57,7 +57,6 @@ public class ApiRegistrationController implements ApiControllerHelper {
         );
         user = userRepository.save(user);
         verificationService.createAndSendVerification(user);
-        //TODO handle email problems (if email was not sent)
         return UserMapper.INSTANCE.toDto(user);
     }
 }
