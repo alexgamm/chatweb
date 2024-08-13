@@ -7,5 +7,6 @@
     <include file="db/changelog/20240214-initial.xml"/>
     <include file="db/changelog/20240302-codenames.xml"/>
     <include file="db/changelog/20240419-messages-buttons.xml"/>
+    <include file="db/changelog/20240812-chatgpt-creation.xml"/>
 
 </databaseChangeLog>

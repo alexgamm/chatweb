@@ -1,0 +1,8 @@
+dependencies {
+    implementation project(":common")
+    implementation project(":auth:model")
+    implementation project(":events:kafka")
+    implementation project(":events:model")
+    implementation project(":chat:client")
+    implementation project(":chat:model")
+}

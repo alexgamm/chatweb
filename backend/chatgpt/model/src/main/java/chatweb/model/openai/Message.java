@@ -1,4 +1,4 @@
-package chatweb.model.api.chatgpt;
+package chatweb.model.openai;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
