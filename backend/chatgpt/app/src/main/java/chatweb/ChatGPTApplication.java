@@ -5,10 +5,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication(exclude = GrpcServerFactoryAutoConfiguration.class)
-public class EventsApplication {
+public class ChatGPTApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(EventsApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(ChatGPTApplication.class, args);
+    }
 }

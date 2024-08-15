@@ -60,6 +60,10 @@ public class Message {
     @JdbcTypeCode(SqlTypes.JSON)
     private List<Button> buttons;
 
+    public Message(String id) {
+        this.id = id;
+    }
+
     public Integer getRoomId() {
         return room == null ? null : room.getId();
     }

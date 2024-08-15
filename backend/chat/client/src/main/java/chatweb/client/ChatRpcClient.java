@@ -49,4 +49,14 @@ public class ChatRpcClient {
                         .build()
         );
     }
+
+    public ChatServiceOuterClass.MessageIdResponse sendMessage(int userId, String message, String repliedMessageId) {
+        return grpcClient.sendMessage(
+                ChatServiceOuterClass.SendMessageRequest.newBuilder()
+                        .setUserId(userId)
+                        .setMessage(message)
+                        .setRepliedMessageId(repliedMessageId)
+                        .build()
+        );
+    }
 }

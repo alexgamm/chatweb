@@ -24,9 +24,9 @@ public class OpenAiApiClient {
     private final String openAiModel;
 
     public OpenAiApiClient(
-            @Qualifier("chatGPTWebClient") WebClient webClient,
+            @Qualifier("openAiWebClient") WebClient webClient,
             @Value("${openai.token}") String openAiToken,
-            @Value("${openai.model:gpt-3.5-turbo}") String openAiModel
+            @Value("${openai.model}") String openAiModel
     ) {
         this.webClient = webClient;
         this.openAiToken = openAiToken;

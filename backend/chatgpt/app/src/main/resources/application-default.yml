@@ -1,0 +1,15 @@
+grpc.client.chat.negotiation-type: plaintext
+spring:
+  main:
+    web-application-type: none
+  kafka:
+    streams:
+      application-id: chatgpt-filter
+
+jwt.secret: localsecretlocalsecretlocalsecre # TODO remove (conditional beans)
+
+chatgpt: # should match chatgpt values in users table
+  mention: "@Gosha🤖"
+  user-id: -1
+
+openai.model: gpt-4o-mini

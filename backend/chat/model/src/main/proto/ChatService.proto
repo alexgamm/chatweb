@@ -19,7 +19,8 @@ message CreateRoomRequest {
 message SendMessageRequest {
   int32 userId = 1;
   string message = 2;
-  string buttonsJson = 3;
+  optional string buttonsJson = 3;
+  optional string repliedMessageId = 4;
 }
 
 service ChatService {

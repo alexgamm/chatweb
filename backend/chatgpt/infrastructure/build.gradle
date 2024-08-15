@@ -1,3 +1,7 @@
 dependencies {
+    implementation project(":common")
+    implementation project(":events:model")
+    implementation project(":chat:model")
+    implementation project(":chat:events")
     implementation project(":chatgpt:model")
 }

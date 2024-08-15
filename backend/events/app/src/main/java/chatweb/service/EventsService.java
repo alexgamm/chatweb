@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static chatweb.utils.KafkaTopics.EVENTS;
+import static chatweb.utils.KafkaTopics.Events.ROOT;
 import static chatweb.utils.RedisKeys.ONLINE_USER_IDS;
 
 @Service
@@ -107,7 +107,7 @@ public class EventsService {
         return countSessions(userId) > 0;
     }
 
-    @KafkaListener(id = "events", topics = EVENTS)
+    @KafkaListener(id = "events", topics = ROOT)
     public void listen(IEvent event) {
         if (event instanceof PersonalEventProducer personalEventProducer) {
             addEvent(personalEventProducer);
