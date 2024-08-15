@@ -19,7 +19,6 @@ public class OpenAiWebClientConfiguration {
     @Bean
     @Qualifier("openAiWebClient")
     public WebClient openAiWebClient() {
-        // TODO remove port from this part of code
         HttpClient httpClient = HttpClient.create()
                 .proxy(proxy -> proxy
                         .type(ProxyProvider.Proxy.HTTP)
