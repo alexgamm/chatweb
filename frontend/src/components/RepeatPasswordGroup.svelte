@@ -1,5 +1,5 @@
 <script>
-  export let error;
+  export let error = null;
   export let similarPasswords;
   export let password;
   export let repeatPassword;
