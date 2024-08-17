@@ -6,6 +6,7 @@ const PROXY_CONFIGS = {
     "/api/login": "http://localhost:23456",
     "/api/registration": "http://localhost:23456",
     "/api/verification": "http://localhost:23456",
+    "/api/reset-password": "http://localhost:23456",
     "/api/users": "http://localhost:23456",
     "/api/tg/oauth": "http://localhost:23456",
     "/api/google/oauth": "http://localhost:23456",
