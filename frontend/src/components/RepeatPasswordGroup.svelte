@@ -1,16 +1,21 @@
 <script>
-  export let error;
+  export let error = null;
   export let similarPasswords;
   export let password;
   export let repeatPassword;
+  export let inputClass = "";
+  export let labels = ["password", "repeat password"];
+  export let onInput = null;
   let showPassword = false;
+
+  const eyeClass = inputClass?.includes("input-sm") ? "h-3" : "h-4";
 
   $: similarPasswords = password === repeatPassword;
 </script>
 
 <div class="form-control">
   <label class="label" for="password">
-    <span class="label-text">password</span>
+    <span class="label-text">{labels[0]}</span>
   </label>
   <div class="relative w-full">
     <div class="absolute inset-y-0 right-0 flex items-center px-3">
@@ -18,10 +23,11 @@
         type="button"
         class="fill-violet-500 hover:fill-violet-400 cursor-pointer"
         on:click={() => (showPassword = !showPassword)}
+        tabindex="-1"
       >
         {#if showPassword}
           <svg
-            class="eye"
+            class={`eye ${eyeClass}`}
             xmlns="http://www.w3.org/2000/svg"
             height="1em"
             viewBox="-30 0 640 512"
@@ -32,9 +38,8 @@
           </svg>
         {:else}
           <svg
-            class="eye-slash"
+            class={`eye-slash ${eyeClass}`}
             xmlns="http://www.w3.org/2000/svg"
-            height="1em"
             viewBox="0 0 640 512"
           >
             <path
@@ -45,9 +50,12 @@
       </button>
     </div>
     <input
-      class={`input input-bordered ${error ? "input-error" : ""} w-full`}
+      class={`input input-bordered ${error ? "input-error" : ""} w-full ${inputClass}`}
       type={showPassword ? "text" : "password"}
-      on:input={(event) => (password = event.target.value)}
+      on:input={(event) => {
+        password = event.target.value;
+        onInput && onInput(event);
+      }}
       id="password"
       required
     />
@@ -55,13 +63,16 @@
 </div>
 <div class="form-control">
   <label class="label" for="repeat-password">
-    <span class="label-text">repeat password</span>
+    <span class="label-text">{labels[1]}</span>
   </label>
   <input
-    class={`input input-bordered ${error ? "input-error" : ""}`}
+    class={`input input-bordered ${error ? "input-error" : ""} ${inputClass}`}
     id="repeat-password"
     type={showPassword ? "text" : "password"}
-    on:input={(event) => (repeatPassword = event.target.value)}
+    on:input={(event) => {
+      repeatPassword = event.target.value;
+      onInput && onInput(event);
+    }}
     required
   />
 </div>

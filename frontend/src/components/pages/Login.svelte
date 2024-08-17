@@ -1,5 +1,5 @@
 <script>
-  import { Link, navigate } from "svelte-routing";
+  import { link, Link, navigate } from "svelte-routing";
   import useApi from "../../hooks/api";
   import GoogleOAuthButton from "../GoogleOAuthButton.svelte";
   import TelegramOAuthButton from "../TelegramOAuthButton.svelte";
@@ -75,6 +75,13 @@
           on:input={() => (errorMessage = "")}
           required
         />
+        <!-- svelte-ignore a11y-label-has-associated-control -->
+        <label class="label">
+          <!-- svelte-ignore a11y-missing-attribute -->
+          <a class="label-text-alt" use:link href="/reset-password">
+            Forgot password?
+          </a>
+        </label>
       </div>
       <span class="text-error">
         {errorMessage}
@@ -99,7 +106,7 @@
         <svg
           class="fill-violet-400"
           xmlns="http://www.w3.org/2000/svg"
-          height="1.8em"
+          height="1.5em"
           viewBox="0 0 512 512"
         >
           <path
