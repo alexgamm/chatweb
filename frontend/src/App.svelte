@@ -1,8 +1,6 @@
 <script>
   import { Route, Router } from "svelte-routing";
   import Toasts from "./components/Toasts.svelte";
-  import ChangePasswordModal from "./components/modals/ChangePasswordModal.svelte";
-  import ChangeUsernameModal from "./components/modals/ChangeUsernameModal.svelte";
   import Login from "./components/pages/Login.svelte";
   import Registration from "./components/pages/Registration.svelte";
   import Room from "./components/pages/Room.svelte";
@@ -21,5 +19,3 @@
   <Route component={Room} />
 </Router>
 <Toasts />
-<ChangeUsernameModal />
-<ChangePasswordModal />
