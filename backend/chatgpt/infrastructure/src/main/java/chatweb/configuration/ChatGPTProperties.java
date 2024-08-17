@@ -10,4 +10,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class ChatGPTProperties {
     private Integer userId;
     private String mention;
+    private String loadingMessage;
+    private String errorMessage;
 }

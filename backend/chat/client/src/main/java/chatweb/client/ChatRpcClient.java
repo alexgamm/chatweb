@@ -18,7 +18,9 @@ public class ChatRpcClient {
 
     public ChatRpcClient(
             ObjectMapper objectMapper,
-            @GrpcClient("chat") ChatServiceGrpc.ChatServiceBlockingStub grpcClient
+            @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+            @GrpcClient("chat")
+            ChatServiceGrpc.ChatServiceBlockingStub grpcClient
     ) {
         this.objectMapper = objectMapper;
         this.grpcClient = grpcClient;
@@ -34,7 +36,7 @@ public class ChatRpcClient {
         return grpcClient.createRoom(builder.build());
     }
 
-    public ChatServiceOuterClass.MessageIdResponse sendMessage(int userId, String message, List<Button> buttons) {
+    public String sendMessage(int userId, String message, List<Button> buttons) {
         String buttonsJson;
         try {
             buttonsJson = objectMapper.writeValueAsString(buttons);
@@ -47,16 +49,25 @@ public class ChatRpcClient {
                         .setMessage(message)
                         .setButtonsJson(buttonsJson)
                         .build()
-        );
+        ).getMessageId();
     }
 
-    public ChatServiceOuterClass.MessageIdResponse sendMessage(int userId, String message, String repliedMessageId) {
+    public String sendMessage(int userId, String message, String repliedMessageId) {
         return grpcClient.sendMessage(
                 ChatServiceOuterClass.SendMessageRequest.newBuilder()
                         .setUserId(userId)
                         .setMessage(message)
                         .setRepliedMessageId(repliedMessageId)
                         .build()
-        );
+        ).getMessageId();
+    }
+
+    public String editMessage(String messageId, String message) {
+        return grpcClient.editMessage(
+                ChatServiceOuterClass.EditMessageRequest.newBuilder()
+                        .setMessageId(messageId)
+                        .setMessage(message)
+                        .build()
+        ).getMessageId();
     }
 }

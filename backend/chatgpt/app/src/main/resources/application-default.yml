@@ -11,5 +11,7 @@ jwt.secret: localsecretlocalsecretlocalsecre # TODO remove (conditional beans)
 chatgpt: # should match chatgpt values in users table
   mention: "@Gosha🤖"
   user-id: -1
+  loading-message: "⏳"
+  error-message: "🤷‍♂️"
 
 openai.model: gpt-4o-mini

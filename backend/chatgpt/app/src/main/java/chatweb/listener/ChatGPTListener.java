@@ -3,7 +3,6 @@ package chatweb.listener;
 import chatweb.client.ChatRpcClient;
 import chatweb.client.OpenAiApiClient;
 import chatweb.configuration.ChatGPTProperties;
-import chatweb.exception.chatgpt.ChatCompletionException;
 import chatweb.model.dto.MessageDto;
 import chatweb.model.event.NewMessageEvent;
 import lombok.RequiredArgsConstructor;
@@ -24,16 +23,22 @@ public class ChatGPTListener {
     @KafkaListener(id = "chatgpt-processor", topics = CHATGPT_TO_PROCESS)
     public void handleNewMessageEvent(NewMessageEvent event) {
         MessageDto message = event.getMessage();
+        String chatGPTMessageId = chatRpcClient.sendMessage(
+                chatGPTProperties.getUserId(),
+                chatGPTProperties.getLoadingMessage(),
+                message.getId()
+        );
         String completionContent;
         try {
             completionContent = openAiApiClient.getCompletionContent(
                     message.getMessage().replace(chatGPTProperties.getMention(), "")
             );
-        } catch (ChatCompletionException e) {
-            log.error("Could not get completion for message id {}", message.getId());
+        } catch (Throwable e) {
+            log.error("Could not get completion for message id {}", message.getId(), e);
+            chatRpcClient.editMessage(chatGPTMessageId, chatGPTProperties.getErrorMessage());
             return;
         }
-        chatRpcClient.sendMessage(chatGPTProperties.getUserId(), completionContent, message.getId());
+        chatRpcClient.editMessage(chatGPTMessageId, completionContent);
     }
 }
 

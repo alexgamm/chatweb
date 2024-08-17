@@ -23,7 +23,13 @@ message SendMessageRequest {
   optional string repliedMessageId = 4;
 }
 
+message EditMessageRequest {
+  string messageId = 1;
+  string message = 2;
+}
+
 service ChatService {
   rpc CreateRoom(CreateRoomRequest) returns (CreateRoomResponse);
   rpc SendMessage(SendMessageRequest) returns (MessageIdResponse);
+  rpc EditMessage(EditMessageRequest) returns (MessageIdResponse);
 }

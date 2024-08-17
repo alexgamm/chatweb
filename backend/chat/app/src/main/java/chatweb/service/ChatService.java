@@ -7,6 +7,7 @@ import chatweb.entity.Room;
 import chatweb.entity.User;
 import chatweb.mapper.MessageMapper;
 import chatweb.model.dto.MessageDto;
+import chatweb.model.event.EditedMessageEvent;
 import chatweb.model.event.NewMessageEvent;
 import chatweb.model.message.Button;
 import chatweb.producer.EventsKafkaProducer;
@@ -60,7 +61,10 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
     }
 
     @Override
-    public void sendMessage(ChatServiceOuterClass.SendMessageRequest request, StreamObserver<ChatServiceOuterClass.MessageIdResponse> responseObserver) {
+    public void sendMessage(
+            ChatServiceOuterClass.SendMessageRequest request,
+            StreamObserver<ChatServiceOuterClass.MessageIdResponse> responseObserver
+    ) {
         User user = userRepository.findUserById(request.getUserId());
         if (user == null) {
             responseObserver.onError(badRequest("Message sender not found").toException());
@@ -94,6 +98,29 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
         responseObserver.onNext(
                 ChatServiceOuterClass.MessageIdResponse.newBuilder()
                         .setMessageId(messageDto.getId())
+                        .build()
+        );
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void editMessage(
+            ChatServiceOuterClass.EditMessageRequest request,
+            StreamObserver<ChatServiceOuterClass.MessageIdResponse> responseObserver
+    ) {
+        Message message = messageRepository.findById(request.getMessageId()).orElse(null);
+        if (message == null) {
+            responseObserver.onError(badRequest("no message for edit").toException());
+            return;
+        }
+        message.setMessage(request.getMessage());
+        messageRepository.save(message);
+        eventsProducer.addEvent(new EditedMessageEvent(
+                MessageMapper.messageToMessageDto(message, null, false)
+        ));
+        responseObserver.onNext(
+                ChatServiceOuterClass.MessageIdResponse.newBuilder()
+                        .setMessageId(message.getId())
                         .build()
         );
         responseObserver.onCompleted();
