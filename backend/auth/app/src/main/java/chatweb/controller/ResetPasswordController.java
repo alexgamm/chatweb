@@ -94,6 +94,7 @@ public class ResetPasswordController implements ApiControllerHelper {
         if (user == null) {
             throw badRequest("Something went wrong").toException();
         }
+        resetPasswordSessionRepository.delete(session);
         userRepository.updatePassword(PasswordUtils.hash(body.getNewPassword()), user.getId());
         String accessToken = jwtService.createToken(user.getId());
         return new LoginResponse(accessToken, false);
