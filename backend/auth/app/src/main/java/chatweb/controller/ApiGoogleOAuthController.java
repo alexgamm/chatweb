@@ -1,31 +1,34 @@
 package chatweb.controller;
 
+import chatweb.controller.helper.AuthControllerHelper;
 import chatweb.entity.User;
-import chatweb.entity.Verification;
 import chatweb.exception.ApiErrorException;
 import chatweb.model.api.ApiError;
 import chatweb.model.api.LoginResponse;
 import chatweb.model.google.GoogleOAuthTokenRequest;
 import chatweb.model.google.UserInfo;
-import chatweb.repository.UserRepository;
 import chatweb.service.GoogleOAuthService;
 import chatweb.service.JwtService;
-import chatweb.service.VerificationService;
-import chatweb.utils.UserColorUtils;
+import chatweb.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 
 @RestController
 @RequestMapping("api/google/oauth")
 @RequiredArgsConstructor
-public class ApiGoogleOAuthController implements ApiControllerHelper {
+public class ApiGoogleOAuthController implements ApiControllerHelper, AuthControllerHelper {
     private final GoogleOAuthService googleOAuthService;
-    private final UserRepository userRepository;
-    private final VerificationService verificationService;
+    private final UserService userService;
+    @Getter
     private final JwtService jwtService;
 
     @GetMapping
@@ -42,26 +45,12 @@ public class ApiGoogleOAuthController implements ApiControllerHelper {
         } catch (IOException e) {
             throw new ApiErrorException(new ApiError(HttpStatus.SERVICE_UNAVAILABLE, "external error"));
         }
-        User user = userRepository.findUserByEmail(userInfo.getEmail().toLowerCase());
+        User user = userService.findUserByEmail(userInfo.getEmail());
         if (user == null) {
             String username = userInfo.getEmail().split("@")[0];
-            user = new User(
-                    null,
-                    username,
-                    userInfo.getEmail().toLowerCase(),
-                    null,
-                    UserColorUtils.getRandomColor()
-            );
-            user = userRepository.save(user);
+            user = userService.createUser(username, userInfo.getEmail());
         }
-        Verification verification = verificationService.findVerification(user.getId());
-        if (verification == null) {
-            verification = verificationService.createVerification(user.getId(), "");
-        }
-        if (!verification.isVerified()) {
-            verificationService.updateVerified(user.getId());
-        }
-        String accessToken = jwtService.createToken(user.getId());
-        return new LoginResponse(accessToken, null);
+        return auth(user.getId());
     }
+
 }

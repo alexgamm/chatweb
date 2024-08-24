@@ -1,14 +1,16 @@
 package chatweb.controller;
 
+import chatweb.controller.helper.AuthControllerHelper;
 import chatweb.entity.User;
 import chatweb.entity.Verification;
 import chatweb.exception.ApiErrorException;
 import chatweb.model.api.ApiError;
 import chatweb.model.api.LoginResponse;
 import chatweb.model.api.VerificationRequest;
-import chatweb.repository.UserRepository;
 import chatweb.service.JwtService;
+import chatweb.service.UserService;
 import chatweb.service.VerificationService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,9 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("api/verification")
 @RequiredArgsConstructor
-public class ApiVerificationController implements ApiControllerHelper {
-    private final UserRepository userRepository;
+public class ApiVerificationController implements ApiControllerHelper, AuthControllerHelper {
+    private final UserService userService;
     private final VerificationService verificationService;
+    @Getter
     private final JwtService jwtService;
 
     @PostMapping
@@ -29,7 +32,7 @@ public class ApiVerificationController implements ApiControllerHelper {
         if (body.getEmail() == null || body.getEmail().isEmpty()) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, null));
         }
-        User user = userRepository.findUserByEmail(body.getEmail().toLowerCase());
+        User user = userService.findUserByEmail(body.getEmail());
         if (user == null) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, null));
         }
@@ -43,7 +46,6 @@ public class ApiVerificationController implements ApiControllerHelper {
         if (!verification.isVerified()) {
             verificationService.updateVerified(user.getId());
         }
-        String accessToken = jwtService.createToken(user.getId());
-        return new LoginResponse(accessToken, false);
+        return auth(user.getId());
     }
 }
