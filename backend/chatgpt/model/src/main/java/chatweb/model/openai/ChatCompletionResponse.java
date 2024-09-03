@@ -1,4 +1,4 @@
-package chatweb.model.api.chatgpt;
+package chatweb.model.openai;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;

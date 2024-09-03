@@ -22,7 +22,6 @@ import chatweb.model.event.TypingEvent;
 import chatweb.producer.EventsKafkaProducer;
 import chatweb.repository.MessageRepository;
 import chatweb.repository.RoomRepository;
-import chatweb.service.ChatGPTService;
 import chatweb.utils.RoomUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +53,6 @@ import static java.util.UUID.randomUUID;
 public class MessagesController implements ApiControllerHelper {
 
     private final MessageRepository messageRepository;
-    private final ChatGPTService chatGPTService;
     private final RoomRepository roomRepository;
     private final EventsKafkaProducer eventsProducer;
 
@@ -121,7 +119,6 @@ public class MessagesController implements ApiControllerHelper {
         ));
         MessageDto messageDto = MessageMapper.messageToMessageDto(message, user.getId(), false);
         eventsProducer.addEvent(new NewMessageEvent(messageDto));
-        chatGPTService.handleMessage(message);
         return new MessageIdResponse(message.getId());
     }
 

@@ -7,6 +7,7 @@ import chatweb.entity.Room;
 import chatweb.entity.User;
 import chatweb.mapper.MessageMapper;
 import chatweb.model.dto.MessageDto;
+import chatweb.model.event.EditedMessageEvent;
 import chatweb.model.event.NewMessageEvent;
 import chatweb.model.message.Button;
 import chatweb.producer.EventsKafkaProducer;
@@ -22,6 +23,7 @@ import net.devh.boot.grpc.server.service.GrpcService;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static chatweb.model.api.ApiError.badRequest;
 import static java.util.UUID.randomUUID;
@@ -59,25 +61,35 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
     }
 
     @Override
-    public void sendMessage(ChatServiceOuterClass.SendMessageRequest request, StreamObserver<ChatServiceOuterClass.MessageIdResponse> responseObserver) {
+    public void sendMessage(
+            ChatServiceOuterClass.SendMessageRequest request,
+            StreamObserver<ChatServiceOuterClass.MessageIdResponse> responseObserver
+    ) {
         User user = userRepository.findUserById(request.getUserId());
         if (user == null) {
             responseObserver.onError(badRequest("Message sender not found").toException());
             return;
         }
-        List<Button> buttons;
-        try {
-            buttons = objectMapper.readValue(request.getButtonsJson(), BUTTON_LIST_TR);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+        List<Button> buttons = Collections.emptyList();
+        if (request.hasButtonsJson()) {
+            try {
+                buttons = objectMapper.readValue(request.getButtonsJson(), BUTTON_LIST_TR);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
         }
+        Message repliedMessage = Optional.of(request.hasRepliedMessageId())
+                .filter(has -> has)
+                .map(has -> request.getRepliedMessageId())
+                .flatMap(messageRepository::findById)
+                .orElse(null);
         Message message = messageRepository.save(new Message(
                 randomUUID().toString(),
                 request.getMessage().trim(),
                 null,
                 user,
                 Collections.emptySet(),
-                null,
+                repliedMessage,
                 new Date(),
                 buttons
         ));
@@ -86,6 +98,29 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
         responseObserver.onNext(
                 ChatServiceOuterClass.MessageIdResponse.newBuilder()
                         .setMessageId(messageDto.getId())
+                        .build()
+        );
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void editMessage(
+            ChatServiceOuterClass.EditMessageRequest request,
+            StreamObserver<ChatServiceOuterClass.MessageIdResponse> responseObserver
+    ) {
+        Message message = messageRepository.findById(request.getMessageId()).orElse(null);
+        if (message == null) {
+            responseObserver.onError(badRequest("no message for edit").toException());
+            return;
+        }
+        message.setMessage(request.getMessage());
+        messageRepository.save(message);
+        eventsProducer.addEvent(new EditedMessageEvent(
+                MessageMapper.messageToMessageDto(message, null, false)
+        ));
+        responseObserver.onNext(
+                ChatServiceOuterClass.MessageIdResponse.newBuilder()
+                        .setMessageId(message.getId())
                         .build()
         );
         responseObserver.onCompleted();

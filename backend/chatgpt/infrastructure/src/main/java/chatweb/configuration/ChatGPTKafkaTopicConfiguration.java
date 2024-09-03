@@ -5,12 +5,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.TopicBuilder;
 
-import static chatweb.utils.KafkaTopics.Events.ROOT;
+import static chatweb.utils.KafkaTopics.Events.CHATGPT_TO_PROCESS;
 
 @Configuration
-public class EventsKafkaTopicConfiguration {
+public class ChatGPTKafkaTopicConfiguration {
     @Bean
-    public NewTopic eventsTopic() {
-        return TopicBuilder.name(ROOT).build();
+    public NewTopic eventsChatGPTToProcessTopic() {
+        return TopicBuilder.name(CHATGPT_TO_PROCESS).build();
     }
 }
