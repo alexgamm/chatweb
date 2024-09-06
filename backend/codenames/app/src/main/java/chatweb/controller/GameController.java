@@ -134,7 +134,7 @@ public class GameController implements ApiControllerHelper {
         if (game.getState().getStatus() == Status.FINISHED) {
             gameService.executeAction(game, new ResetGame(game));
         }
-        gameService.executeAction(game, new StartGame(game.getSettings().getTurnSeconds()));
+        gameService.executeAction(game, new StartGame(game.getSettings().turnSeconds()));
         return new ApiResponse(true);
     }
 
@@ -175,7 +175,7 @@ public class GameController implements ApiControllerHelper {
             gameService.executeAction(game, new PickCard(
                     request.getWord(),
                     userTeam.getId(),
-                    game.getSettings().getTurnSeconds())
+                    game.getSettings().turnSeconds())
             );
         } catch (IllegalStateException e) {
             throw badRequest(e.getMessage()).toException();
@@ -203,7 +203,7 @@ public class GameController implements ApiControllerHelper {
         if (!game.getState().getTurn().isLeader() && userTeam.isLeader(user)) {
             throw badRequest("Now it's the team members' turn").toException();
         }
-        gameService.executeAction(game, new ChangeTurn(game.getSettings().getTurnSeconds()));
+        gameService.executeAction(game, new ChangeTurn(game.getSettings().turnSeconds()));
         return new ApiResponse(true);
     }
 

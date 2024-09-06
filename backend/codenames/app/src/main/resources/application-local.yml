@@ -5,4 +5,4 @@ spring:
 
 jwt.secret: localsecretlocalsecretlocalsecre
 
-grpc.client.chat.address: static://localhost:23457
+grpc.client.chat.address: static://localhost:13457
