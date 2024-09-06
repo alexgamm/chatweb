@@ -5,10 +5,11 @@ import chatweb.entity.Game;
 import chatweb.entity.Team;
 import chatweb.entity.User;
 import chatweb.exception.ApiErrorException;
+import chatweb.mapper.GameMapper;
 import chatweb.model.api.ApiError;
 import chatweb.model.api.ApiResponse;
 import chatweb.model.api.JoinTeamRequest;
-import chatweb.model.event.ServiceGameUpdatedEvent;
+import chatweb.model.event.GameUpdatedEvent;
 import chatweb.model.game.state.Status;
 import chatweb.producer.EventsKafkaProducer;
 import chatweb.service.GameService;
@@ -66,7 +67,7 @@ public class TeamController implements ApiControllerHelper {
         }
         gameService.removeViewer(game, user);
         teamService.addPlayer(team, user, request.isLeader());
-        eventsProducer.addEvent(new ServiceGameUpdatedEvent(gameService.findGame(game.getId())));
+        eventsProducer.addEvent(new GameUpdatedEvent(GameMapper.INSTANCE.toDto(gameService.findGame(game.getId()))));
         return new ApiResponse(true);
     }
 

@@ -1,4 +1,4 @@
 package chatweb.exception;
 
-public class InvalidRoomKeyException extends Exception {
+public class InvalidRoomKeyException extends IllegalArgumentException {
 }

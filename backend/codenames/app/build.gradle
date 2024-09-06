@@ -11,4 +11,6 @@ dependencies {
     implementation project(":codenames:model")
     implementation project(":codenames:events")
     implementation project(":codenames:infrastructure")
+
+    implementation "net.devh:grpc-client-spring-boot-starter:${springBootGrpcVersion}"
 }

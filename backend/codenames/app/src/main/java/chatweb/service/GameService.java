@@ -14,8 +14,10 @@ import chatweb.entity.Game;
 import chatweb.entity.Room;
 import chatweb.entity.Team;
 import chatweb.entity.User;
+import chatweb.mapper.GameMapper;
 import chatweb.model.Color;
-import chatweb.model.event.ServiceGameUpdatedEvent;
+import chatweb.model.event.GameStateUpdatedEvent;
+import chatweb.model.event.GameUpdatedEvent;
 import chatweb.model.game.Settings;
 import chatweb.producer.EventsKafkaProducer;
 import chatweb.repository.GameRepository;
@@ -88,7 +90,7 @@ public class GameService {
 
     public void addViewer(Game game, User viewer) {
         game.getViewers().add(viewer);
-        eventsProducer.addEvent(new ServiceGameUpdatedEvent(game));
+        eventsProducer.addEvent(new GameUpdatedEvent(GameMapper.INSTANCE.toDto(game)));
     }
 
     public void removeViewer(Game game, User viewer) {
@@ -104,7 +106,7 @@ public class GameService {
         }
         GameActionExecutionResult result = executor.execute(game.getState(), action);
         game.setState(result.getNewState());
-        eventsProducer.addEvent(new ServiceGameUpdatedEvent(game));
+        eventsProducer.addEvent(new GameStateUpdatedEvent(game.getId()));
         if (result.isCancelScheduledTask()) {
             gameSchedulingService.cancelTaskIfExists(game.getId());
         }

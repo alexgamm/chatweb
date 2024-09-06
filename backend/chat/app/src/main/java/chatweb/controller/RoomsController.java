@@ -7,7 +7,9 @@ import chatweb.model.api.ApiResponse;
 import chatweb.model.api.JoinRoomRequest;
 import chatweb.repository.RoomRepository;
 import chatweb.utils.PasswordUtils;
+import chatweb.utils.RedisKeys;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
@@ -23,6 +25,7 @@ import static chatweb.model.api.ApiError.badRequest;
 public class RoomsController implements ApiControllerHelper {
 
     private final RoomRepository roomRepository;
+    private final RedisTemplate<String, Integer> redisTemplate;
 
     @PostMapping("{room}/join")
     public ApiResponse joinRoom(
@@ -42,6 +45,7 @@ public class RoomsController implements ApiControllerHelper {
         }
         relatedRoom.addUser(user);
         roomRepository.save(relatedRoom);
+        redisTemplate.opsForSet().add(RedisKeys.userRooms(user.getId()), relatedRoom.getId());
         return new ApiResponse(true);
     }
 

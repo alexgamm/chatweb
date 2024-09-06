@@ -1,6 +1,5 @@
 package chatweb.model.api;
 
-import chatweb.model.game.GameState;
 import chatweb.model.game.Member;
 import chatweb.model.game.Settings;
 import lombok.AllArgsConstructor;
@@ -17,5 +16,4 @@ public class GameDto {
     private Set<Member> viewers;
     private List<TeamDto> teams;
     private Settings settings;
-    private GameState state;
 }

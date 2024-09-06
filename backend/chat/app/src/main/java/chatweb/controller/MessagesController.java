@@ -12,21 +12,24 @@ import chatweb.model.api.EmptyResponse;
 import chatweb.model.api.MessageIdResponse;
 import chatweb.model.api.MessagesResponse;
 import chatweb.model.api.ReactionRequest;
+import chatweb.model.api.ReactionsResponse;
 import chatweb.model.api.SendMessageRequest;
 import chatweb.model.dto.MessageDto;
 import chatweb.model.event.DeletedMessageEvent;
 import chatweb.model.event.EditedMessageEvent;
 import chatweb.model.event.NewMessageEvent;
-import chatweb.model.event.ServiceReactionEvent;
+import chatweb.model.event.ReactionEvent;
 import chatweb.model.event.TypingEvent;
 import chatweb.producer.EventsKafkaProducer;
 import chatweb.repository.MessageRepository;
+import chatweb.repository.ReactionRepository;
 import chatweb.repository.RoomRepository;
 import chatweb.service.ChatGPTService;
 import chatweb.utils.RoomUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -46,6 +49,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import static chatweb.model.api.ApiError.badRequest;
+import static chatweb.model.api.ApiError.forbidden;
 import static java.util.UUID.randomUUID;
 
 @RestController
@@ -54,6 +59,7 @@ import static java.util.UUID.randomUUID;
 public class MessagesController implements ApiControllerHelper {
 
     private final MessageRepository messageRepository;
+    private final ReactionRepository reactionRepository;
     private final ChatGPTService chatGPTService;
     private final RoomRepository roomRepository;
     private final EventsKafkaProducer eventsProducer;
@@ -79,7 +85,7 @@ public class MessagesController implements ApiControllerHelper {
         List<Message> messages = messageRepository.findMessages(count, roomId, from);
         return new MessagesResponse(
                 messages.stream()
-                        .map(message -> MessageMapper.messageToMessageDto(message, user.getId(), true))
+                        .map(MessageMapper.INSTANCE::toDto)
                         .toList()
         );
     }
@@ -114,14 +120,12 @@ public class MessagesController implements ApiControllerHelper {
                 body.getMessage().trim(),
                 room,
                 user,
-                Collections.emptySet(),
                 repliedMessage,
                 new Date(),
                 Collections.emptyList()
         ));
-        MessageDto messageDto = MessageMapper.messageToMessageDto(message, user.getId(), false);
+        MessageDto messageDto = MessageMapper.INSTANCE.toDto(message);
         eventsProducer.addEvent(new NewMessageEvent(messageDto));
-        chatGPTService.handleMessage(message);
         return new MessageIdResponse(message.getId());
     }
 
@@ -161,59 +165,59 @@ public class MessagesController implements ApiControllerHelper {
         }
         message.setMessage(body.getMessage().trim());
         messageRepository.save(message);
-        MessageDto messageDto = MessageMapper.messageToMessageDto(message, user.getId(), true);
+        MessageDto messageDto = MessageMapper.INSTANCE.toDto(message);
         eventsProducer.addEvent(new EditedMessageEvent(
-                MessageMapper.messageToMessageDto(message, null, false)
+                MessageMapper.INSTANCE.toDto(message)
         ));
         return messageDto;
     }
 
+    @GetMapping("{messageId}/reactions")
+    public ReactionsResponse getReactions(
+            @PathVariable String messageId,
+            @RequestAttribute User user
+    ) throws ApiErrorException {
+        findMessage(messageId, user);
+        return new ReactionsResponse(reactionRepository.groupReactions(user.getId(), messageId));
+    }
+
     @PutMapping("{messageId}/reactions")
-    public MessageDto toggleReaction(
+    public ResponseEntity<EmptyResponse> toggleReaction(
             @PathVariable String messageId,
             @RequestBody ReactionRequest body,
             @RequestAttribute User user
     ) throws ApiErrorException {
         if (body.getReaction() == null || body.getReaction().isBlank()) {
-            throw new ApiErrorException(new ApiError(
-                    HttpStatus.BAD_REQUEST,
-                    "reaction is required"
-            ));
+            throw badRequest("reaction is required").toException();
         }
-        Message message = messageRepository.findById(messageId).orElse(null);
-        if (message == null) {
-            throw new ApiErrorException(new ApiError(
-                    HttpStatus.BAD_REQUEST,
-                    "cannot put reaction without message"
-            ));
-        }
-        if (message.getRoomId() != null && !roomRepository.isUserInRoom(message.getRoomId(), user.getId())) {
-            throw new ApiErrorException(new ApiError(
-                    HttpStatus.FORBIDDEN,
-                    "you are not in the room"
-            ));
-        }
-        Reaction existingReaction = message.getReactions().stream()
-                .filter(r -> r.getReaction().equals(body.getReaction())
-                        && r.getUserId() == user.getId())
-                .findFirst().orElse(null);
-        if (existingReaction == null) {
-            message.getReactions().add(new Reaction(
+        var message = findMessage(messageId, user);
+        var existingReaction = reactionRepository.findByMessage_IdAndUserIdAndReaction(
+                messageId, user.getId(), body.getReaction()
+        );
+        if (existingReaction.isPresent()) {
+            reactionRepository.delete(existingReaction.get());
+        } else {
+            reactionRepository.save(new Reaction(
                     null,
                     message,
                     user.getId(),
                     body.getReaction()
             ));
-        } else {
-            message.getReactions().remove(existingReaction);
         }
-        Message saved = messageRepository.save(message);
-        eventsProducer.addEvent(new ServiceReactionEvent(
-                saved.getRoomKey(),
-                saved.getId(),
-                saved.getReactions()
-        ));
-        return MessageMapper.messageToMessageDto(saved, user.getId(), true);
+        eventsProducer.addEvent(new ReactionEvent(message.getRoomKey(), message.getId()));
+        return ResponseEntity.ok(new EmptyResponse());
+    }
+
+    @NotNull
+    private Message findMessage(String messageId, User user) throws ApiErrorException {
+        var message = messageRepository.findById(messageId).orElse(null);
+        if (message == null) {
+            throw badRequest("cannot put reaction without message").toException();
+        }
+        if (message.getRoomId() != null && !roomRepository.isUserInRoom(message.getRoomId(), user.getId())) {
+            throw forbidden("you are not in the room").toException();
+        }
+        return message;
     }
 
     @PutMapping("typing")

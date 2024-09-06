@@ -110,13 +110,12 @@ public class ChatGPTService {
                         completionContent,
                         message.getRoom(),
                         user,
-                        null,
                         message,
                         new Date(),
                         Collections.emptyList()
                 ));
                 eventsProducer.addEvent(new NewMessageEvent(
-                        MessageMapper.messageToMessageDto(completionMessage, null, false)
+                        MessageMapper.INSTANCE.toDto(completionMessage)
                 ));
             } catch (ChatCompletionException e) {
                 // TODO handle properly
