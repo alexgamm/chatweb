@@ -2,8 +2,9 @@ import SockJS from "sockjs-client/dist/sockjs";
 import Stomp from "stompjs";
 
 let socket;
+let connectedStomp;
 const handlers = {};
-const subscribedTo = [];
+const subscriptions = {};
 
 const initSocket = () => {
   socket = new SockJS("/api/ws/events");
@@ -11,6 +12,10 @@ const initSocket = () => {
 
 const connect = () =>
   new Promise((resolve, reject) => {
+    if (connectedStomp) {
+      resolve(connectedStomp);
+      return;
+    }
     const accessToken = localStorage.getItem("token");
     const headers = {};
     if (accessToken) {
@@ -21,6 +26,7 @@ const connect = () =>
     stomp.connect(
       headers,
       () => {
+        connectedStomp = stomp;
         resolve(stomp);
       },
       reject
@@ -34,14 +40,14 @@ const useEvents = (room) => {
       if (!socket) {
         initSocket();
       }
-      if (!subscribedTo.includes(destination)) {
-        subscribedTo.push(destination);
+      if (!subscriptions[destination]) {
+        subscriptions[destination] = (message) => {
+          const eventData = JSON.parse(message.body);
+          const eventHandlers = handlers[eventData.type?.slice(1)] ?? [];
+          eventHandlers.forEach((handler) => handler(eventData));
+        };
         connect().then((stomp) => {
-          stomp.subscribe(destination, (message) => {
-            const eventData = JSON.parse(message.body);
-            const eventHandlers = handlers[eventData.type?.slice(1)] ?? [];
-            eventHandlers.forEach((handler) => handler(eventData));
-          });
+          stomp.subscribe(destination, subscriptions[destination]);
         });
       }
       handlers[eventType] = [...(handlers[eventType] ?? []), handler];
