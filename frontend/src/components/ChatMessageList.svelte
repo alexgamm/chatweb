@@ -1,10 +1,10 @@
 <script>
   import { onMount, tick } from "svelte";
-  import { addEventHandler } from "../contexts/events";
   import useApi from "../hooks/api";
   import setSendDate from "../utils/message-send-date";
   import { reactionsOrder } from "../utils/reactions";
   import ChatMessage from "./ChatMessage.svelte";
+  import useEvents from "../contexts/events";
 
   export let room;
   export let onContextMenu;
@@ -16,6 +16,7 @@
   const {
     authorized: { get },
   } = useApi();
+  const { addEventHandler } = useEvents(room);
   let messagesContainerWrapper;
   let loading = false;
 

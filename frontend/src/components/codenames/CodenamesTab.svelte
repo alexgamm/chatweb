@@ -23,6 +23,7 @@
   );
 
   $: isLeader = currentTeam?.leader?.userId === $user?.id;
+  $: isHost = $user?.id === $game?.host?.userId;
   $: canBecomeLeader = !currentTeam?.leader;
 
   let teams;
@@ -75,28 +76,30 @@
       <LeaveIcon />
       Leave room
     </button>
-    <div class="flex gap-2 mt-2 mb-6">
-      <button
-        class={`btn flex flex-col h-20 rounded-xl gap-3 flex-1 ${
-          $game.state.status === "ACTIVE" ? "btn-neutral" : "btn-primary"
-        }`}
-        on:click={() => toggleGame()}
-      >
-        {#if $game.state.status !== "ACTIVE"}
-          <PlayIcon />
-          Play
-        {:else}
-          <PauseIcon />
-          Pause
-        {/if}
-      </button>
-      <button
-        class="btn flex flex-col h-20 rounded-xl gap-3 flex-1 btn-neutral"
-        on:click={() => resetGame()}
-      >
-        <RefreshIcon /> Change cards
-      </button>
-    </div>
+    {#if isHost}
+      <div class="flex gap-2 mt-2 mb-6">
+        <button
+          class={`btn flex flex-col h-20 rounded-xl gap-3 flex-1 ${
+            $game.state?.status === "ACTIVE" ? "btn-neutral" : "btn-primary"
+          }`}
+          on:click={() => toggleGame()}
+        >
+          {#if $game.state?.status !== "ACTIVE"}
+            <PlayIcon />
+            Play
+          {:else}
+            <PauseIcon />
+            Pause
+          {/if}
+        </button>
+        <button
+          class="btn flex flex-col h-20 rounded-xl gap-3 flex-1 btn-neutral"
+          on:click={() => resetGame()}
+        >
+          <RefreshIcon /> Change cards
+        </button>
+      </div>
+    {/if}
     {#each teams as team}
       {#if team.players.length}
         <li class="mb-2">

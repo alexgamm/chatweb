@@ -2,6 +2,7 @@
   import chunk from "lodash/chunk";
   import { COLORS, TEAM_NAMES } from "../../codenames/codenames-utils";
 
+  import { onMount } from "svelte";
   import useApi from "../../hooks/api";
   import { dropGame, game } from "../../stores/codenames";
   import { pushToast } from "../../stores/toast";
@@ -9,7 +10,6 @@
   import Countdown from "../common/Countdown.svelte";
   import SparksIcon from "../icons/SparksIcon.svelte";
   import TapIcon from "../icons/TapIcon.svelte";
-  import { onMount } from "svelte";
 
   let turnProgress;
 
@@ -17,7 +17,7 @@
     authorized: { post },
   } = useApi();
 
-  $: cardRows = $game ? chunk($game.state.cards, 5) : null;
+  $: cardRows = $game?.state ? chunk($game.state.cards, 5) : null;
   $: turnTeam = $game?.teams?.find(
     ({ id }) => id === $game?.state?.turn?.teamId
   );
@@ -51,6 +51,7 @@
   };
 
   const pickCard = async (card) => {
+    $game.state = { ...$game?.state };
     try {
       await post(`/api/codenames/game/${$game.id}/cards/pick`, {
         word: card.word,
@@ -68,12 +69,20 @@
     }
   };
 
+  const cardPickedCls = (card) => {
+    if (card.pickedByTeamId) {
+      return `bg-opacity-60 ${card.type === "COLOR" ? "animate-pop" : "animate-wiggle"}`;
+    } else {
+      return "bg-opacity-30";
+    }
+  };
+
   onMount(() => {
     return () => dropGame();
   });
 </script>
 
-{#if $game}
+{#if $game?.state}
   <div class="bg-black bg-opacity-30 pb-6">
     <div class="flex flex-col items-center">
       <div
@@ -82,7 +91,7 @@
         {#each cardRows as row}
           {#each row as card}
             <button
-              class={`word-card ${cardColor(card)} ${card.pickedByTeamId ? "bg-opacity-60" : "bg-opacity-30"} ${$game?.settings?.dictionaryId === "emoji" ? "word-card--emoji" : ""}`}
+              class={`relative word-card ${cardColor(card)} ${cardPickedCls(card)} ${$game?.settings?.dictionaryId === "emoji" ? "word-card--emoji" : ""}`}
               on:click={() => pickCard(card)}
             >
               {card.word}

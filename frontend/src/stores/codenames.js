@@ -29,4 +29,19 @@ export const fetchGame = async (gameId) => {
   return response;
 };
 
+export const fetchGameState = async (gameId) => {
+  const {
+    authorized: { get },
+  } = useApi();
+  let response;
+  try {
+    response = await get(`/api/codenames/game/${gameId}/state`);
+  } catch (err) {
+    console.error("could not fetch game", err);
+    return;
+  }
+  game.update((old) => ({ ...old, state: response }));
+  return response;
+};
+
 export const dropGame = () => game.set(null);

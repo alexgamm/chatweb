@@ -7,6 +7,7 @@ import chatweb.utils.PasswordUtils;
 import chatweb.utils.RoomUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +39,7 @@ public class RoomService {
         Room room = new Room(
                 null,
                 null,
-                roomPassword == null ? null : PasswordUtils.hash(roomPassword),
+                Strings.isBlank(roomPassword) ? null : PasswordUtils.hash(roomPassword),
                 creator,
                 new HashSet<>()
         );

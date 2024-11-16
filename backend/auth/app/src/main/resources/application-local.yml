@@ -1,7 +1,10 @@
 server.port: 23456
 app.url: http://localhost:5173
 spring:
-  datasource.url: jdbc:postgresql://localhost:5432/chilldrill?user=chilldrill&password=chilldrill
+  datasource:
+    url: jdbc:postgresql://localhost:5432/chilldrill
+    username: chilldrill
+    password: chilldrill
   kafka.producer.bootstrap-servers: localhost:9092
   data.redis.url: redis://localhost:6379
 

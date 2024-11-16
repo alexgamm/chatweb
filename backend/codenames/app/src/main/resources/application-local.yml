@@ -1,6 +1,9 @@
 server.port: 23459
 spring:
-  datasource.url: jdbc:postgresql://localhost:5432/chilldrill?user=chilldrill&password=chilldrill
+  datasource:
+    url: jdbc:postgresql://localhost:5432/chilldrill
+    username: chilldrill
+    password: chilldrill
   kafka.producer.bootstrap-servers: localhost:9092
 
 jwt.secret: localsecretlocalsecretlocalsecre
