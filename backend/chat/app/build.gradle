@@ -7,4 +7,6 @@ dependencies {
     implementation project(":chat:model")
     implementation project(":chat:infrastructure")
     implementation project(":chat:events")
+
+    implementation "net.devh:grpc-server-spring-boot-starter:${springBootGrpcVersion}"
 }

@@ -26,7 +26,7 @@ public class ResetGameExecutor implements GameActionExecutor<ResetGame> {
     @Override
     public GameActionExecutionResult execute(GameState state, ResetGame action) throws IllegalStateException {
         Dictionary dictionary = dictionaryRepository
-                .findById(action.getGame().getSettings().getDictionaryId())
+                .findById(action.getGame().getSettings().dictionaryId())
                 .orElse(null);
         if (dictionary == null) {
             throw new IllegalStateException("Dictionary is not found");
@@ -41,10 +41,10 @@ public class ResetGameExecutor implements GameActionExecutor<ResetGame> {
         List<Integer> shuffledTeamIds = game.getShuffledTeams().stream().map(Team::getId).toList();
         Settings settings = game.getSettings();
         List<Card> cards = GameUtils.createCards(
-                dictionary.getRandomWords(settings.getBoardSize().getWordAmount()),
+                dictionary.getRandomWords(settings.boardSize().getWordAmount()),
                 shuffledTeamIds
         );
-        int firstTurnDurationSeconds = settings.getTurnSeconds() * 2;
+        int firstTurnDurationSeconds = settings.turnSeconds() * 2;
         Turn turn = Turn.builder()
                 .teamId(shuffledTeamIds.get(0))
                 .leader(true)

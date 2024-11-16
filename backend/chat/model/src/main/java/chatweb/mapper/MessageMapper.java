@@ -1,51 +1,26 @@
 package chatweb.mapper;
 
 import chatweb.entity.Message;
-import chatweb.entity.Reaction;
 import chatweb.model.dto.MessageDto;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+import org.mapstruct.factory.Mappers;
 
-import java.util.Set;
-import java.util.stream.Collectors;
+@Mapper
+public interface MessageMapper {
+    MessageMapper INSTANCE = Mappers.getMapper(MessageMapper.class);
 
-public class MessageMapper {
-    public static MessageDto messageToMessageDto(
-            Message message,
-            Integer userId,
-            boolean includeRepliedMessage,
-            boolean includeReactions
-    ) {
-        return new MessageDto(
-                message.getId(),
-                message.getUser().getId(),
-                message.getUser().getUsername(),
-                message.getMessage(),
-                message.getRoomKey(),
-                includeRepliedMessage
-                        ? messageToMessageDto(message.getRepliedMessage(), userId, false, false)
-                        : null,
-                message.getSendDate(),
-                includeReactions ? groupReactions(message.getReactions(), userId) : null,
-                message.getButtons()
-        );
-    }
+    @Mapping(target = "userId", expression = "java(message.getUser().getId())")
+    @Mapping(target = "username", expression = "java(message.getUser().getUsername())")
+    @Mapping(target = "room", expression = "java(message.getRoomKey())")
+    @Mapping(target = "repliedMessage", qualifiedByName = "toDtoWithoutReplyMessage")
+    MessageDto toDto(Message message);
 
-    public static MessageDto messageToMessageDto(
-            Message message,
-            Integer userId,
-            boolean includeReactions
-    ) {
-        return messageToMessageDto(message, userId, message.getRepliedMessage() != null, includeReactions);
-    }
-
-    public static Set<MessageDto.Reaction> groupReactions(Set<Reaction> reactions, int userId) {
-        return reactions.stream()
-                .collect(Collectors.groupingBy(Reaction::getReaction))
-                .entrySet().stream()
-                .map(entry -> new MessageDto.Reaction(
-                        entry.getKey(),
-                        entry.getValue().size(),
-                        entry.getValue().stream().anyMatch(reaction -> reaction.getUserId() == userId)
-                ))
-                .collect(Collectors.toSet());
-    }
+    @Mapping(target = "userId", expression = "java(message.getUser().getId())")
+    @Mapping(target = "username", expression = "java(message.getUser().getUsername())")
+    @Mapping(target = "room", expression = "java(message.getRoomKey())")
+    @Mapping(target = "repliedMessage", ignore = true)
+    @Named("toDtoWithoutReplyMessage")
+    MessageDto toDtoWithoutReplyMessage(Message message);
 }

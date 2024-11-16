@@ -1,21 +1,58 @@
-let socket;
-const handlers = {};
-const baseUrl = `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}`;
+import SockJS from "sockjs-client/dist/sockjs";
+import Stomp from "stompjs";
 
-export const addEventHandler = (eventType, handler) => {
-  if (!socket) {
-    const accessToken = localStorage.getItem("token");
-    if (!accessToken) {
+let socket;
+let connectedStomp;
+const handlers = {};
+const subscriptions = {};
+
+const initSocket = () => {
+  socket = new SockJS("/api/ws/events");
+};
+
+const connect = () =>
+  new Promise((resolve, reject) => {
+    if (connectedStomp) {
+      resolve(connectedStomp);
       return;
     }
-    // TODO Handle expired token
-    socket = new WebSocket(`${baseUrl}/api/ws/events?access_token=${accessToken}`);
-    socket.addEventListener("message", (event) => {
-      if (event.data === "PING") return;
-      const eventData = JSON.parse(event.data);
-      const eventHandlers = handlers[eventData.type?.slice(1)] ?? [];
-      eventHandlers.forEach(handler => handler(eventData));
-    });
-  }
-  handlers[eventType] = [...(handlers[eventType] ?? []), handler];
+    const accessToken = localStorage.getItem("token");
+    const headers = {};
+    if (accessToken) {
+      // TODO Handle expired token
+      headers["Authorization"] = `Bearer ${accessToken}`;
+    }
+    const stomp = Stomp.over(socket);
+    stomp.connect(
+      headers,
+      () => {
+        connectedStomp = stomp;
+        resolve(stomp);
+      },
+      reject
+    );
+  });
+
+const useEvents = (room) => {
+  return {
+    addEventHandler(eventType, handler) {
+      const destination = `/events${room ? `/${room}` : ""}`;
+      if (!socket) {
+        initSocket();
+      }
+      if (!subscriptions[destination]) {
+        subscriptions[destination] = (message) => {
+          const eventData = JSON.parse(message.body);
+          const eventHandlers = handlers[eventData.type?.slice(1)] ?? [];
+          eventHandlers.forEach((handler) => handler(eventData));
+        };
+        connect().then((stomp) => {
+          stomp.subscribe(destination, subscriptions[destination]);
+        });
+      }
+      handlers[eventType] = [...(handlers[eventType] ?? []), handler];
+    },
+  };
 };
+
+export default useEvents;

@@ -3,20 +3,20 @@ package chatweb.controller;
 import chatweb.entity.User;
 import chatweb.exception.ApiErrorException;
 import chatweb.mapper.UserMapper;
-import chatweb.model.api.ApiError;
 import chatweb.model.api.RegistrationRequest;
 import chatweb.model.dto.UserDto;
-import chatweb.repository.UserRepository;
+import chatweb.service.UserService;
 import chatweb.service.VerificationService;
 import chatweb.utils.PasswordUtils;
-import chatweb.utils.UserColorUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.validator.routines.EmailValidator;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import static chatweb.model.api.ApiError.badRequest;
+import static chatweb.model.api.ApiError.conflict;
 
 @RestController
 @RequestMapping("api/registration")
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ApiRegistrationController implements ApiControllerHelper {
     private static final EmailValidator EMAIL_VALIDATOR = EmailValidator.getInstance();
 
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final VerificationService verificationService;
 
     @PostMapping
@@ -33,29 +33,21 @@ public class ApiRegistrationController implements ApiControllerHelper {
         String email = body.getEmail();
         String password = body.getPassword();
         if (username == null || username.isEmpty()) {
-            throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "username is missing"));
+            throw badRequest("username is missing").toException();
         }
         if (email == null || email.isEmpty() || !EMAIL_VALIDATOR.isValid(email)) {
-            throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "email is missing or invalid"));
+            throw badRequest("email is missing or invalid").toException();
         }
-        if (userRepository.existsByEmail(email)) {
-            throw new ApiErrorException(new ApiError(HttpStatus.CONFLICT, "email is already taken"));
+        if (userService.existsByEmail(email)) {
+            throw conflict("email is already taken").toException();
         }
         if (!PasswordUtils.validate(password)) {
-            throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "password is missing or short"));
+            throw badRequest("password is missing or short").toException();
         }
-        User user = userRepository.findUserByUsername(username);
-        if (user != null) {
-            throw new ApiErrorException(new ApiError(HttpStatus.CONFLICT, "username has been already taken"));
+        if (userService.existsByUsername(username)) {
+            throw conflict("username has been already taken").toException();
         }
-        user = new User(
-                null,
-                username.toLowerCase(),
-                email.toLowerCase(),
-                PasswordUtils.hash(password),
-                UserColorUtils.getRandomColor()
-        );
-        user = userRepository.save(user);
+        User user = userService.createUser(username, email, password);
         verificationService.createAndSendVerification(user);
         return UserMapper.INSTANCE.toDto(user);
     }

@@ -19,7 +19,6 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.server.service.GrpcService;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -34,7 +33,7 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
     };
 
     private final ObjectMapper objectMapper;
-    private final RoomsService roomsService;
+    private final RoomService roomService;
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
     private final EventsKafkaProducer eventsProducer;
@@ -48,7 +47,7 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
             responseObserver.onError(badRequest("Creator not found").toException());
             return;
         }
-        Room room = roomsService.createRoom(request.getCreatorId(), request.getPassword(), request.getPrefix());
+        Room room = roomService.createRoom(request.getCreatorId(), request.getPassword(), request.getPrefix());
         responseObserver.onNext(
                 ChatServiceOuterClass.CreateRoomResponse.newBuilder()
                         .setId(room.getId())
@@ -76,12 +75,11 @@ public class ChatService extends ChatServiceGrpc.ChatServiceImplBase {
                 request.getMessage().trim(),
                 null,
                 user,
-                Collections.emptySet(),
                 null,
                 new Date(),
                 buttons
         ));
-        MessageDto messageDto = MessageMapper.messageToMessageDto(message, user.getId(), false);
+        MessageDto messageDto = MessageMapper.INSTANCE.toDto(message);
         eventsProducer.addEvent(new NewMessageEvent(messageDto));
         responseObserver.onNext(
                 ChatServiceOuterClass.MessageIdResponse.newBuilder()

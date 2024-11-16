@@ -1,9 +1,15 @@
 <script>
   import { onMount } from "svelte";
-  import { addEventHandler } from "../../contexts/events";
+  import { get } from "svelte/store";
+  import useEvents from "../../contexts/events";
   import useApi from "../../hooks/api";
   import useMessageColor from "../../hooks/message-color";
-  import { fetchGame, game, joinGame } from "../../stores/codenames";
+  import {
+    fetchGame,
+    fetchGameState,
+    game,
+    joinGame,
+  } from "../../stores/codenames";
   import roomPasswordModal from "../../stores/room-password-modal";
   import user, { getUser } from "../../stores/user";
   import { userColors } from "../../stores/users";
@@ -25,6 +31,7 @@
   const {
     authorized: { post },
   } = useApi();
+  const { addEventHandler } = useEvents(room);
 
   $: roomPrefix = room.split("-")[0];
   $: addColor = useMessageColor($userColors, $game);
@@ -67,7 +74,9 @@
   const afterJoin = async () => {
     await getUser();
     if (roomPrefix === "codenames") {
-      const fetched = await fetchGame(room);
+      await fetchGame(room);
+      await fetchGameState(room);
+      const fetched = get(game);
       if (
         !fetched.teams.find(({ players }) =>
           players.find(({ userId }) => userId === $user.id)
@@ -76,9 +85,15 @@
       ) {
         joinGame(room).then(() => fetchGame(room));
       }
-      addEventHandler("GameUpdatedEvent", (event) => {
-        if (event.game.id === room) {
-          game.set(event.game);
+      addEventHandler("GameUpdatedEvent", async (event) => {
+        if (event.room === room) {
+          await fetchGame(room);
+          await fetchGameState(room);
+        }
+      });
+      addEventHandler("GameStateUpdatedEvent", async (event) => {
+        if (event.room === room) {
+          await fetchGameState(room);
         }
       });
     }

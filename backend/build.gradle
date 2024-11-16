@@ -18,7 +18,6 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
-    apply plugin: 'com.google.protobuf'
 
     java {
         sourceCompatibility = '17'
@@ -27,22 +26,6 @@ subprojects {
     configurations {
         compileOnly {
             extendsFrom annotationProcessor
-        }
-    }
-
-    protobuf {
-        protoc {
-            artifact = "com.google.protobuf:protoc:${protobufVersion}"
-        }
-        plugins {
-            grpc {
-                artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
-            }
-        }
-        generateProtoTasks {
-            all()*.plugins {
-                grpc {}
-            }
         }
     }
 
@@ -60,8 +43,6 @@ subprojects {
 
         implementation 'org.springframework.kafka:spring-kafka'
         annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
-        implementation "net.devh:grpc-client-spring-boot-starter:${springBootGrpcVersion}"
-        implementation "net.devh:grpc-server-spring-boot-starter:${springBootGrpcVersion}"
         implementation "io.grpc:grpc-netty-shaded:${grpcVersion}"
         implementation "io.grpc:grpc-stub:${grpcVersion}"
         implementation "io.grpc:grpc-protobuf:${grpcVersion}"

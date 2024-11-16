@@ -1,16 +1,15 @@
 <script>
   import { onMount } from "svelte";
   import { fade } from "svelte/transition";
-  import { addEventHandler } from "../../contexts/events";
+  import useEvents from "../../contexts/events";
   import useApi from "../../hooks/api";
-  import USER_COLORS from "../../utils/user-colors";
   import users from "../../stores/users";
-  import useHeavyPush from "../../hooks/heavy-list";
+  import USER_COLORS from "../../utils/user-colors";
   const {
     authorized: { get },
   } = useApi();
+  const { addEventHandler } = useEvents();
   let loading = false;
-  const heavyPush = useHeavyPush();
 
   const loadUsers = async () => {
     loading = true;

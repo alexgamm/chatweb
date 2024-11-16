@@ -7,7 +7,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -19,7 +18,6 @@ import org.hibernate.type.SqlTypes;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -44,10 +42,7 @@ public class Message {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    @Setter
-    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Reaction> reactions;
-
+    //TODO add fetchType or remove hibernate (maybe reply to reply to reply to reply...)
     @Setter
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "replied_message_id", referencedColumnName = "id")

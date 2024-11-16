@@ -14,12 +14,14 @@ import chatweb.entity.Team;
 import chatweb.entity.User;
 import chatweb.exception.ApiErrorException;
 import chatweb.mapper.GameMapper;
+import chatweb.mapper.GameStateMapper;
 import chatweb.model.api.ApiResponse;
 import chatweb.model.api.CreateGameRequest;
 import chatweb.model.api.CreateGameResponse;
 import chatweb.model.api.GameDto;
 import chatweb.model.api.PickCardRequest;
 import chatweb.model.api.UpdateSettingsRequest;
+import chatweb.model.game.GameState;
 import chatweb.model.game.Settings;
 import chatweb.model.game.state.Status;
 import chatweb.model.message.LinkButton;
@@ -27,6 +29,7 @@ import chatweb.repository.DictionaryRepository;
 import chatweb.service.GameService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -53,6 +56,16 @@ public class GameController implements ApiControllerHelper {
 
     @GetMapping("{gameId}")
     public GameDto getGame(@PathVariable String gameId, @RequestAttribute User user) throws ApiErrorException {
+        return GameMapper.INSTANCE.toDto(findGame(gameId, user));
+    }
+
+    @GetMapping("{gameId}/state")
+    public GameState getGameState(@PathVariable String gameId, @RequestAttribute User user) throws ApiErrorException {
+        return GameStateMapper.INSTANCE.toPersonalState(user.getId(), findGame(gameId, user));
+    }
+
+    @NotNull
+    private Game findGame(@PathVariable String gameId, @RequestAttribute User user) throws ApiErrorException {
         Game game = gameService.findGame(gameId);
         if (game == null) {
             throw notFound("Game is not found").toException();
@@ -61,8 +74,9 @@ public class GameController implements ApiControllerHelper {
         if (!room.getUsers().contains(user)) {
             throw badRequest("You are not a member of this room").toException();
         }
-        return GameMapper.INSTANCE.toPersonalDto(user.getId(), game);
+        return game;
     }
+
 
     @Transactional
     @PostMapping
@@ -107,10 +121,7 @@ public class GameController implements ApiControllerHelper {
     @Transactional
     @PostMapping("{gameId}/start")
     public ApiResponse startGame(@PathVariable String gameId, @RequestAttribute User user) throws ApiErrorException {
-        Game game = gameService.findGame(gameId);
-        if (game == null) {
-            throw notFound("Game is not found").toException();
-        }
+        Game game = findGame(gameId, user);
         if (!user.equals(game.getHost())) {
             throw badRequest("Only host may start the game").toException();
         }
@@ -123,17 +134,14 @@ public class GameController implements ApiControllerHelper {
         if (game.getState().getStatus() == Status.FINISHED) {
             gameService.executeAction(game, new ResetGame(game));
         }
-        gameService.executeAction(game, new StartGame(game.getSettings().getTurnSeconds()));
+        gameService.executeAction(game, new StartGame(game.getSettings().turnSeconds()));
         return new ApiResponse(true);
     }
 
     @Transactional
     @PostMapping("{gameId}/pause")
     public ApiResponse pauseGame(@PathVariable String gameId, @RequestAttribute User user) throws ApiErrorException {
-        Game game = gameService.findGame(gameId);
-        if (game == null) {
-            throw notFound("Game is not found").toException();
-        }
+        Game game = findGame(gameId, user);
         if (!user.equals(game.getHost())) {
             throw badRequest("Only host may pause the game").toException();
         }
@@ -151,11 +159,8 @@ public class GameController implements ApiControllerHelper {
             @RequestAttribute User user,
             @RequestBody PickCardRequest request
     ) throws ApiErrorException {
-        // TODO all team members should pick at the same card to invoke this method
-        Game game = gameService.findGame(gameId);
-        if (game == null) {
-            throw notFound("Game is not found").toException();
-        }
+        // TODO all team members should pick the same card to invoke this method
+        Game game = findGame(gameId, user);
         Team userTeam = game.getTeams().stream()
                 .filter(team -> team.isPlayer(user))
                 .findFirst()
@@ -170,7 +175,7 @@ public class GameController implements ApiControllerHelper {
             gameService.executeAction(game, new PickCard(
                     request.getWord(),
                     userTeam.getId(),
-                    game.getSettings().getTurnSeconds())
+                    game.getSettings().turnSeconds())
             );
         } catch (IllegalStateException e) {
             throw badRequest(e.getMessage()).toException();
@@ -181,10 +186,7 @@ public class GameController implements ApiControllerHelper {
     @Transactional
     @PostMapping("{gameId}/turn/end")
     public ApiResponse endTurn(@PathVariable String gameId, @RequestAttribute User user) throws ApiErrorException {
-        Game game = gameService.findGame(gameId);
-        if (game == null) {
-            throw notFound("Game is not found").toException();
-        }
+        Game game = findGame(gameId, user);
         if (game.getState().getStatus() != Status.ACTIVE) {
             throw badRequest("Game is not active").toException();
         }
@@ -201,17 +203,14 @@ public class GameController implements ApiControllerHelper {
         if (!game.getState().getTurn().isLeader() && userTeam.isLeader(user)) {
             throw badRequest("Now it's the team members' turn").toException();
         }
-        gameService.executeAction(game, new ChangeTurn(game.getSettings().getTurnSeconds()));
+        gameService.executeAction(game, new ChangeTurn(game.getSettings().turnSeconds()));
         return new ApiResponse(true);
     }
 
     @Transactional
     @PostMapping("{gameId}/reset")
     public ApiResponse resetGame(@PathVariable String gameId, @RequestAttribute User user) throws ApiErrorException {
-        Game game = gameService.findGame(gameId);
-        if (game == null) {
-            throw notFound("Game is not found").toException();
-        }
+        Game game = findGame(gameId, user);
         if (!user.equals(game.getHost())) {
             throw badRequest("Only host may reset the game").toException();
         }
@@ -226,10 +225,7 @@ public class GameController implements ApiControllerHelper {
             @RequestAttribute User user,
             @RequestBody @Validated UpdateSettingsRequest request
     ) throws ApiErrorException {
-        Game game = gameService.findGame(gameId);
-        if (game == null) {
-            throw notFound("Game is not found").toException();
-        }
+        Game game = findGame(gameId, user);
         if (!user.equals(game.getHost())) {
             throw badRequest("Only host may change the settings").toException();
         }

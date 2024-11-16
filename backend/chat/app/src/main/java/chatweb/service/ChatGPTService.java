@@ -11,7 +11,6 @@ import chatweb.model.event.NewMessageEvent;
 import chatweb.producer.EventsKafkaProducer;
 import chatweb.repository.MessageRepository;
 import chatweb.repository.UserRepository;
-import chatweb.utils.UserColorUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.http.HttpHeaders;
@@ -111,13 +110,12 @@ public class ChatGPTService {
                         completionContent,
                         message.getRoom(),
                         user,
-                        null,
                         message,
                         new Date(),
                         Collections.emptyList()
                 ));
                 eventsProducer.addEvent(new NewMessageEvent(
-                        MessageMapper.messageToMessageDto(completionMessage, null, false)
+                        MessageMapper.INSTANCE.toDto(completionMessage)
                 ));
             } catch (ChatCompletionException e) {
                 // TODO handle properly
@@ -127,13 +125,6 @@ public class ChatGPTService {
     }
 
     public User getOrCreateUser() {
-        return Optional.ofNullable(userRepository.findUserByUsername(chatGPTProperties.getUsername()))
-                .orElseGet(() -> userRepository.save(new User(
-                        null,
-                        chatGPTProperties.getUsername(),
-                        null,
-                        null,
-                        UserColorUtils.getRandomColor()
-                )));
+        throw new UnsupportedOperationException("Not supported");
     }
 }

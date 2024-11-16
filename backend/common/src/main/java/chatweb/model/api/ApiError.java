@@ -33,7 +33,12 @@ public class ApiError {
     public static ApiError notFound(String message) {
         return new ApiError(HttpStatus.NOT_FOUND, message);
     }
+
     public static ApiError forbidden(String message) {
         return new ApiError(HttpStatus.FORBIDDEN, message);
+    }
+
+    public static ApiError conflict(String message) {
+        return new ApiError(HttpStatus.CONFLICT, message);
     }
 }

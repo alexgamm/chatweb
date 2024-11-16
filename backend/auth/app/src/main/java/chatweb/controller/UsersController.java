@@ -11,10 +11,9 @@ import chatweb.model.dto.UserDto;
 import chatweb.model.event.ChangeUserColorEvent;
 import chatweb.model.event.ChangeUsernameEvent;
 import chatweb.producer.EventsKafkaProducer;
-import chatweb.repository.UserRepository;
+import chatweb.service.UserService;
 import chatweb.utils.PasswordUtils;
 import chatweb.utils.RedisKeys;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
@@ -33,7 +32,7 @@ import java.util.Set;
 @RestController
 @RequestMapping("api/users")
 public class UsersController implements ApiControllerHelper {
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final EventsKafkaProducer eventsProducer;
     private final RedisTemplate<String, Integer> redisTemplate;
 
@@ -41,7 +40,7 @@ public class UsersController implements ApiControllerHelper {
     public UserListResponse users() {
         // TODO introduce pagination
         Set<Integer> onlineUserIds = redisTemplate.opsForSet().members(RedisKeys.ONLINE_USER_IDS);
-        List<UserListResponse.User> list = userRepository.findAll().stream()
+        List<UserListResponse.User> list = userService.findAll().stream()
                 .map(user -> new UserListResponse.User(
                         user.getId(),
                         user.getUsername(),
@@ -58,22 +57,19 @@ public class UsersController implements ApiControllerHelper {
     }
 
     @PutMapping("me/username")
-    @Transactional
     public UserDto changeUsername(@RequestBody UserDto input, @RequestAttribute User user) throws ApiErrorException {
         if (input.getUsername().isEmpty()) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "invalid username"));
         }
-        if (userRepository.findUserByUsername(input.getUsername()) != null) {
+        if (userService.existsByUsername(input.getUsername())) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "username is already taken"));
         }
-        userRepository.updateUsername(user.getId(), input.getUsername());
-        user = userRepository.findUserById(user.getId());
+        userService.updateUsername(user.getId(), input.getUsername());
         eventsProducer.addEvent(new ChangeUsernameEvent(user.getId(), user.getUsername()));
         return UserMapper.INSTANCE.toDto(user);
     }
 
     @PutMapping("me/password")
-    @Transactional
     public ResponseEntity<EmptyResponse> changePassword(
             @RequestBody ChangePasswordRequest body,
             @RequestAttribute User user
@@ -84,18 +80,17 @@ public class UsersController implements ApiControllerHelper {
         if (!PasswordUtils.check(body.getOldPassword(), user.getPassword())) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "invalid password"));
         }
-        userRepository.updatePassword(PasswordUtils.hash(body.getNewPassword()), user.getId());
+        userService.updatePassword(user.getId(), body.getNewPassword());
         return ResponseEntity.ok(new EmptyResponse());
     }
 
     @PutMapping("me/color")
-    @Transactional
     public UserDto changeColor(@RequestBody UserDto body, @RequestAttribute User user) throws ApiErrorException {
         if (body.getColor() == null) {
             throw new ApiErrorException(new ApiError(HttpStatus.BAD_REQUEST, "color is required"));
         }
-        userRepository.updateColor(user.getId(), body.getColor());
+        userService.updateColor(user.getId(), body.getColor());
         eventsProducer.addEvent(new ChangeUserColorEvent(user.getId(), body.getColor()));
-        return UserMapper.INSTANCE.toDto(userRepository.findUserById(user.getId()));
+        return UserMapper.INSTANCE.toDto(user);
     }
 }

@@ -1,30 +1,35 @@
 package chatweb.configuration;
 
-import chatweb.handler.EventsWebSocketHandler;
 import chatweb.helper.UserAuthHelper;
 import chatweb.interceptor.UserAuthWebSocketInterceptor;
-import chatweb.service.EventsService;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.config.annotation.EnableWebSocket;
-import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
-import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+import org.springframework.messaging.simp.config.ChannelRegistration;
+import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
+import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
+import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 @Configuration
-@EnableWebSocket
+@EnableWebSocketMessageBroker
 @RequiredArgsConstructor
-public class WebSocketConfiguration implements WebSocketConfigurer {
+public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer {
 
     private final UserAuthHelper userAuthHelper;
-    private final EventsService eventsService;
-
 
     @Override
-    public void registerWebSocketHandlers(@NotNull WebSocketHandlerRegistry registry) {
-        registry.addHandler(new EventsWebSocketHandler(eventsService), "/api/ws/events")
-                .setAllowedOriginPatterns("*")
-                .addInterceptors(new UserAuthWebSocketInterceptor(userAuthHelper));
+    public void configureMessageBroker(MessageBrokerRegistry config) {
+        config.enableSimpleBroker("/events");
+        config.setApplicationDestinationPrefixes("/app");
     }
 
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        registry.addEndpoint("/api/ws/events").withSockJS();
+    }
+
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(new UserAuthWebSocketInterceptor(userAuthHelper));
+    }
 }

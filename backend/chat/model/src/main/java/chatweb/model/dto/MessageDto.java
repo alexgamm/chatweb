@@ -4,14 +4,14 @@ import chatweb.model.message.Button;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class MessageDto {
@@ -23,15 +23,5 @@ public class MessageDto {
     private String room;
     private MessageDto repliedMessage;
     private Date sendDate;
-    private Set<Reaction> reactions;
     private List<Button> buttons;
-
-    @Getter
-    @RequiredArgsConstructor
-    public static class Reaction {
-        private final String reaction;
-        private final int count;
-        private final boolean hasOwn;
-
-    }
 }
